@@ -19,9 +19,9 @@ def get_request_path():
 class SusInstances(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
-    get_parser.add_argument("domains", required=False, default=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
     get_parser.add_argument("user_to_post_ratio", required=False, default=20, type=int, help="The amount of local users / amount of local posts to consider suspicious", location="args")
     get_parser.add_argument("csv", required=False, default=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
+    get_parser.add_argument("domains", required=False, default=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser)
     @logger.catch(reraise=True)
