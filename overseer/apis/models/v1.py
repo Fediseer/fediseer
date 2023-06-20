@@ -9,10 +9,11 @@ class Models:
             'domain': fields.String(description="The instance domain"),
             'uptime_alltime': fields.Float(description="The instance uptime pct. 100% and thousand of users is unlikely"),
             'local_posts': fields.Integer(description="The amount of local posts in that instance"),
+            'comment_counts': fields.Integer(description="The amount of comments in that instance"),
             'total_users': fields.Integer(description="The total amount of users registered in that instance"),
             'active_users_monthly': fields.Integer(description="The amount of active users monthly."),
             'signup': fields.Boolean(default=False,description="True when subscriptions are open, else False"),
-            'user_post_ratio': fields.Float(description="Users to Post Ratio"),
+            'activity_suspicion': fields.Float(description="Local Comments+Posts per User. Higher is worse"),
         })
         self.response_model_model_SusInstances_get = api.model('SuspiciousInstancesDomainList', {
             'instances': fields.List(fields.Nested(self.response_model_suspicious_instances)),

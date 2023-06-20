@@ -2,7 +2,7 @@ import requests
 from loguru import logger
 
 
-def retrieve_suspicious_instances(users_to_posts_ratio = 20):
+def retrieve_suspicious_instances(activity_suspicion = 20):
     # GraphQL query
     query = '''
     {
@@ -19,6 +19,7 @@ def retrieve_suspicious_instances(users_to_posts_ratio = 20):
         active_users_halfyear
         signup
         local_posts
+        comment_counts
     }
     }
     '''
@@ -58,12 +59,12 @@ def retrieve_suspicious_instances(users_to_posts_ratio = 20):
         bad_nodes = []
         for node in data["data"]["nodes"]:
             is_bad = False
-            local_posts = node["local_posts"]
+            local_activity = node["local_posts"] + node["comment_counts"]
             if node["total_users"] < 300:
                 continue
-            if local_posts == 0:
-                local_posts= 1
-            if node["total_users"] / local_posts > users_to_posts_ratio:
+            if local_activity == 0:
+                local_activity= 1
+            if node["total_users"] / local_activity > activity_suspicion:
                 is_bad = True
                 # print(node)
             if is_bad:
@@ -71,10 +72,11 @@ def retrieve_suspicious_instances(users_to_posts_ratio = 20):
                     "domain": node["domain"],
                     "uptime_alltime": node["uptime_alltime"],
                     "local_posts": node["local_posts"],
+                    "comment_counts": node["comment_counts"],
                     "total_users": node["total_users"],
                     "active_users_monthly": node["active_users_monthly"],
                     "signup": node["signup"],
-                    "user_post_ratio": node["total_users"] / local_posts,
+                    "activity_suspicion": node["total_users"] / local_activity,
                 }
                 bad_nodes.append(bad_node)
         return bad_nodes
