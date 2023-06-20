@@ -18,7 +18,7 @@ if __name__ == "__main__":
     if args.insecure:
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Disable this on prod
         url_scheme = 'http'
-    allowed_host = "overseer.dbzer0.net"
+    allowed_host = "127.0.0.1"
     if args.insecure:
         allowed_host = "0.0.0.0"
         logger.init_warn("WSGI Mode", status="Insecure")
