@@ -14,11 +14,8 @@ class Models:
             'signup': fields.Boolean(default=False,description="True when subscriptions are open, else False"),
             'user_post_ratio': fields.Float(description="Users to Post Ratio"),
         })
-        self.input_model_SusInstances_post = api.model('SuspiciousInstancesListInput', {
-            'user_to_post_ratio': fields.Integer(default=20,description="The threshold over which to consider instances suspicious."),
-            'whitelist': fields.List(fields.String(description="List of domains to avoid returning in the supicion list.")),
-            'blacklist': fields.List(fields.String(description="List of domains to append to the supicion list.")),
-        })
-        self.response_model_model_SusInstances_post = api.model('SuspiciousInstancesDomainList', {
-            'domains': fields.List(fields.String(description="The domains in shit suspicious list.")),
+        self.response_model_model_SusInstances_get = api.model('SuspiciousInstancesDomainList', {
+            'instances': fields.List(fields.Nested(self.response_model_suspicious_instances)),
+            'domains': fields.List(fields.String(description="The suspicious domains as a list.")),
+            'csv': fields.String(description="The suspicious domains as a csv."),
         })
