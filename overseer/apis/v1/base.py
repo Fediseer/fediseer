@@ -41,7 +41,7 @@ class Suspicions(Resource):
         return {"instances": sus_instances},200
 
 
-class Instances(Resource):
+class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("endorsements", required=False, default=1, type=int, help="Limit to this amount of endorsements of more", location="args")
