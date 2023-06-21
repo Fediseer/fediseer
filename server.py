@@ -1,12 +1,15 @@
 from dotenv import load_dotenv
 import os
 import logging
+import sys
 
 load_dotenv()
 
 from overseer.argparser import args
 from overseer.flask import OVERSEER
 from loguru import logger
+
+logger.add(sys.stdout)
 
 if __name__ == "__main__":
     # Only setting this for the WSGI logs

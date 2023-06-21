@@ -15,7 +15,7 @@ if SQLITE_MODE:
     logger.warning("Using SQLite for database")
     OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///horde.db"
 else:
-    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://postgres:{os.getenv('POSTGRES_PASS')}@{os.getenv('POSTGRES_URL')}"
+    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('POSTGRES_URI')
     OVERSEER.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         "pool_size": 50,
         "max_overflow": -1,
