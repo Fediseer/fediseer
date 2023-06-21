@@ -4,4 +4,5 @@ RUN mkdir -p /opt/overseer
 ADD overseer /opt/overseer
 ADD requirements.txt /opt/overseer/requirements.txt
 RUN pip install -r /opt/overseer/requirements.txt
+EXPOSE 10001
 CMD ["python3", "/opt/overseer/server.py"]
