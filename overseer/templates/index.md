@@ -1,6 +1,6 @@
 # Lemmy Overseer
 
-This is a service to help Lemmy instances detect and avoid suspcicious instances
+This is a [FOSS service](https://github.com/db0/lemmy-overseer) to help Lemmy instances detect and avoid suspcicious instances
 
 ## REST API
 
