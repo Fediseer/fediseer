@@ -1,4 +1,5 @@
 import os
+import sys
 import socket
 from uuid import uuid4
 
@@ -8,7 +9,7 @@ from overseer.routes import *
 from overseer.apis import apiv1
 from overseer.argparser import args
 from overseer.consts import OVERSEER_VERSION
-
+logger.add(sys.stdout)
 
 OVERSEER.register_blueprint(apiv1)
 
