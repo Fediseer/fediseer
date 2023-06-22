@@ -1,4 +1,5 @@
 from overseer.apis.v1.base import *
+from overseer.utils import get_nodeinfo
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -68,21 +69,34 @@ class WhitelistDomain(Resource):
         if domain.endswith("test.dbzer0.com"):
             requested_lemmy = Lemmy(f"https://{domain}")
             requested_lemmy._requestor.nodeinfo = {"software":{"name":"lemmy"}}
-            site = {"site_view":{"local_site":{"require_email_verification": True,"registration_mode":"open"}}}
+            open_registrations = False
+            email_verify = True
+            software = "lemmy"
         else:
-            requested_lemmy = Lemmy(f"https://{domain}")
-            site = requested_lemmy.site.get()
-        if not site:
-            raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
+            nodeinfo = get_nodeinfo(domain)
+            if not nodeinfo:
+                raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
+            software = nodeinfo["software"]["name"]
+            if software == "lemmy":
+                requested_lemmy = Lemmy(f"https://{domain}")
+                site = requested_lemmy.site.get()
+                if not site:
+                    raise e.BadRequest(f"Error encountered while polling lemmy domain {domain}. Please check it's running correctly")
+                open_registrations = site["site_view"]["local_site"]["registration_mode"] == "open"
+                email_verify = site["site_view"]["local_site"]["require_email_verification"]
+                software = software
+            else:
+                open_registrations = nodeinfo["openRegistrations"]
+                email_verify = False
         api_key = pm_new_api_key(domain)
         if not api_key:
             raise e.BadRequest("Failed to generate API Key")
         new_instance = Instance(
             domain=domain,
             api_key=hash_api_key(api_key),
-            open_registrations=site["site_view"]["local_site"]["registration_mode"] == "open",
-            email_verify=site["site_view"]["local_site"]["require_email_verification"],
-            software=requested_lemmy.nodeinfo['software']['name'],
+            open_registrations=open_registrations,
+            email_verify=email_verify,
+            software=software,
         )
         new_instance.create()
         if guarantor_instance:
