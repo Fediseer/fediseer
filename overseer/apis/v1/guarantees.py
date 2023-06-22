@@ -100,6 +100,9 @@ class Guarantees(Resource):
         db.session.add(new_endorsement)
         db.session.commit()
         pm_instance(target_instance.domain, f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.")
+        orphan_ids = database.get_guarantee_chain(target_instance.id)
+        for orphan in database.get_instances_by_ids(orphan_ids):
+            pm_instance(orphan.domain, f"Phew! You guarantor chain has been repaired as {instance.domain} has guaranteed for {domain}.")
         logger.info(f"{instance.domain} Guaranteed for {domain}")
         return {"message":'Changed'}, 200
 
@@ -138,6 +141,9 @@ class Guarantees(Resource):
             db.session.delete(endorsement)
         db.session.delete(guarantee)
         db.session.commit()
-        pm_instance(target_instance.domain, f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\nIMPORTANT: All your endorsements and guarantees will be deleted unless you manage to find a new guarantor within 24hours!")
+        pm_instance(target_instance.domain, f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\nIMPORTANT: All your guarantees will be deleted unless you manage to find a new guarantor within 24hours!")
+        orphan_ids = database.get_guarantee_chain(target_instance.id)
+        for orphan in database.get_instances_by_ids(orphan_ids):
+            pm_instance(orphan.domain, f"Attention! You guarantor chain has been b broken because {instance.domain} has withdrawn their backing from {domain}.\n\nIMPORTANT: All your guarantees will be deleted unless the chain is repaired or you find a new guarantor within 24hours!")
         logger.info(f"{instance.domain} Withdrew guarantee from {domain}")
         return {"message":'Changed'}, 200

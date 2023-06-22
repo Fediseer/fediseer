@@ -144,3 +144,9 @@ def get_guarantee_chain(instance_id):
     for gid in guarantees_ids:
         guarantees_ids = guarantees_ids | get_guarantee_chain(gid)
     return guarantees_ids
+
+def get_instances_by_ids(instance_ids):
+    query = Instance.query.filter(
+        Instance.id.in_(instance_ids)
+    )
+    return query
