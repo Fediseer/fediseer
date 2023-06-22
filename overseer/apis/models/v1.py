@@ -29,7 +29,7 @@ class Models:
             'endorsements': fields.Integer(description="The amount of endorsements this instance has received"),
             'guarantor': fields.String(description="The domain of the instance which guaranteed this instance."),
         })
-        self.response_model_model_Instances_get = api.model('Instances', {
+        self.response_model_model_Whitelist_get = api.model('Instances', {
             'instances': fields.List(fields.Nested(self.response_model_instances)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),

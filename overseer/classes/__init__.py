@@ -12,15 +12,16 @@ with OVERSEER.app_context():
 
     db.create_all()
 
-    admin_domain = os.getenv("ADMIN_DOMAIN")
+    admin_domain = os.getenv("OVERSEER_LEMMY_DOMAIN")
     admin = db.session.query(Instance).filter_by(domain=admin_domain).first()
     if not admin:
         admin = Instance(
             id=0,
             domain=admin_domain,
-            api_key=hash_api_key(os.getenv("ADMIN_PASSWORD")),
+            api_key=hash_api_key(os.getenv("ADMIN_API_KEY")),
             open_registrations=False,
             email_verify=False,
+            software="lemmy",
         )
         admin.create()
         guarantee = Guarantee(

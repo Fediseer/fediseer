@@ -35,13 +35,14 @@ class Instance(db.Model):
     __tablename__ = "instances"
 
     id = db.Column(db.Integer, primary_key=True) 
-    domain = db.Column(db.String(255), unique=True, nullable=False)
+    domain = db.Column(db.String(255), unique=True, nullable=False, index=True)
     api_key = db.Column(db.String(100), unique=True, nullable=False, index=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     open_registrations = db.Column(db.Boolean, unique=False, nullable=False, index=True)
     email_verify = db.Column(db.Boolean, unique=False, nullable=False, index=True)
+    software = db.Column(db.String(50), unique=False, nullable=False, index=True)
 
     approvals = db.relationship("Endorsement", back_populates="approving_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.approving_id])
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
@@ -53,16 +54,19 @@ class Instance(db.Model):
         db.session.commit()
 
     def get_details(self):
+        guarantor = self.get_guarantor()
         ret_dict = {
             "domain": self.domain,
             "open_registrations": self.open_registrations,
             "email_verify": self.email_verify,
             "endorsements": len(self.endorsements),
             "approvals": len(self.approvals),
-            "guarantor": self.get_guarantor().domain,
+            "guarantor": guarantor.domain if guarantor else None,
         }
         return ret_dict
 
     def get_guarantor(self):
+        if len(self.guarantors) == 0:
+            return None
         guarantee = self.guarantors[0]
         return Instance.query.filter_by(id=guarantee.guarantor_id).first()
