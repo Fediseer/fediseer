@@ -1,7 +1,7 @@
 from overseer.apis.v1.base import *
-from overseer.classes.instance import Endorsement
+from overseer.classes.instance import Guarantee, Endorsement
 
-class Approvals(Resource):
+class Guarantors(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
@@ -12,22 +12,22 @@ class Approvals(Resource):
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def get(self, domain):
-        '''Display all endorsements given by a specific domain
+        '''Display all guarantees given by a specific domain
         '''
         self.args = self.get_parser.parse_args()
         instance = database.find_instance_by_domain(domain)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
         instance_details = []
-        for instance in database.get_all_endorsed_instances_by_approving_id(instance.id):
-            instance_details.append(instance.get_details())
+        for guaranteed in database.get_all_guaranteed_instances_by_guarantor_id(instance.id):
+            instance_details.append(guaranteed.get_details())
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {"csv": ",".join([guaranteed["domain"] for guaranteed in instance_details])},200
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
+            return {"domains": [guaranteed["domain"] for guaranteed in instance_details]},200
         return {"instances": instance_details},200
     
-class Endorsements(Resource):
+class Guarantees(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
@@ -38,19 +38,20 @@ class Endorsements(Resource):
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def get(self, domain):
-        '''Display all endorsements given by a specific domain
+        '''Display all instances guaranteeing for this domain
         '''
         self.args = self.get_parser.parse_args()
         instance = database.find_instance_by_domain(domain)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
         instance_details = []
-        for instance in database.get_all_approving_instances_by_endorsed_id(instance.id):
-            instance_details.append(instance.get_details())
+        for guarantor in database.get_all_guarantor_instances_by_guaranteed_id(instance.id):
+            instance_details.append(guarantor.get_details())
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {"csv": ",".join([guarantor["domain"] for guarantor in instance_details])},200
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
+            return {"domains": [guarantor["domain"] for guarantor in instance_details]},200
+        logger.debug(database.get_guarantor_chain(instance.id))
         return {"instances": instance_details},200
 
     put_parser = reqparse.RequestParser()
@@ -62,7 +63,7 @@ class Endorsements(Resource):
     @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
-    @api.response(403, 'Not Guaranteed', models.response_model_error)
+    @api.response(403, 'Instance Not Guaranteed or Tartget instance Guaranteed by others', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def put(self, domain):
         '''Endorse an instance
@@ -74,27 +75,32 @@ class Endorsements(Resource):
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if len(instance.guarantors) == 0:
-            raise e.Forbidden("Only guaranteed instances can endorse others.")
-        if instance.domain == domain:
-            raise e.BadRequest("Nice try, but you can't endorse yourself.")
+            raise e.Forbidden("Only guaranteed instances can guarantee others.")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
         target_instance = database.find_instance_by_domain(domain=domain)
-        if len(target_instance.guarantors) == 0:
-            raise e.Forbidden("Not Guaranteed instances can be endorsed. Please guarantee for them, or find someone who will.")
         if not target_instance:
             raise e.BadRequest("Instance to endorse not found")
-        if database.get_endorsement(target_instance.id,instance.id):
+        if database.get_guarantee(target_instance.id,instance.id):
             return {"message":'OK'}, 200
+        gdomain = target_instance.get_guarantor_domain()
+        if gdomain:
+            raise e.Forbidden("Target instance already guaranteed by {gdomain}")
+        new_guarantee = Guarantee(
+            guaranteed_id=target_instance.id,
+            guarantor_id=instance.id,
+        )
+        db.session.add(new_guarantee)
+        # Guaranteed instances get their automatic first endorsement
         new_endorsement = Endorsement(
             approving_id=instance.id,
             endorsed_id=target_instance.id,
         )
         db.session.add(new_endorsement)
         db.session.commit()
-        pm_instance(target_instance.domain, f"Your instance has just been endorsed by {instance.domain}")
-        logger.info(f"{instance.domain} Endorsed {domain}")
+        pm_instance(target_instance.domain, f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.")
+        logger.info(f"{instance.domain} Guaranteed for {domain}")
         return {"message":'Changed'}, 200
 
 
@@ -108,7 +114,7 @@ class Endorsements(Resource):
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def delete(self,domain):
-        '''Withdraw an instance endorsement
+        '''Withdraw an instance guarantee
         '''
         self.args = self.delete_parser.parse_args()
         if not self.args.apikey:
@@ -119,11 +125,19 @@ class Endorsements(Resource):
         target_instance = database.find_instance_by_domain(domain=domain)
         if not target_instance:
             raise e.BadRequest("Instance from which to withdraw endorsement not found")
-        endorsement = database.get_endorsement(target_instance.id,instance.id)
-        if not endorsement:
+        # If API key matches the target domain, we assume they want to remove the guarantee added to them to allow another domain to guarantee them
+        if instance.id == target_instance.id:
+            guarantee = instance.get_guarantee()
+        else:
+            guarantee = database.get_guarantee(target_instance.id,instance.id)
+        if not guarantee:
             return {"message":'OK'}, 200
-        db.session.delete(endorsement)
+        # Removing a guarantee removes the endorsement
+        endorsement = database.get_endorsement(target_instance.id,instance.id)     
+        if endorsement:   
+            db.session.delete(endorsement)
+        db.session.delete(guarantee)
         db.session.commit()
-        pm_instance(target_instance.domain, f"Oh now. {instance.domain} has just withdrawn the endorsement of your instance")
-        logger.info(f"{instance.domain} Withdrew endorsement from {domain}")
+        pm_instance(target_instance.domain, f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\nIMPORTANT: All your endorsements and guarantees will be deleted unless you manage to find a new guarantor within 24hours!")
+        logger.info(f"{instance.domain} Withdrew guarantee from {domain}")
         return {"message":'Changed'}, 200

@@ -54,7 +54,6 @@ class Instance(db.Model):
         db.session.commit()
 
     def get_details(self):
-        guarantor = self.get_guarantor()
         ret_dict = {
             "id": self.id,
             "domain": self.domain,
@@ -62,12 +61,23 @@ class Instance(db.Model):
             "email_verify": self.email_verify,
             "endorsements": len(self.endorsements),
             "approvals": len(self.approvals),
-            "guarantor": guarantor.domain if guarantor else None,
+            "guarantor": self.get_guarantor_domain(),
         }
         return ret_dict
 
-    def get_guarantor(self):
+
+    def get_guarantee(self):
         if len(self.guarantors) == 0:
             return None
-        guarantee = self.guarantors[0]
+        return self.guarantors[0]
+
+    def get_guarantor(self):
+        guarantee = self.get_guarantee()
+        if not guarantee:
+            return None
+        return guarantee.guarantor_instance
         return Instance.query.filter_by(id=guarantee.guarantor_id).first()
+
+    def get_guarantor_domain(self):
+        guarantor = self.get_guarantor()
+        return guarantor.domain if guarantor else None
