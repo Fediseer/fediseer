@@ -5,6 +5,9 @@ class Models:
         self.response_model_error = api.model('RequestError', {
             'message': fields.String(description="The error message for this status code."),
         })
+        self.response_model_simple_response = api.model('SimpleResponse', {
+            "message": fields.String(default='OK',required=True, description="The result of this operation."),
+        })
         self.response_model_suspicious_instances = api.model('SuspiciousInstances', {
             'domain': fields.String(description="The instance domain"),
             'uptime_alltime': fields.Float(description="The instance uptime pct. 100% and thousand of users is unlikely"),

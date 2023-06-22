@@ -131,3 +131,27 @@ class Whitelist(Resource):
             instance.api_key = hash_api_key(new_key)
             db.session.commit()
         return instance.get_details(),200
+
+    delete_parser = reqparse.RequestParser()
+    delete_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
+    delete_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    delete_parser.add_argument("domain", required=False, type=str, help="The instance domain. It MUST be alredy registered in https://overctrl.dbzer0.com", location="json")
+
+
+    @api.expect(delete_parser)
+    @api.marshal_with(models.response_model_simple_response, code=200, description='Instances', skip_none=True)
+    def delete(self):
+        '''Delete instance from overseer
+        '''
+        self.args = self.patch_parser.parse_args()
+        if not self.args.apikey:
+            raise e.Unauthorized("You must provide the API key that was PM'd to your overctrl.dbzer0.com account")
+        instance = database.find_authenticated_instance(self.args.domain, self.args.apikey)
+        if not instance:
+            raise e.BadRequest(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        if self.args.domain == os.getenv('OVERSEER_LEMMY_DOMAIN'):
+            raise e.Forbidden("Cannot delete overseer control instance")
+        db.session.delete(instance)
+        db.session.commit()
+        logger.warning(f"{self.args.domain} deleted")
+        return {"message":'OK'}, 200
