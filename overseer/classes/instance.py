@@ -56,6 +56,7 @@ class Instance(db.Model):
     def get_details(self):
         guarantor = self.get_guarantor()
         ret_dict = {
+            "id": self.id,
             "domain": self.domain,
             "open_registrations": self.open_registrations,
             "email_verify": self.email_verify,

@@ -12,7 +12,7 @@ overseer_lemmy_user = overctrl_lemmy.user.get(username=os.getenv('OVERSEER_LEMMY
 
 def pm_new_api_key(domain: str):
     api_key = secrets.token_urlsafe(16)
-    pm_content = f"The API Key for domain {domain} is {api_key}.\n\nUse this to perform operations on the overseer."
+    pm_content = f"The API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the overseer."
     domain_username = domain.replace(".", "_")
     domain_user = overctrl_lemmy.user.get(username=domain_username)
     if not domain_user:

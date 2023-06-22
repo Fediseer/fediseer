@@ -54,8 +54,8 @@ class Suspicions(Resource):
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
-    get_parser.add_argument("endorsements", required=False, default=1, type=int, help="Limit to this amount of endorsements of more", location="args")
-    get_parser.add_argument("domain", required=False, type=str, help="Filter by instance domain", location="args")
+    get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
+    get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
@@ -67,7 +67,7 @@ class Whitelist(Resource):
         '''
         self.args = self.get_parser.parse_args()
         instance_details = []
-        for instance in database.get_all_instances():
+        for instance in database.get_all_instances(self.args.endorsements,self.args.guarantors):
             instance_details.append(instance.get_details())
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
@@ -84,6 +84,7 @@ class Whitelist(Resource):
 
     @api.expect(put_parser)
     @api.marshal_with(models.response_model_instances, code=200, description='Instances')
+    @api.response(400, 'Bad Request', models.response_model_error)
     def put(self):
         '''Register a new instance to the overseer
         An instance account has to exist in the overseer lemmy instance
@@ -117,15 +118,17 @@ class Whitelist(Resource):
 
     @api.expect(patch_parser)
     @api.marshal_with(models.response_model_instances, code=200, description='Instances', skip_none=True)
+    @api.response(401, 'Invalid API Key', models.response_model_error)
+    @api.response(403, 'Instance Not Registered', models.response_model_error)
     def patch(self):
         '''Regenerate API key for instance
         '''
         self.args = self.patch_parser.parse_args()
         if not self.args.apikey:
             raise e.Unauthorized("You must provide the API key that was PM'd to your overctrl.dbzer0.com account")
-        instance = database.find_authenticated_instance(self.args.domain, self.args.apikey)
+        instance = database.find_instance_by_api_key(self.args.apikey)
         if not instance:
-            raise e.BadRequest(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+            raise e.Forbidden(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if self.args.regenerate_key:
             new_key = pm_new_api_key(self.args.domain)
             instance.api_key = hash_api_key(new_key)
@@ -140,6 +143,9 @@ class Whitelist(Resource):
 
     @api.expect(delete_parser)
     @api.marshal_with(models.response_model_simple_response, code=200, description='Instances', skip_none=True)
+    @api.response(400, 'Bad Request', models.response_model_error)
+    @api.response(401, 'Invalid API Key', models.response_model_error)
+    @api.response(403, 'Forbidden', models.response_model_error)
     def delete(self):
         '''Delete instance from overseer
         '''
@@ -154,4 +160,22 @@ class Whitelist(Resource):
         db.session.delete(instance)
         db.session.commit()
         logger.warning(f"{self.args.domain} deleted")
-        return {"message":'OK'}, 200
+        return {"message":'Changed'}, 200
+
+
+
+class WhitelistDomain(Resource):
+    get_parser = reqparse.RequestParser()
+    get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+
+    @api.expect(get_parser)
+    @cache.cached(timeout=10, query_string=True)
+    @api.marshal_with(models.response_model_instances, code=200, description='Instances')
+    def get(self, domain):
+        '''Display info about a specific instance
+        '''
+        self.args = self.get_parser.parse_args()
+        instance = database.find_instance_by_domain(domain)
+        if not instance:
+            raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
+        return instance.get_details(),200
