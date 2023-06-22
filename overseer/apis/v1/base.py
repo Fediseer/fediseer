@@ -19,6 +19,8 @@ models = Models(api)
 
 handle_bad_request = api.errorhandler(e.BadRequest)(e.handle_bad_requests)
 handle_forbidden = api.errorhandler(e.Forbidden)(e.handle_bad_requests)
+handle_unauthorized = api.errorhandler(e.Unauthorized)(e.handle_bad_requests)
+handle_not_found = api.errorhandler(e.NotFound)(e.handle_bad_requests)
 
 # Used to for the flask limiter, to limit requests per url paths
 def get_request_path():
@@ -83,7 +85,9 @@ class Whitelist(Resource):
     @api.expect(put_parser)
     @api.marshal_with(models.response_model_instances, code=200, description='Instances')
     def put(self):
-        '''A List with the details of all instances and their endorsements
+        '''Register a new instance to the overseer
+        An instance account has to exist in the overseer lemmy instance
+        That account will recieve the new API key via PM
         '''
         self.args = self.put_parser.parse_args()
         existing_instance = Instance.query.filter_by(domain=self.args.domain).first()
@@ -105,22 +109,25 @@ class Whitelist(Resource):
         return new_instance.get_details(),200
 
     patch_parser = reqparse.RequestParser()
-    patch_parser.add_argument("Authorization: apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
+    patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     patch_parser.add_argument("domain", required=False, type=str, help="The instance domain. It MUST be alredy registered in https://overctrl.dbzer0.com", location="json")
-    patch_parser.add_argument("guarantor", required=False, type=str, help="(Optiona) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
+    patch_parser.add_argument("regenerate_key", required=False, type=bool, help="If True, will PM a new api key to this instance", location="json")
 
 
-    @api.expect(put_parser)
-    @logger.catch(reraise=True)
+    @api.expect(patch_parser)
     @api.marshal_with(models.response_model_instances, code=200, description='Instances', skip_none=True)
     def patch(self):
-        '''A List with the details of all instances and their endorsements
+        '''Regenerate API key for instance
         '''
         self.args = self.patch_parser.parse_args()
-        self.apikey = self.args["Authorization: apikey"]
-        if not self.apikey:
-            raise e.BadRequest("You must provide the API key that was PM'd to your overctrl.dbzer0.com account")
-        existing_instance = Instance.query.filter_by(domain=self.args.domain).first()
-        if existing_instance:
-            return existing_instance.get_details,200
+        if not self.args.apikey:
+            raise e.Unauthorized("You must provide the API key that was PM'd to your overctrl.dbzer0.com account")
+        instance = database.find_authenticated_instance(self.args.domain, self.args.apikey)
+        if not instance:
+            raise e.BadRequest(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        if self.args.regenerate_key:
+            new_key = pm_new_api_key(self.args.domain)
+            instance.api_key = hash_api_key(new_key)
+            db.session.commit()
+        return instance.get_details(),200

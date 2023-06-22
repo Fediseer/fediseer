@@ -11,6 +11,16 @@ class Forbidden(wze.Forbidden):
         self.specific = message
         self.log = log
 
+class Unauthorized(wze.Unauthorized):
+    def __init__(self, message, log=None):
+        self.specific = message
+        self.log = log
+
+class NotFound(wze.NotFound):
+    def __init__(self, message, log=None):
+        self.specific = message
+        self.log = log
+
 class Locked(wze.Locked):
     def __init__(self, message, log=None):
         self.specific = message
