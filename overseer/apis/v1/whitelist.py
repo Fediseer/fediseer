@@ -57,9 +57,14 @@ class WhitelistDomain(Resource):
         That account will recieve the new API key via PM
         '''
         self.args = self.put_parser.parse_args()
-        existing_instance = Instance.query.filter_by(domain=domain).first()
+        existing_instance = database.find_instance_by_domain(domain)
         if existing_instance:
             return existing_instance.get_details(),200
+        guarantor_instance = None
+        if self.args.guarantor:
+            guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
+            if not guarantor_instance:
+                raise e.BadRequest(f"Requested guarantor domain {self.args.guarantor} is not registered with the Overseer yet!")
         if domain.endswith("test.dbzer0.com"):
             requested_lemmy = Lemmy(f"https://{domain}")
             requested_lemmy._requestor.nodeinfo = {"software":{"name":"lemmy"}}
@@ -80,6 +85,8 @@ class WhitelistDomain(Resource):
             software=requested_lemmy.nodeinfo['software']['name'],
         )
         new_instance.create()
+        if guarantor_instance:
+            pm_instance(guarantor_instance.domain, f"New instance {domain} was just registered with the Overseer and have asked you to guarantee for them!")
         return new_instance.get_details(),200
 
     patch_parser = reqparse.RequestParser()
