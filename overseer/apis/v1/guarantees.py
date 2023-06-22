@@ -76,6 +76,8 @@ class Guarantees(Resource):
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if len(instance.guarantors) == 0:
             raise e.Forbidden("Only guaranteed instances can guarantee others.")
+        if len(instance.guarantors) >= 20 and instance.id != 0:
+            raise e.Forbidden("You cannot guarantee for more than 20 instances")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
