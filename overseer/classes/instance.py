@@ -19,6 +19,7 @@ class Guarantee(db.Model):
     guarantor_instance = db.relationship("Instance", back_populates="guarantees", foreign_keys=[guarantor_id])
     guaranteed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), unique=True, nullable=False)
     guaranteed_instance = db.relationship("Instance", back_populates="guarantors", foreign_keys=[guaranteed_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
 class Endorsement(db.Model):
@@ -29,6 +30,7 @@ class Endorsement(db.Model):
     approving_instance = db.relationship("Instance", back_populates="approvals", foreign_keys=[approving_id])
     endorsed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
     endorsed_instance = db.relationship("Instance", back_populates="endorsements", foreign_keys=[endorsed_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 
 class Instance(db.Model):
@@ -39,6 +41,7 @@ class Instance(db.Model):
     api_key = db.Column(db.String(100), unique=True, nullable=False, index=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    oprhan_since = db.Column(db.DateTime, nullable=True)
 
     open_registrations = db.Column(db.Boolean, unique=False, nullable=False, index=True)
     email_verify = db.Column(db.Boolean, unique=False, nullable=False, index=True)
@@ -81,3 +84,12 @@ class Instance(db.Model):
     def get_guarantor_domain(self):
         guarantor = self.get_guarantor()
         return guarantor.domain if guarantor else None
+
+    def set_as_oprhan(self):
+        self.oprhan_since = datetime.utcnow()
+        db.session.commit()
+    
+    def unset_as_orphan(self):
+        self.oprhan_since = None
+        db.session.commit()
+        

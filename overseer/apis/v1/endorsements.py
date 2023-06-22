@@ -38,7 +38,7 @@ class Endorsements(Resource):
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def get(self, domain):
-        '''Display all endorsements given by a specific domain
+        '''Display all endorsements received by a specific domain
         '''
         self.args = self.get_parser.parse_args()
         instance = database.find_instance_by_domain(domain)

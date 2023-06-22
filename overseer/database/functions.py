@@ -21,6 +21,11 @@ def get_all_instances(min_endorsements = 0, min_guarantors = 1):
         joinedload(Instance.endorsements),
     ).group_by(
         Instance.id
+    ).filter(
+        or_(
+            Instance.oprhan_since == None,
+            Instance.oprhan_since > datetime.utcnow() - timedelta(hours=24)
+        )
     ).having(
         db.func.count(Instance.endorsements) >= min_endorsements,
     ).having(
