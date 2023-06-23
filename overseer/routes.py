@@ -47,7 +47,7 @@ def wellknown_redirect():
             {
                 "rel": "self",
                 "type": "application/activity+json",
-                "href": "https://overseer.dbzer0.com/actor"
+                "href": "https://overseer.dbzer0.com/api/v1/user/overseer"
             }
         ]
     }
