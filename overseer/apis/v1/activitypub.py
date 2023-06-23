@@ -44,6 +44,7 @@ class Inbox(Resource):
             raise e.NotFound("User does not exist")
         self.args = self.post_parser.parse_args()
         json_payload = request.get_json()
-        print(json_payload)
-        print("inbox hit")
+        logger.info("aaa")
+        logger.warning(json_payload)
+        logger.info("inbox hit")
         return {"message": "delivered"}, 200
