@@ -101,10 +101,20 @@ class Guarantees(Resource):
         )
         db.session.add(new_endorsement)
         db.session.commit()
-        pm_instance(target_instance.domain, f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.")
+        activitypub_pm.pm_admins(
+            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.",
+            domain=target_instance.domain,
+            software=target_instance.software,
+            instance=target_instance,
+        )
         orphan_ids = database.get_guarantee_chain(target_instance.id)
         for orphan in database.get_instances_by_ids(orphan_ids):
-            pm_instance(orphan.domain, f"Phew! You guarantor chain has been repaired as {instance.domain} has guaranteed for {domain}.")
+            activitypub_pm.pm_admins(
+                message=f"Phew! You guarantor chain has been repaired as {instance.domain} has guaranteed for {domain}.",
+                domain=orphan.domain,
+                software=orphan.software,
+                instance=orphan,
+            )
             orphan.unset_as_orphan()
         logger.info(f"{instance.domain} Guaranteed for {domain}")
         return {"message":'Changed'}, 200
@@ -144,15 +154,23 @@ class Guarantees(Resource):
             db.session.delete(endorsement)
         db.session.delete(guarantee)
         db.session.commit()
-        pm_instance(target_instance.domain, 
-                    f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\n"
+        activitypub_pm.pm_admins(
+            message=f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\n"
                     "IMPORTANT: You are still considered guaranteed for the next 24hours, but you cannot further endorse or guarantee others."
                     "If you find a new guarantor then your guarantees will be reactivated!.\n\n"
-                    "Note that if you do not find a guarantor within 7 days, all your endorsements will be removed."
+                    "Note that if you do not find a guarantor within 7 days, all your endorsements will be removed.",
+            domain=target_instance.domain,
+            software=target_instance.software,
+            instance=target_instance,
         )
         orphan_ids = database.get_guarantee_chain(target_instance.id)
         for orphan in database.get_instances_by_ids(orphan_ids):
-            pm_instance(orphan.domain, f"Attention! You guarantor chain has been broken because {instance.domain} has withdrawn their backing from {domain}.\n\nIMPORTANT: All your guarantees will be deleted unless the chain is repaired or you find a new guarantor within 24hours!")
+            activitypub_pm.pm_admins(
+                message=f"Attention! You guarantor chain has been broken because {instance.domain} has withdrawn their backing from {domain}.\n\nIMPORTANT: All your guarantees will be deleted unless the chain is repaired or you find a new guarantor within 24hours!",
+                domain=orphan.domain,
+                software=orphan.software,
+                instance=orphan,
+            )
             orphan.set_as_oprhan()
         logger.info(f"{instance.domain} Withdrew guarantee from {domain}")
         return {"message":'Changed'}, 200

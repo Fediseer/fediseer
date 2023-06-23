@@ -27,6 +27,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True) 
     account = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    username = db.Column(db.String(255), unique=False, nullable=False)
     api_key = db.Column(db.String(100), unique=True, nullable=False, index=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

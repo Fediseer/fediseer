@@ -38,7 +38,6 @@ class Instance(db.Model):
 
     id = db.Column(db.Integer, primary_key=True) 
     domain = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    api_key = db.Column(db.String(100), unique=True, nullable=False, index=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     oprhan_since = db.Column(db.DateTime, nullable=True)

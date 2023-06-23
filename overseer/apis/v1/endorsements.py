@@ -93,7 +93,12 @@ class Endorsements(Resource):
         )
         db.session.add(new_endorsement)
         db.session.commit()
-        pm_instance(target_instance.domain, f"Your instance has just been endorsed by {instance.domain}")
+        activitypub_pm.pm_admins(
+            message=f"Your instance has just been endorsed by {instance.domain}",
+            domain=target_instance.domain,
+            software=target_instance.software,
+            instance=target_instance,
+        )
         logger.info(f"{instance.domain} Endorsed {domain}")
         return {"message":'Changed'}, 200
 
@@ -124,6 +129,11 @@ class Endorsements(Resource):
             return {"message":'OK'}, 200
         db.session.delete(endorsement)
         db.session.commit()
-        pm_instance(target_instance.domain, f"Oh now. {instance.domain} has just withdrawn the endorsement of your instance")
+        activitypub_pm.pm_admins(
+            message=f"Oh no. {instance.domain} has just withdrawn the endorsement of your instance",
+            domain=target_instance.domain,
+            software=target_instance.software,
+            instance=target_instance,
+        )
         logger.info(f"{instance.domain} Withdrew endorsement from {domain}")
         return {"message":'Changed'}, 200

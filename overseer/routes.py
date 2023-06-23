@@ -42,13 +42,22 @@ def wellknown_redirect():
         return {"message":"User does not exist"},404
     webfinger = {
         "subject": "acct:overseer@overseer.dbzer0.com",
-
         "links": [
             {
                 "rel": "self",
                 "type": "application/activity+json",
-                "href": "https://overseer.dbzer0.com/actor"
+                "href": "https://overseer.dbzer0.com/api/v1/user/overseer"
             }
         ]
     }
     return webfinger,200
+
+@logger.catch(reraise=True)
+@OVERSEER.route('/inbox', methods=['POST'])
+def inbox():
+    query_string = request.query_string.decode()
+    print(query_string)
+    # Access the JSON payload
+    json_payload = request.get_json()
+    print(json_payload)
+    return 'ok', 200

@@ -3,7 +3,7 @@ from loguru import logger
 import os
 import secrets
 import overseer.exceptions as e
-  
+
 overctrl_lemmy = Lemmy(f"https://{os.getenv('OVERSEER_LEMMY_DOMAIN')}")
 _login = overctrl_lemmy.log_in(os.getenv('OVERSEER_LEMMY_USERNAME'),os.getenv('OVERSEER_LEMMY_PASSWORD'))
 if not _login:

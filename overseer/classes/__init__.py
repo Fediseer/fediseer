@@ -19,7 +19,6 @@ with OVERSEER.app_context():
         admin = Instance(
             id=0,
             domain=admin_domain,
-            api_key=hash_api_key(os.getenv("ADMIN_API_KEY")),
             open_registrations=False,
             email_verify=False,
             software="lemmy",

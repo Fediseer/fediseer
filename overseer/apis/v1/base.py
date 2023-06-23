@@ -8,7 +8,7 @@ from overseer.classes.instance import Instance
 from overseer.database import functions as database
 from overseer import exceptions as e
 from overseer.utils import hash_api_key
-from overseer.lemmy import pm_new_api_key, pm_instance
+from overseer.messaging import activitypub_pm
 from pythorhead import Lemmy
 
 api = Namespace('v1', 'API Version 1' )

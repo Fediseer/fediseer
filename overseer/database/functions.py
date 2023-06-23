@@ -9,6 +9,7 @@ from overseer.flask import db, SQLITE_MODE
 from overseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
 from overseer.classes.instance import Instance, Endorsement, Guarantee
+from overseer.classes.user import Claim, User
 
 def get_all_instances(min_endorsements = 0, min_guarantors = 1):
     query = db.session.query(
@@ -92,15 +93,62 @@ def get_all_guarantor_instances_by_guaranteed_id(guaranteed_id):
 
 
 def find_instance_by_api_key(api_key):
-    instance = Instance.query.filter_by(api_key=hash_api_key(api_key)).first()
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.api_key == hash_api_key(api_key)
+    ).first()
     return instance
+
+def find_instance_by_user(user):
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.id == user.id
+    ).first()
+    return instance
+
+def find_admins_by_instance(instance):
+    users = User.query.join(
+        Claim
+    ).join(
+        Instance
+    ).filter(
+        Instance.id == instance.id
+    ).all()
+    return users
+
+def find_claim(admin_username):
+    claim = Claim.query.join(
+        User
+    ).filter(
+        User.account == admin_username
+    ).first()
+    return claim
+
+def find_user_by_api_key(api_key):
+    user = User.query.filter(
+        User.api_key == hash_api_key(api_key)
+    ).first()
+    return user
 
 def find_instance_by_domain(domain):
     instance = Instance.query.filter_by(domain=domain).first()
     return instance
 
 def find_authenticated_instance(domain,api_key):
-    instance = Instance.query.filter_by(domain=domain, api_key=hash_api_key(api_key)).first()
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.api_key == hash_api_key(api_key),
+        Instance.domain ==domain,
+    ).first()
     return instance
 
 def get_endorsement(instance_id, endorsing_instance_id):
