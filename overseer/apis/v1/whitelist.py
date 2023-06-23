@@ -1,5 +1,6 @@
 from overseer.apis.v1.base import *
 from overseer.utils import get_nodeinfo
+from overseer.messaging import activitypub_pm
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -46,6 +47,7 @@ class WhitelistDomain(Resource):
 
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    put_parser.add_argument("admin", required=False, type=str, help="The username of the admin who wants to register this domain", location="json")
     put_parser.add_argument("guarantor", required=False, type=str, help="(Optiona) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
 
 
@@ -58,6 +60,8 @@ class WhitelistDomain(Resource):
         That account will recieve the new API key via PM
         '''
         self.args = self.put_parser.parse_args()
+        if '@' in self.args.admin:
+            raise e.BadRequest("Please send the username without any @ signs or domains")
         existing_instance = database.find_instance_by_domain(domain)
         if existing_instance:
             return existing_instance.get_details(),200
@@ -88,7 +92,7 @@ class WhitelistDomain(Resource):
             else:
                 open_registrations = nodeinfo["openRegistrations"]
                 email_verify = False
-        api_key = pm_new_api_key(domain)
+        api_key = activitypub_pm.pm_new_api_key(domain, self.args.admin, software)
         if not api_key:
             raise e.BadRequest("Failed to generate API Key")
         new_instance = Instance(
@@ -100,7 +104,11 @@ class WhitelistDomain(Resource):
         )
         new_instance.create()
         if guarantor_instance:
-            pm_instance(guarantor_instance.domain, f"New instance {domain} was just registered with the Overseer and have asked you to guarantee for them!")
+            activitypub_pm.pm_to_first_admin(
+                message=f"New instance {domain} was just registered with the Overseer and have asked you to guarantee for them!",
+                domain=guarantor_instance.domain,
+                software=software.software,
+            )
         return new_instance.get_details(),200
 
     patch_parser = reqparse.RequestParser()
