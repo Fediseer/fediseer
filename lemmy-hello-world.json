@@ -1,0 +1,44 @@
+{
+	"id": "https://overseer.dbzer0.com/new_id_template",
+	"to": ["https://overctrl.dbzer0.com/u/overseer"],
+	"type": "Create",
+	"actor": "https://overseer.dbzer0.com/api/v1/user/overseer",
+	"object": {
+		"id": "https://overseer.dbzer0.com/new_object_id_template",
+		"type": "ChatMessage",
+		"to": ["https://overctrl.dbzer0.com/u/overseer"],
+		"source": {
+			"content": "hello world",
+			"mediaType": "text/markdown"
+		},
+		"attributedTo": "https://overseer.dbzer0.com/api/v1/user/overseer",
+		"content": "<p>hello world</p>\n",
+		"mediaType": "text/html",
+		"published": "2021-10-29T15:31:56.058289+00:00"
+	},
+    "@context": [
+        "https://www.w3.org/ns/activitystreams",
+        "https: //w3id.org/security/v1",
+        {
+            "pt": "https://joinpeertube.org/ns#",
+            "sc": "http://schema.org/",
+            "lemmy": "https://join-lemmy.org/ns#",
+            "expires": "as:endTime",
+            "litepub": "http://litepub.social/ns#",
+            "language": "sc:inLanguage",
+            "stickied": "lemmy:stickied",
+            "sensitive": "as:sensitive",
+            "identifier": "sc:identifier",
+            "moderators": {
+                "@id": "lemmy:moderators",
+                "@type": "@id"
+            },
+            "removeData": "lemmy:removeData",
+            "ChatMessage": "litepub:ChatMessage",
+            "matrixUserId": "lemmy:matrixUserId",
+            "distinguished": "lemmy:distinguished",
+            "commentsEnabled": "pt:commentsEnabled",
+            "postingRestrictedToMods": "lemmy:postingRestrictedToMods"
+        }
+	]	
+  }

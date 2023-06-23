@@ -16,6 +16,7 @@ class ActivityPub:
     def send_lemmy_pm(self, message, username, domain):
         with open('lemmy-pm.json', 'r') as file:
             document = json.loads(file.read())
+        documebnt
         self.send_pm(document, domain)
 
     def send_pm(self, document, domain):
