@@ -30,3 +30,25 @@ def index():
     </head>
     """
     return(head + markdown(findex))
+
+
+@logger.catch(reraise=True)
+@OVERSEER.route('/.well-known/webfinger')
+def wellknown_redirect():
+    query_string = request.query_string.decode()
+    if not query_string:
+        return {"message":"No user specified"},400
+    if query_string != "resource=acct:overseer@overseer.dbzer0.com":
+        return {"message":"User does not exist"},404
+    webfinger = {
+        "subject": "acct:overseer@overseer.dbzer0.com",
+
+        "links": [
+            {
+                "rel": "self",
+                "type": "application/activity+json",
+                "href": "https://overseer.dbzer0.com/actor"
+            }
+        ]
+    }
+    return webfinger,200
