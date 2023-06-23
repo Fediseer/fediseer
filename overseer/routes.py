@@ -52,3 +52,13 @@ def wellknown_redirect():
         ]
     }
     return webfinger,200
+
+@logger.catch(reraise=True)
+@OVERSEER.route('/inbox', methods=['POST'])
+def inbox():
+    query_string = request.query_string.decode()
+    print(query_string)
+    # Access the JSON payload
+    json_payload = request.get_json()
+    print(json_payload)
+    return 'ok', 200
