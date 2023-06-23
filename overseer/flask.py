@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, redirect
 from flask_caching import Cache
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
@@ -38,3 +38,4 @@ if cache is None:
     cache = Cache(config=cache_config)
     cache.init_app(OVERSEER)
     logger.init_warn("Flask Cache", status="SimpleCache")
+

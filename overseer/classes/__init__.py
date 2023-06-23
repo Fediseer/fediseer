@@ -7,6 +7,7 @@ from overseer.utils import hash_api_key
 
 # Importing for DB creation
 from overseer.classes.instance import Instance, Guarantee
+import overseer.classes.user
 
 with OVERSEER.app_context():
 
