@@ -103,7 +103,7 @@ class WhitelistDomain(Resource):
     patch_parser = reqparse.RequestParser()
     patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
-    patch_parser.add_argument("regenerate_key", required=False, type=bool, help="If True, will PM a new api key to this instance", location="json")
+    patch_parser.add_argument("regenerate_key", required=False, type=str, help="If a username is given, their API will be reset. This can be initiated by other instance admins or the fediseer.", location="json")
 
 
     @api.expect(patch_parser)
@@ -119,8 +119,15 @@ class WhitelistDomain(Resource):
         user = database.find_user_by_api_key(self.args.apikey)
         if not user:
             raise e.Forbidden("You have not yet claimed an instance. Use the POST method to do so.")
+        instance = database.find_instance_by_user(user)
         if self.args.regenerate_key:
-            new_key = pm_new_api_key(domain)
+            requestor = None
+            if self.args.regenerate_key != user.username or user.username == "fediseer":
+                requestor = user.username
+                instance_to_reset = database.find_instance_by_account(f"@{self.args.regenerate_key}@{domain}")
+                if instance != instance_to_reset and user.username != "fediseer":
+                    raise e.BadRequest("Only other admins or the fediseer can request API key reset for others.")
+            new_key = activitypub_pm.pm_new_api_key(domain, self.args.regenerate_key, instance.software, requestor=requestor)
             user.api_key = hash_api_key(new_key)
             db.session.commit()
             return {"message": "Changed"},200
@@ -146,7 +153,7 @@ class WhitelistDomain(Resource):
         instance = database.find_authenticated_instance(domain, self.args.apikey)
         if not instance:
             raise e.BadRequest(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
-        if domain == os.getenv('OVERSEER_LEMMY_DOMAIN'):
+        if domain == os.getenv('FEDISEER_LEMMY_DOMAIN'):
             raise e.Forbidden("Cannot delete overseer control instance")
         db.session.delete(instance)
         db.session.commit()
@@ -162,6 +169,9 @@ class WhitelistDomain(Resource):
             email_verify = True
             software = "lemmy"
             admin_usernames = ["db0"]
+            nodeinfo = get_nodeinfo("lemmy.dbzer0.com")
+            requested_lemmy = Lemmy(f"https://{domain}")
+            site = requested_lemmy.site.get()
         else:
             nodeinfo = get_nodeinfo(domain)
             if not nodeinfo:

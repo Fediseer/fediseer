@@ -66,7 +66,7 @@ class Guarantees(Resource):
     @api.response(403, 'Instance Not Guaranteed or Tartget instance Guaranteed by others', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def put(self, domain):
-        '''Endorse an instance
+        '''Guarantee an instance
         '''
         self.args = self.put_parser.parse_args()
         if not self.args.apikey:
@@ -83,7 +83,7 @@ class Guarantees(Resource):
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
         target_instance = database.find_instance_by_domain(domain=domain)
         if not target_instance:
-            raise e.BadRequest("Instance to endorse not found")
+            raise e.BadRequest("Instance to endorse not found")        
         if database.get_guarantee(target_instance.id,instance.id):
             return {"message":'OK'}, 200
         gdomain = target_instance.get_guarantor_domain()
@@ -156,9 +156,9 @@ class Guarantees(Resource):
         db.session.commit()
         activitypub_pm.pm_admins(
             message=f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\n"
-                    "IMPORTANT: You are still considered guaranteed for the next 24hours, but you cannot further endorse or guarantee others."
+                    "IMPORTANT: The instances you vouched for are still considered guaraneed but cannot guarantee or endorse others"
                     "If you find a new guarantor then your guarantees will be reactivated!.\n\n"
-                    "Note that if you do not find a guarantor within 7 days, all your endorsements will be removed.",
+                    "Note that if you do not find a guarantor within 7 days, all your guarantees and endorsements will be removed.",
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,

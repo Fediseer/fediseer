@@ -112,6 +112,16 @@ def find_instance_by_user(user):
     ).first()
     return instance
 
+def find_instance_by_account(user_account):
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.account == user_account
+    ).first()
+    return instance
+
 def find_admins_by_instance(instance):
     users = User.query.join(
         Claim

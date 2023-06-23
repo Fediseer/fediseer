@@ -4,11 +4,11 @@ import os
 import secrets
 import overseer.exceptions as e
 
-overctrl_lemmy = Lemmy(f"https://{os.getenv('OVERSEER_LEMMY_DOMAIN')}")
-_login = overctrl_lemmy.log_in(os.getenv('OVERSEER_LEMMY_USERNAME'),os.getenv('OVERSEER_LEMMY_PASSWORD'))
+overctrl_lemmy = Lemmy(f"https://{os.getenv('FEDISEER_LEMMY_DOMAIN')}")
+_login = overctrl_lemmy.log_in(os.getenv('FEDISEER_LEMMY_USERNAME'),os.getenv('FEDISEER_LEMMY_PASSWORD'))
 if not _login:
     raise Exception("Failed to login to overctrl")
-overseer_lemmy_user = overctrl_lemmy.user.get(username=os.getenv('OVERSEER_LEMMY_USERNAME'))
+overseer_lemmy_user = overctrl_lemmy.user.get(username=os.getenv('FEDISEER_LEMMY_USERNAME'))
 
 def pm_instance(domain: str, message: str):
     domain_username = domain.replace(".", "_")

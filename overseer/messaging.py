@@ -37,8 +37,22 @@ class ActivityPubPM:
         software_map = {
             "lemmy": self.send_lemmy_pm,
             "mastodon": self.send_mastodon_pm,
+            "fediseer": self.send_fediseer_pm,
         }
+        logger.debug(software)
         return software_map[software](message, username, domain)
+
+    def send_fediseer_pm(self, message, username, domain):
+        document = copy.deepcopy(self.document_core)
+        document["to"] =  [f"https://lemmy.dbzer0.com/u/db0"]
+        document["object"]["type"] = "ChatMessage"
+        document["object"]["mediaType"] = "text/html"
+        document["object"]["to"] = [f"https://lemmy.dbzer0.com/u/db0"]
+        document["object"]["source"] =  {
+            "content": message,
+            "mediaType": "text/markdown",
+        }
+        return self.send_pm(document, message, domain)
 
     def send_lemmy_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
@@ -85,9 +99,12 @@ class ActivityPubPM:
         response = requests.post(url, data=document, headers=headers)
         return response.ok
 
-    def pm_new_api_key(self, domain: str, username: str, software: str):
+    def pm_new_api_key(self, domain: str, username: str, software: str, requestor = None):
         api_key = secrets.token_urlsafe(16)
-        pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the Fediseer."
+        if requestor:
+            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}"
+        else:
+            pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the [Fediseer](https://fediseer.com)."
         if not self.send_pm_to_right_software(
             message=pm_content,
             username=username,
@@ -104,6 +121,8 @@ class ActivityPubPM:
         admins = database.find_admins_by_instance(instance)
         if not admins:
             admins = get_admin_for_software(software, domain)
+        else:
+            admins = [a.username for a in admins]
         if not admins:
             raise e.BadRequest(f"Could not determine admins for {domain}")
         for admin_username in admins:
