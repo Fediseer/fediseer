@@ -43,5 +43,7 @@ class Inbox(Resource):
         if username != "overseer":
             raise e.NotFound("User does not exist")
         self.args = self.post_parser.parse_args()
+        json_payload = request.get_json()
+        print(json_payload)
         print("inbox hit")
         return {"message": "delivered"}, 200
