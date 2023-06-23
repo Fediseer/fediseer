@@ -107,7 +107,7 @@ class WhitelistDomain(Resource):
             activitypub_pm.pm_to_first_admin(
                 message=f"New instance {domain} was just registered with the Overseer and have asked you to guarantee for them!",
                 domain=guarantor_instance.domain,
-                software=software.software,
+                software=guarantor_instance.software,
             )
         return new_instance.get_details(),200
 
