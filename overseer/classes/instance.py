@@ -51,6 +51,7 @@ class Instance(db.Model):
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
     guarantees = db.relationship("Guarantee", back_populates="guarantor_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guarantor_id])
     guarantors = db.relationship("Guarantee", back_populates="guaranteed_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guaranteed_id])
+    admins = db.relationship("Claim", back_populates="user", cascade="all, delete-orphan")
 
     def create(self):
         db.session.add(self)
