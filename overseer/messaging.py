@@ -39,7 +39,6 @@ class ActivityPubPM:
             "mastodon": self.send_mastodon_pm,
             "fediseer": self.send_fediseer_pm,
         }
-        logger.debug(software)
         return software_map[software](message, username, domain)
 
     def send_fediseer_pm(self, message, username, domain):

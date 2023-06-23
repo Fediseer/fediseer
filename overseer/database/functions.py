@@ -146,6 +146,12 @@ def find_user_by_api_key(api_key):
     ).first()
     return user
 
+def find_user_by_account(user_account):
+    user = User.query.filter(
+        User.account == user_account
+    ).first()
+    return user
+
 def find_instance_by_domain(domain):
     instance = Instance.query.filter_by(domain=domain).first()
     return instance
