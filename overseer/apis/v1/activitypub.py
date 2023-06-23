@@ -19,12 +19,12 @@ class User(Resource):
                 "https://www.w3.org/ns/activitystreams",
                 "https://w3id.org/security/v1"
             ],
-
+            "type": "Person",
             "id": "https://overseer.dbzer0.com/api/v1/user/overseer",
             "type": "Person",
             "preferredUsername": "overseer",
             "inbox": "https://overseer.dbzer0.com/api/v1/inbox/overseer",
-
+            "outbox": "https://overseer.dbzer0.com/api/v1/outbox/overseer",
             "publicKey": {
                 "id": "https://overseer.dbzer0.com/api/v1/user/overseer#main-key",
                 "owner": "https://overseer.dbzer0.com/api/v1/user/overseer",
