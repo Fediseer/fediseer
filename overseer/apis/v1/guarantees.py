@@ -1,5 +1,5 @@
 from overseer.apis.v1.base import *
-from overseer.classes.instance import Guarantee, Endorsement
+from overseer.classes.instance import Guarantee, Endorsement, RejectionRecord
 
 class Guarantors(Resource):
     get_parser = reqparse.RequestParser()
@@ -88,7 +88,7 @@ class Guarantees(Resource):
             return {"message":'OK'}, 200
         gdomain = target_instance.get_guarantor_domain()
         if gdomain:
-            raise e.Forbidden("Target instance already guaranteed by {gdomain}")
+            raise e.Forbidden(f"Target instance already guaranteed by {gdomain}")
         new_guarantee = Guarantee(
             guaranteed_id=target_instance.id,
             guarantor_id=instance.id,
@@ -148,11 +148,22 @@ class Guarantees(Resource):
             guarantee = database.get_guarantee(target_instance.id,instance.id)
         if not guarantee:
             return {"message":'OK'}, 200
+        if database.has_recent_rejection(target_instance.id,instance.id):
+            raise e.Forbidden("You cannot remove your guarantee from the same instance within 24 hours")
         # Removing a guarantee removes the endorsement
-        endorsement = database.get_endorsement(target_instance.id,instance.id)     
-        if endorsement:   
+        endorsement = database.get_endorsement(target_instance.id,instance.id)
+        if endorsement:
             db.session.delete(endorsement)
         db.session.delete(guarantee)
+        rejection_record = database.get_rejection_record(instance.id,target_instance.id)
+        if rejection_record:
+            rejection_record.refresh()
+        else:
+            rejection = RejectionRecord(
+                rejected_id=target_instance.id,
+                rejector_id=instance.id,
+            )
+            db.session.add(rejection)
         db.session.commit()
         activitypub_pm.pm_admins(
             message=f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\n"

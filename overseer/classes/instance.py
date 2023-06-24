@@ -10,7 +10,23 @@ from loguru import logger
 from overseer.flask import db, SQLITE_MODE
 
 uuid_column_type = lambda: UUID(as_uuid=True) if not SQLITE_MODE else db.String(36)
-   
+
+# This is used to know when last time an instance removed their guarantee from another to prevent trolling/spamming
+# By someone adding/removing guarantees
+class RejectionRecord(db.Model):   
+    __tablename__ = "rejection_records"
+    __table_args__ = (UniqueConstraint('rejector_id', 'rejected_id', name='endoresements_rejector_id_rejected_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    rejector_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    rejector_instance = db.relationship("Instance", back_populates="rejections", foreign_keys=[rejector_id])
+    rejected_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    rejected_instance = db.relationship("Instance", back_populates="rejectors", foreign_keys=[rejected_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    performed = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def refresh(self):
+        self.performed = datetime.utcnow()
+        
 
 class Guarantee(db.Model):
     __tablename__ = "guarantees"
@@ -50,6 +66,8 @@ class Instance(db.Model):
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
     guarantees = db.relationship("Guarantee", back_populates="guarantor_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guarantor_id])
     guarantors = db.relationship("Guarantee", back_populates="guaranteed_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guaranteed_id])
+    rejections = db.relationship("RejectionRecord", back_populates="rejector_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejector_id])
+    rejectors = db.relationship("RejectionRecord", back_populates="rejected_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejected_id])
     admins = db.relationship("Claim", back_populates="instance", cascade="all, delete-orphan")
 
     def create(self):

@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload
 from overseer.flask import db, SQLITE_MODE
 from overseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from overseer.classes.instance import Instance, Endorsement, Guarantee
+from overseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord
 from overseer.classes.user import Claim, User
 
 def get_all_instances(min_endorsements = 0, min_guarantors = 1):
@@ -171,6 +171,35 @@ def get_endorsement(instance_id, endorsing_instance_id):
     query = Endorsement.query.filter_by(
         endorsed_id=instance_id,
         approving_id=endorsing_instance_id,
+    )
+    return query.first()
+
+def has_recent_endorsement(instance_id):
+    query = Endorsement.query.filter(
+        Endorsement.endorsed_id == instance_id,
+        Endorsement.created > datetime.utcnow() - timedelta(hours=1),
+    )
+    return query.first()
+
+def count_endorsements(instance_id):
+    query = Endorsement.query.filter_by(
+        endorsed_id=instance_id
+    )
+    return query.count()
+
+def has_recent_rejection(instance_id, rejector_id):
+    query = RejectionRecord.query.filter_by(
+        rejected_id=instance_id,
+        rejector_id=rejector_id,
+    ).filter(
+        RejectionRecord.performed > datetime.utcnow() - timedelta(hours=24)
+    )
+    return query.count() > 0
+
+def get_rejection_record(rejector_id, rejected_id):
+    query = RejectionRecord.query.filter_by(
+        rejected_id=rejected_id,
+        rejector_id=rejector_id,
     )
     return query.first()
 
