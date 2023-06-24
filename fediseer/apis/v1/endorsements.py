@@ -66,6 +66,7 @@ class Endorsements(Resource):
     @api.response(404, 'Instance not registered', models.response_model_error)
     def put(self, domain):
         '''Endorse an instance
+        An endorsement signifies an approval from your instance to how that instance is being run.
         '''
         self.args = self.put_parser.parse_args()
         if not self.args.apikey:

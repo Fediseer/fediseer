@@ -67,6 +67,9 @@ class Guarantees(Resource):
     @api.response(404, 'Instance not registered', models.response_model_error)
     def put(self, domain):
         '''Guarantee an instance
+        A instance can only be guaranteed by one other instance
+        An instance can guarantee up to 20 other instances
+        A guaranteed instance can guarantee and endorse other instances.
         '''
         self.args = self.put_parser.parse_args()
         if not self.args.apikey:

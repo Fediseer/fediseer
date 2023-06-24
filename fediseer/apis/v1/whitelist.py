@@ -57,9 +57,9 @@ class WhitelistDomain(Resource):
     @api.marshal_with(models.response_model_instances, code=200, description='Instances')
     @api.response(400, 'Bad Request', models.response_model_error)
     def put(self, domain):
-        '''Register a new instance to the fediseer
-        An instance account has to exist in the fediseer lemmylemmy instance
-        That account will recieve the new API key via PM
+        '''Claim an fediverse instance.
+        If the instance hasn't been recorded yet it will be polled and added.
+        You must specify an admin account which will recieve the new API key via Private Message.
         '''
         self.args = self.put_parser.parse_args()
         if '@' in self.args.admin:
@@ -146,7 +146,7 @@ class WhitelistDomain(Resource):
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(403, 'Forbidden', models.response_model_error)
     def delete(self, domain):
-        '''Delete claim to instance
+        '''Delete claim to instance (Not implemented)
         '''
         return e.BadRequest("Not implemented")
         self.args = self.patch_parser.parse_args()
