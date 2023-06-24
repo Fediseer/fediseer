@@ -1,8 +1,6 @@
 from fediseer.apis.v1.base import *
 from fediseer.messaging import activitypub_pm
-from fediseer.fediverse import get_admin_for_software, get_nodeinfo
 from fediseer.classes.user import User, Claim
-from fediseer.consts import SUPPORTED_SOFTWARE
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -41,7 +39,7 @@ class WhitelistDomain(Resource):
         '''Display info about a specific instance
         '''
         self.args = self.get_parser.parse_args()
-        instance, nodeinfo, site, admin_usernames = self.ensure_instance_registered(domain)
+        instance, nodeinfo, site, admin_usernames = ensure_instance_registered(domain)
         if not instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         return instance.get_details(),200
@@ -64,7 +62,7 @@ class WhitelistDomain(Resource):
         self.args = self.put_parser.parse_args()
         if '@' in self.args.admin:
             raise e.BadRequest("Please send the username without any @ signs or domains")
-        instance, nodeinfo, site, admin_usernames = self.ensure_instance_registered(domain)
+        instance, nodeinfo, site, admin_usernames = ensure_instance_registered(domain)
         guarantor_instance = None
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
@@ -161,47 +159,3 @@ class WhitelistDomain(Resource):
         db.session.commit()
         logger.warning(f"{domain} deleted")
         return {"message":'Changed'}, 200
-
-    def ensure_instance_registered(self, domain):        
-        if domain.endswith("test.dbzer0.com"):
-            # Fake instances for testing chain of trust
-            requested_lemmy = Lemmy(f"https://{domain}")
-            requested_lemmy._requestor.nodeinfo = {"software":{"name":"lemmy"}}
-            open_registrations = False
-            email_verify = True
-            software = "lemmy"
-            admin_usernames = ["db0"]
-            nodeinfo = get_nodeinfo("lemmy.dbzer0.com")
-            requested_lemmy = Lemmy(f"https://{domain}")
-            site = requested_lemmy.site.get()
-        else:
-            nodeinfo = get_nodeinfo(domain)
-            if not nodeinfo:
-                raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
-            software = nodeinfo["software"]["name"]
-            if software not in SUPPORTED_SOFTWARE:
-                raise e.BadRequest(f"Fediverse software {software} not supported at this time")
-            if software == "lemmy":
-                requested_lemmy = Lemmy(f"https://{domain}")
-                site = requested_lemmy.site.get()
-                if not site:
-                    raise e.BadRequest(f"Error encountered while polling lemmy domain {domain}. Please check it's running correctly")
-                open_registrations = site["site_view"]["local_site"]["registration_mode"] == "open"
-                email_verify = site["site_view"]["local_site"]["require_email_verification"]
-                software = software
-                admin_usernames = [a["person"]["name"] for a in site["admins"]]
-            else:
-                open_registrations = nodeinfo["openRegistrations"]
-                email_verify = False
-                admin_usernames = get_admin_for_software(software, domain)
-        instance = database.find_instance_by_domain(domain)
-        if instance:
-            return instance, nodeinfo, site, admin_usernames
-        new_instance = Instance(
-            domain=domain,
-            open_registrations=open_registrations,
-            email_verify=email_verify,
-            software=software,
-        )
-        new_instance.create()
-        return new_instance, nodeinfo, site, admin_usernames
