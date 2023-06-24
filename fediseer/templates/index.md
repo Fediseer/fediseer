@@ -1,6 +1,6 @@
 # Fediseer
 
-This is a [FOSS service](https://github.com/db0/lemmy-fediseer) to help Fediverse instances detect and avoid suspcicious instances
+This is a [FOSS service](https://github.com/db0/fediseer) to help Fediverse instances detect and avoid suspcicious instances
 
 [Release Devlog](https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/)
 
