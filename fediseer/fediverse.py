@@ -13,10 +13,10 @@ def get_lemmy_admins(domain):
 
 def get_mastodon_admins(domain):
     try:
-        site = requests(f"https://{domain}/api/v2/instance").json()
+        site = requests.get(f"https://{domain}/api/v2/instance").json()
         return [site["contact"]["account"]["username"]]
     except Exception as err:
-        logger.warning(f"Error retrieving mastodon site info for {domain}")
+        logger.warning(f"Error retrieving mastodon site info for {domain}: {err}")
         return None
 
 def get_admin_for_software(software: str, domain: str):
@@ -44,5 +44,4 @@ def get_nodeinfo(domain):
         nodeinfo = requests.get(wellknown['links'][0]['href'], headers=headers, timeout=3).json()
         return nodeinfo
     except Exception as err:
-        logger.debug(err)
         return None

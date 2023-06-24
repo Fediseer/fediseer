@@ -88,7 +88,7 @@ def ensure_instance_registered(domain):
             admin_usernames = get_admin_for_software(software, domain)
     instance = database.find_instance_by_domain(domain)
     if instance:
-        return instance, nodeinfo, site, admin_usernames
+        return instance, nodeinfo, admin_usernames
     new_instance = Instance(
         domain=domain,
         open_registrations=open_registrations,
@@ -96,4 +96,4 @@ def ensure_instance_registered(domain):
         software=software,
     )
     new_instance.create()
-    return new_instance, nodeinfo, site, admin_usernames
+    return new_instance, nodeinfo, admin_usernames

@@ -39,7 +39,7 @@ class WhitelistDomain(Resource):
         '''Display info about a specific instance
         '''
         self.args = self.get_parser.parse_args()
-        instance, nodeinfo, site, admin_usernames = ensure_instance_registered(domain)
+        instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
         if not instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         return instance.get_details(),200
@@ -62,7 +62,7 @@ class WhitelistDomain(Resource):
         self.args = self.put_parser.parse_args()
         if '@' in self.args.admin:
             raise e.BadRequest("Please send the username without any @ signs or domains")
-        instance, nodeinfo, site, admin_usernames = ensure_instance_registered(domain)
+        instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
         guarantor_instance = None
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
