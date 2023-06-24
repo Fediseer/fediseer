@@ -2,7 +2,7 @@ import requests
 from loguru import logger
 
 
-def retrieve_suspicious_instances(activity_suspicion = 20):
+def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 500):
     # GraphQL query
     query = '''
     {
@@ -67,6 +67,12 @@ def retrieve_suspicious_instances(activity_suspicion = 20):
             if node["total_users"] / local_activity > activity_suspicion:
                 is_bad = True
                 # print(node)
+
+            # check active users (monthly is a lot lower than total users)
+            if node["total_users"] / node["active_users_monthly"] > active_suspicious:
+                is_bad = True
+                # print(node)
+
             if is_bad:
                 bad_node = {
                     "domain": node["domain"],
