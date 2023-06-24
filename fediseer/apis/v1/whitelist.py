@@ -49,7 +49,7 @@ class WhitelistDomain(Resource):
 
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
-    put_parser.add_argument("admin", required=False, type=str, help="The username of the admin who wants to register this domain", location="json")
+    put_parser.add_argument("admin", required=True, type=str, help="The username of the admin who wants to register this domain", location="json")
     put_parser.add_argument("guarantor", required=False, type=str, help="(Optiona) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
 
 
@@ -62,6 +62,8 @@ class WhitelistDomain(Resource):
         You must specify an admin account which will recieve the new API key via Private Message.
         '''
         self.args = self.put_parser.parse_args()
+        if not self.args.admin:
+            raise e.BadRequest("You must specify an admin of that instance to receive the claim API key")
         if '@' in self.args.admin:
             raise e.BadRequest("Please send the username without any @ signs or domains")
         instance, nodeinfo, site, admin_usernames = self.ensure_instance_registered(domain)
