@@ -6,4 +6,4 @@ It's reliant on the [Lemmy Fediverse Observer](https://lemmy.fediverse.observer/
 
 The currently running instance is on https://fediseer.com
 
-See devlog: https://dbzer0.com/blog/fediseer-a-fediverse-chain-of-trust/
+See devlog: https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/
