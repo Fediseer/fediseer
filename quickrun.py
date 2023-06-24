@@ -1,5 +1,5 @@
 import json
-from overseer.observer import retrieve_suspicious_instances
+from fediseer.observer import retrieve_suspicious_instances
 
 sus = retrieve_suspicious_instances(20)
 if sus:

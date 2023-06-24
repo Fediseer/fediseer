@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, redirect
 from flask_caching import Cache
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
@@ -13,9 +13,9 @@ SQLITE_MODE = os.getenv("USE_SQLITE", "0") == "1"
 
 if SQLITE_MODE:
     logger.warning("Using SQLite for database")
-    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///horde.db"
+    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///fediseer.db"
 else:
-    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://postgres:{os.getenv('POSTGRES_PASS')}@{os.getenv('POSTGRES_URL')}"
+    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('POSTGRES_URI')
     OVERSEER.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         "pool_size": 50,
         "max_overflow": -1,
@@ -27,7 +27,7 @@ db.init_app(OVERSEER)
 if not SQLITE_MODE:
     with OVERSEER.app_context():
         logger.debug("pool size = {}".format(db.engine.pool.size()))
-logger.init_ok("Horde Database", status="Started")
+logger.init_ok("Fediseer Database", status="Started")
 
 # Allow local workstation run
 if cache is None:
@@ -38,3 +38,4 @@ if cache is None:
     cache = Cache(config=cache_config)
     cache.init_app(OVERSEER)
     logger.init_warn("Flask Cache", status="SimpleCache")
+

@@ -130,10 +130,8 @@ dmypy.json
 
 
 db/*
-test_commands.txt
-SQL_statements.txt
-horde.log
-horde*.bz2
-horde.db
-/.idea
-/boto3oeo.py
+fediseer.log
+fediseer*.bz2
+fediseer.db
+private.pem
+public.pem

@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_restx import Api
 from importlib import import_module
 
-from overseer.apis.v1 import api as v1
+from fediseer.apis.v1 import api as v1
 
 blueprint = Blueprint('apiv1', __name__, url_prefix='/api')
 api = Api(blueprint,
