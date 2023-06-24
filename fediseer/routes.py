@@ -57,5 +57,7 @@ def wellknown_redirect():
 def inbox():
     # Access the JSON payload
     json_payload = request.get_json()
-    logger.info(json_payload)
+    actor = json_payload["actor"]
+    message = json_payload["object"]["content"]
+    logger.info(f"Shared Inbox Received: From: {actor} | {message}")
     return 'ok', 200
