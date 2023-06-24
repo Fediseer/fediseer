@@ -1,6 +1,6 @@
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from overseer.flask import OVERSEER
+from fediseer.flask import OVERSEER
 from loguru import logger
 
 limiter = None

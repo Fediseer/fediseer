@@ -5,11 +5,11 @@ from loguru import logger
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_, and_, not_, Boolean
 from sqlalchemy.orm import noload
-from overseer.flask import db, SQLITE_MODE
-from overseer.utils import hash_api_key
+from fediseer.flask import db, SQLITE_MODE
+from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from overseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord
-from overseer.classes.user import Claim, User
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord
+from fediseer.classes.user import Claim, User
 
 def get_all_instances(min_endorsements = 0, min_guarantors = 1):
     query = db.session.query(

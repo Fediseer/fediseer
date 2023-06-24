@@ -8,12 +8,12 @@ import uuid
 import copy
 import os
 import secrets
-import overseer.exceptions as e
+import fediseer.exceptions as e
 from pythorhead import Lemmy
 from loguru import logger
-from overseer.database import functions as database
-from overseer.consts import SUPPORTED_SOFTWARE
-from overseer.fediverse import get_admin_for_software
+from fediseer.database import functions as database
+from fediseer.consts import SUPPORTED_SOFTWARE
+from fediseer.fediverse import get_admin_for_software
 
 class ActivityPubPM:
     private_key = None
@@ -23,13 +23,13 @@ class ActivityPubPM:
             self.private_key = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, private_key_data)
         self.document_core = {
             "type": "Create",
-            "actor": "https://overseer.dbzer0.com/api/v1/user/overseer",
+            "actor": "https://fediseer.com/api/v1/user/fediseer",
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
                 "https: //w3id.org/security/v1"
             ],	
             "object": {
-                "attributedTo": "https://overseer.dbzer0.com/api/v1/user/overseer",
+                "attributedTo": "https://fediseer.com/api/v1/user/fediseer",
             },
         }
 
@@ -72,9 +72,9 @@ class ActivityPubPM:
         return self.send_pm(document, message, domain)
 
     def send_pm(self, document, message, domain):
-        document["id"] = f"https://overseer.dbzer0.com/{uuid.uuid4()}"
+        document["id"] = f"https://fediseer.com/{uuid.uuid4()}"
         document["object"]["content"] = message
-        document["object"]["id"] = f"https://overseer.dbzer0.com/{uuid.uuid4()}"
+        document["object"]["id"] = f"https://fediseer.com/{uuid.uuid4()}"
         document["object"]["published"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         document = json.dumps(document, indent=4)
         digest = hashlib.sha256(document.encode('utf-8')).digest()
@@ -86,7 +86,7 @@ class ActivityPubPM:
         signature = OpenSSL.crypto.sign(self.private_key, signed_string.encode('utf-8'), 'sha256')
         encoded_signature = base64.b64encode(signature).decode('utf-8')
 
-        header = f'keyId="https://overseer.dbzer0.com/api/v1/user/overseer",headers="(request-target) host date digest",signature="{encoded_signature}"'
+        header = f'keyId="https://fediseer.com/api/v1/user/fediseer",headers="(request-target) host date digest",signature="{encoded_signature}"'
         headers = {
             'Host': domain,
             'Date': date,

@@ -1,5 +1,5 @@
-from overseer.apis.v1.base import *
-from overseer.fediverse import get_nodeinfo
+from fediseer.apis.v1.base import *
+from fediseer.fediverse import get_nodeinfo
 
 class User(Resource):
     get_parser = reqparse.RequestParser()
@@ -10,28 +10,28 @@ class User(Resource):
         '''User details
         '''
         self.args = self.get_parser.parse_args()
-        if username != "overseer":
+        if username != "fediseer":
             raise e.NotFound("User does not exist")
         with open('public.pem', 'r') as file:
             pubkey = file.read()       
-        overseer = {
+        fediseer = {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
                 "https://w3id.org/security/v1"
             ],
             "type": "Person",
-            "id": "https://overseer.dbzer0.com/api/v1/user/overseer",
+            "id": "https://fediseer.com/api/v1/user/fediseer",
             "type": "Person",
-            "preferredUsername": "overseer",
-            "inbox": "https://overseer.dbzer0.com/api/v1/inbox/overseer",
-            "outbox": "https://overseer.dbzer0.com/api/v1/outbox/overseer",
+            "preferredUsername": "fediseer",
+            "inbox": "https://fediseer.com/api/v1/inbox/fediseer",
+            "outbox": "https://fediseer.com/api/v1/outbox/fediseer",
             "publicKey": {
-                "id": "https://overseer.dbzer0.com/api/v1/user/overseer#main-key",
-                "owner": "https://overseer.dbzer0.com/api/v1/user/overseer",
+                "id": "https://fediseer.com/api/v1/user/fediseer#main-key",
+                "owner": "https://fediseer.com/api/v1/user/fediseer",
                 "publicKeyPem": pubkey
             }
         }
-        return overseer,200
+        return fediseer,200
 
 class Inbox(Resource):
     post_parser = reqparse.RequestParser()
@@ -40,7 +40,7 @@ class Inbox(Resource):
     def post(self, username):
         '''User Inbox
         '''
-        if username != "overseer":
+        if username != "fediseer":
             raise e.NotFound("User does not exist")
         self.args = self.post_parser.parse_args()
         json_payload = request.get_json()

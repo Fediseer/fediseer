@@ -1,8 +1,8 @@
-from overseer.apis.v1.base import *
-from overseer.messaging import activitypub_pm
-from overseer.fediverse import get_admin_for_software, get_nodeinfo
-from overseer.classes.user import User, Claim
-from overseer.consts import SUPPORTED_SOFTWARE
+from fediseer.apis.v1.base import *
+from fediseer.messaging import activitypub_pm
+from fediseer.fediverse import get_admin_for_software, get_nodeinfo
+from fediseer.classes.user import User, Claim
+from fediseer.consts import SUPPORTED_SOFTWARE
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -57,8 +57,8 @@ class WhitelistDomain(Resource):
     @api.marshal_with(models.response_model_instances, code=200, description='Instances')
     @api.response(400, 'Bad Request', models.response_model_error)
     def put(self, domain):
-        '''Register a new instance to the overseer
-        An instance account has to exist in the overseer lemmylemmy instance
+        '''Register a new instance to the fediseer
+        An instance account has to exist in the fediseer lemmylemmy instance
         That account will recieve the new API key via PM
         '''
         self.args = self.put_parser.parse_args()
@@ -156,7 +156,7 @@ class WhitelistDomain(Resource):
         if not instance:
             raise e.BadRequest(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if domain == os.getenv('FEDISEER_LEMMY_DOMAIN'):
-            raise e.Forbidden("Cannot delete overseer control instance")
+            raise e.Forbidden("Cannot delete fediseer control instance")
         db.session.delete(instance)
         db.session.commit()
         logger.warning(f"{domain} deleted")

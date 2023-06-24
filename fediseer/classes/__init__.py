@@ -1,14 +1,14 @@
 import os
 from loguru import logger
-from overseer.argparser import args
+from fediseer.argparser import args
 from importlib import import_module
-from overseer.flask import db, OVERSEER
-from overseer.utils import hash_api_key
+from fediseer.flask import db, OVERSEER
+from fediseer.utils import hash_api_key
 
 # Importing for DB creation
-from overseer.classes.instance import Instance, Guarantee
-from overseer.classes.user import User, Claim
-import overseer.classes.user
+from fediseer.classes.instance import Instance, Guarantee
+from fediseer.classes.user import User, Claim
+import fediseer.classes.user
 
 with OVERSEER.app_context():
 

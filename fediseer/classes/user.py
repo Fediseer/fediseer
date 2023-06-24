@@ -7,7 +7,7 @@ from sqlalchemy import Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
 from loguru import logger
-from overseer.flask import db, SQLITE_MODE
+from fediseer.flask import db, SQLITE_MODE
 
 uuid_column_type = lambda: UUID(as_uuid=True) if not SQLITE_MODE else db.String(36)
    
