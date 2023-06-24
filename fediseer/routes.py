@@ -25,7 +25,7 @@ def index():
     """
     
     head = f"""<head>
-    <title>Horde Overseer</title>
+    <title>Fediseer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {style}
     </head>

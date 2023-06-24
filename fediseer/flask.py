@@ -27,7 +27,7 @@ db.init_app(OVERSEER)
 if not SQLITE_MODE:
     with OVERSEER.app_context():
         logger.debug("pool size = {}".format(db.engine.pool.size()))
-logger.init_ok("Horde Database", status="Started")
+logger.init_ok("Fediseer Database", status="Started")
 
 # Allow local workstation run
 if cache is None:

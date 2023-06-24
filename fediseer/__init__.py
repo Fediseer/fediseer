@@ -18,5 +18,5 @@ def after_request(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, PUT, DELETE, PATCH"
     response.headers["Access-Control-Allow-Headers"] = "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, apikey, Client-Agent, X-Fields"
-    response.headers["Horde-Node"] = f"{socket.gethostname()}:{args.port}:{OVERSEER_VERSION}"
+    response.headers["Fediseer-Node"] = f"{socket.gethostname()}:{args.port}:{OVERSEER_VERSION}"
     return response
