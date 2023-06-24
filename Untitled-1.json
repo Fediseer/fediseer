@@ -1,0 +1,44 @@
+{
+    "id": "https://overctrl.dbzer0.com/activities/create/d50c9fe4-28a5-4de4-8421-8f806d9d0947",
+    "to": ["https://lemmy.dbzer0.com/u/db0"],
+    "type": "Create",
+    "actor": "https://overctrl.dbzer0.com/u/fediseer",
+    "object": {
+        "id": "https://overctrl.dbzer0.com/private_message/68",
+        "type": "ChatMessage",
+        "to": ["https://lemmy.dbzer0.com/u/db0"],
+        "source": {
+            "content": "password",
+            "mediaType": "text/markdown"
+        },
+        "attributedTo": "https: //overctrl.dbzer0.com/u/fediseer",
+        "content": "<p>password</p>\n",
+        "mediaType": "text/html",
+        "published": "2023-06-23T15: 57: 51.950327+00: 00"
+    },
+    "@context": [
+        "https://www.w3.org/ns/activitystreams",
+        "https: //w3id.org/security/v1",
+        {
+            "pt": "https://joinpeertube.org/ns#",
+            "sc": "http://schema.org/",
+            "lemmy": "https://join-lemmy.org/ns#",
+            "expires": "as:endTime",
+            "litepub": "http://litepub.social/ns#",
+            "language": "sc:inLanguage",
+            "stickied": "lemmy:stickied",
+            "sensitive": "as:sensitive",
+            "identifier": "sc:identifier",
+            "moderators": {
+                "@id": "lemmy:moderators",
+                "@type": "@id"
+            },
+            "removeData": "lemmy:removeData",
+            "ChatMessage": "litepub:ChatMessage",
+            "matrixUserId": "lemmy:matrixUserId",
+            "distinguished": "lemmy:distinguished",
+            "commentsEnabled": "pt:commentsEnabled",
+            "postingRestrictedToMods": "lemmy:postingRestrictedToMods"
+        }
+    ]
+}

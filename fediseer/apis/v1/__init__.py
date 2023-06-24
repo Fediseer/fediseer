@@ -1,9 +1,9 @@
-import overseer.apis.v1.base as base
-import overseer.apis.v1.whitelist as whitelist
-import overseer.apis.v1.endorsements as endorsements
-import overseer.apis.v1.guarantees as guarantees
-import overseer.apis.v1.activitypub as activitypub
-from overseer.apis.v1.base import api
+import fediseer.apis.v1.base as base
+import fediseer.apis.v1.whitelist as whitelist
+import fediseer.apis.v1.endorsements as endorsements
+import fediseer.apis.v1.guarantees as guarantees
+import fediseer.apis.v1.activitypub as activitypub
+from fediseer.apis.v1.base import api
 
 api.add_resource(base.Suspicions, "/instances")
 api.add_resource(activitypub.User, "/user/<string:username>")

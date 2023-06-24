@@ -1,13 +1,14 @@
 from flask import render_template, redirect, url_for, request
 from markdown import markdown
 from loguru import logger
-from overseer.flask import OVERSEER
+from fediseer.flask import OVERSEER
+import fediseer.exceptions as e
 
 @logger.catch(reraise=True)
 @OVERSEER.route('/')
 # @cache.cached(timeout=300)
 def index():
-    with open(f'overseer/templates/index.md') as index_file:
+    with open(f'fediseer/templates/index.md') as index_file:
         index = index_file.read()
     findex = index.format()
 
@@ -31,23 +32,21 @@ def index():
     """
     return(head + markdown(findex))
 
-
 @logger.catch(reraise=True)
 @OVERSEER.route('/.well-known/webfinger')
 def wellknown_redirect():
     query_string = request.query_string.decode()
     if not query_string:
         return {"message":"No user specified"},400
-    if query_string != "resource=acct:overseer@overseer.dbzer0.com":
+    if query_string != "resource=acct:fediseer@fediseer.com":
         return {"message":"User does not exist"},404
     webfinger = {
-        "subject": "acct:overseer@overseer.dbzer0.com",
-
+        "subject": "acct:fediseer@fediseer.com",
         "links": [
             {
                 "rel": "self",
                 "type": "application/activity+json",
-                "href": "https://overseer.dbzer0.com/api/v1/user/overseer"
+                "href": "https://fediseer.com/api/v1/user/fediseer"
             }
         ]
     }

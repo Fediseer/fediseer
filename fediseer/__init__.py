@@ -2,12 +2,12 @@ import os
 import socket
 from uuid import uuid4
 
-from overseer.logger import logger
-from overseer.flask import OVERSEER
-from overseer.routes import * 
-from overseer.apis import apiv1
-from overseer.argparser import args
-from overseer.consts import OVERSEER_VERSION
+from fediseer.logger import logger
+from fediseer.flask import OVERSEER
+from fediseer.routes import * 
+from fediseer.apis import apiv1
+from fediseer.argparser import args
+from fediseer.consts import OVERSEER_VERSION
 
 
 OVERSEER.register_blueprint(apiv1)

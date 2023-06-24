@@ -1,19 +1,19 @@
 import os
 from flask import request
 from flask_restx import Namespace, Resource, reqparse
-from overseer.flask import cache, db
-from overseer.observer import retrieve_suspicious_instances
+from fediseer.flask import cache, db
+from fediseer.observer import retrieve_suspicious_instances
 from loguru import logger
-from overseer.classes.instance import Instance
-from overseer.database import functions as database
-from overseer import exceptions as e
-from overseer.utils import hash_api_key
-from overseer.lemmy import pm_new_api_key, pm_instance
+from fediseer.classes.instance import Instance
+from fediseer.database import functions as database
+from fediseer import exceptions as e
+from fediseer.utils import hash_api_key
+from fediseer.messaging import activitypub_pm
 from pythorhead import Lemmy
 
 api = Namespace('v1', 'API Version 1' )
 
-from overseer.apis.models.v1 import Models
+from fediseer.apis.models.v1 import Models
 
 models = Models(api)
 

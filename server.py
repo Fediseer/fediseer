@@ -4,8 +4,8 @@ import logging
 
 load_dotenv()
 
-from overseer.argparser import args
-from overseer.flask import OVERSEER
+from fediseer.argparser import args
+from fediseer.flask import OVERSEER
 from loguru import logger
 
 if __name__ == "__main__":

@@ -5,10 +5,11 @@ from loguru import logger
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_, and_, not_, Boolean
 from sqlalchemy.orm import noload
-from overseer.flask import db, SQLITE_MODE
-from overseer.utils import hash_api_key
+from fediseer.flask import db, SQLITE_MODE
+from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from overseer.classes.instance import Instance, Endorsement, Guarantee
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord
+from fediseer.classes.user import Claim, User
 
 def get_all_instances(min_endorsements = 0, min_guarantors = 1):
     query = db.session.query(
@@ -92,21 +93,113 @@ def get_all_guarantor_instances_by_guaranteed_id(guaranteed_id):
 
 
 def find_instance_by_api_key(api_key):
-    instance = Instance.query.filter_by(api_key=hash_api_key(api_key)).first()
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.api_key == hash_api_key(api_key)
+    ).first()
     return instance
+
+def find_instance_by_user(user):
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.id == user.id
+    ).first()
+    return instance
+
+def find_instance_by_account(user_account):
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.account == user_account
+    ).first()
+    return instance
+
+def find_admins_by_instance(instance):
+    users = User.query.join(
+        Claim
+    ).join(
+        Instance
+    ).filter(
+        Instance.id == instance.id
+    ).all()
+    return users
+
+def find_claim(admin_username):
+    claim = Claim.query.join(
+        User
+    ).filter(
+        User.account == admin_username
+    ).first()
+    return claim
+
+def find_user_by_api_key(api_key):
+    user = User.query.filter(
+        User.api_key == hash_api_key(api_key)
+    ).first()
+    return user
+
+def find_user_by_account(user_account):
+    user = User.query.filter(
+        User.account == user_account
+    ).first()
+    return user
 
 def find_instance_by_domain(domain):
     instance = Instance.query.filter_by(domain=domain).first()
     return instance
 
 def find_authenticated_instance(domain,api_key):
-    instance = Instance.query.filter_by(domain=domain, api_key=hash_api_key(api_key)).first()
+    instance = Instance.query.join(
+        Claim
+    ).join(
+        User
+    ).filter(
+        User.api_key == hash_api_key(api_key),
+        Instance.domain ==domain,
+    ).first()
     return instance
 
 def get_endorsement(instance_id, endorsing_instance_id):
     query = Endorsement.query.filter_by(
         endorsed_id=instance_id,
         approving_id=endorsing_instance_id,
+    )
+    return query.first()
+
+def has_recent_endorsement(instance_id):
+    query = Endorsement.query.filter(
+        Endorsement.endorsed_id == instance_id,
+        Endorsement.created > datetime.utcnow() - timedelta(hours=1),
+    )
+    return query.first()
+
+def count_endorsements(instance_id):
+    query = Endorsement.query.filter_by(
+        endorsed_id=instance_id
+    )
+    return query.count()
+
+def has_recent_rejection(instance_id, rejector_id):
+    query = RejectionRecord.query.filter_by(
+        rejected_id=instance_id,
+        rejector_id=rejector_id,
+    ).filter(
+        RejectionRecord.performed > datetime.utcnow() - timedelta(hours=24)
+    )
+    return query.count() > 0
+
+def get_rejection_record(rejector_id, rejected_id):
+    query = RejectionRecord.query.filter_by(
+        rejected_id=rejected_id,
+        rejector_id=rejector_id,
     )
     return query.first()
 

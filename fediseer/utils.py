@@ -9,9 +9,7 @@ import json
 from datetime import datetime
 import dateutil.relativedelta
 from loguru import logger
-from overseer.flask import SQLITE_MODE
-import requests
-
+from fediseer.flask import SQLITE_MODE
 
 random.seed(random.SystemRandom().randint(0, 2**32 - 1))
 
@@ -102,11 +100,3 @@ def validate_regex(regex_string):
     except:
         return False
     return True
-
-def get_nodeinfo(domain):
-    try:
-        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", timeout=2).json()
-        nodeinfo = requests.get(wellknown['links'][0]['href'], timeout=2).json()
-        return nodeinfo
-    except Exception as err:
-        return None

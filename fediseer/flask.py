@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, redirect
 from flask_caching import Cache
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
@@ -13,7 +13,7 @@ SQLITE_MODE = os.getenv("USE_SQLITE", "0") == "1"
 
 if SQLITE_MODE:
     logger.warning("Using SQLite for database")
-    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///overseer.db"
+    OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///fediseer.db"
 else:
     OVERSEER.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('POSTGRES_URI')
     OVERSEER.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -38,3 +38,4 @@ if cache is None:
     cache = Cache(config=cache_config)
     cache.init_app(OVERSEER)
     logger.init_warn("Flask Cache", status="SimpleCache")
+
