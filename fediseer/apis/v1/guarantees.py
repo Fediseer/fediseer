@@ -125,7 +125,7 @@ class Guarantees(Resource):
     delete_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
 
     @api.expect(delete_parser)
-    @api.marshal_with(models.response_model_simple_response, code=200, description='Withdraw Instance Endorsement')
+    @api.marshal_with(models.response_model_simple_response, code=200, description='Withdraw Instance Guarantee')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
