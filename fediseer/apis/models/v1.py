@@ -25,13 +25,14 @@ class Models:
             'csv': fields.String(description="The suspicious domains as a csv."),
         })
         self.response_model_instances = api.model('InstanceDetails', {
-            'id': fields.Integer(description="The instance id"),
-            'domain': fields.String(description="The instance domain"),
+            'id': fields.Integer(description="The instance id", example=1),
+            'domain': fields.String(description="The instance domain", example="lemmy.dbzer0.com"),
+            'software': fields.String(description="The fediverse software running in this instance", example="lemmy"),
             'open_registrations': fields.Boolean(description="The instance uptime pct. 100% and thousand of users is unlikely"),
             'email_verify': fields.Boolean(description="The amount of local posts in that instance"),
             'approvals': fields.Integer(description="The amount of endorsements this instance has given out"),
             'endorsements': fields.Integer(description="The amount of endorsements this instance has received"),
-            'guarantor': fields.String(description="The domain of the instance which guaranteed this instance."),
+            'guarantor': fields.String(description="The domain of the instance which guaranteed this instance.", example="fediseer.com"),
         })
         self.response_model_model_Whitelist_get = api.model('WhitelistedInstances', {
             'instances': fields.List(fields.Nested(self.response_model_instances)),

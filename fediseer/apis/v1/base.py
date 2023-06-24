@@ -71,8 +71,6 @@ def ensure_instance_registered(domain):
         if not nodeinfo:
             raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
         software = nodeinfo["software"]["name"]
-        if software not in SUPPORTED_SOFTWARE:
-            raise e.BadRequest(f"Fediverse software {software} not supported at this time")
         if software == "lemmy":
             requested_lemmy = Lemmy(f"https://{domain}")
             site = requested_lemmy.site.get()

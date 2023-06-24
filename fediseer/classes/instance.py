@@ -78,6 +78,7 @@ class Instance(db.Model):
         ret_dict = {
             "id": self.id,
             "domain": self.domain,
+            "software": self.software,
             "open_registrations": self.open_registrations,
             "email_verify": self.email_verify,
             "endorsements": len(self.endorsements),

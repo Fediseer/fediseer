@@ -25,7 +25,7 @@ def get_admin_for_software(software: str, domain: str):
         "mastodon": get_mastodon_admins,
     }
     if software not in software_map:
-        return None
+        return []
     return software_map[software](domain)
 
 
