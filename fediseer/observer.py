@@ -1,6 +1,6 @@
 import requests
 from loguru import logger
-
+from fediseer.consts import FEDISEER_VERSION
 
 def retrieve_suspicious_instances(activity_suspicion = 20):
     # GraphQL query
@@ -29,7 +29,7 @@ def retrieve_suspicious_instances(activity_suspicion = 20):
 
     # Request headers
     headers = {
-        'User-Agent': 'Lemmy Overseer / mail@dbzer0.com',
+        'User-Agent': f'Fediseer/{FEDISEER_VERSION}',
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate, br',

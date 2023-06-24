@@ -67,7 +67,7 @@ class WhitelistDomain(Resource):
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
             if not guarantor_instance:
-                raise e.BadRequest(f"Requested guarantor domain {self.args.guarantor} is not registered with the Overseer yet!")
+                raise e.BadRequest(f"Requested guarantor domain {self.args.guarantor} is not registered with the Fediseer yet!")
         if self.args.admin not in admin_usernames:
             raise e.Forbidden(f"Only admins of that {instance.software} are allowed to claim it.")
         existing_claim = database.find_claim(f"@{self.args.admin}@{domain}")
@@ -91,7 +91,7 @@ class WhitelistDomain(Resource):
         db.session.commit()
         if guarantor_instance:
             activitypub_pm.pm_admins(
-                message=f"New instance {domain} was just registered with the Overseer and have asked you to guarantee for them!",
+                message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
                 domain=guarantor_instance.domain,
                 software=guarantor_instance.software,
                 instance=guarantor_instance,
