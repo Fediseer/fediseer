@@ -12,7 +12,7 @@ import fediseer.exceptions as e
 from pythorhead import Lemmy
 from loguru import logger
 from fediseer.database import functions as database
-from fediseer.consts import SUPPORTED_SOFTWARE
+from fediseer.consts import SUPPORTED_SOFTWARE, FEDISEER_VERSION
 from fediseer.fediverse import get_admin_for_software
 
 class ActivityPubPM:
@@ -92,7 +92,13 @@ class ActivityPubPM:
             'Date': date,
             'Signature': header,
             'Digest': digest_header,
-            'Content-Type': 'application/ld+json; profile="http://www.w3.org/ns/activitystreams"'
+            'Content-Type': 'application/ld+json; profile="http://www.w3.org/ns/activitystreams"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Sec-GPC": "1",
+            "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
         }
         url = f"https://{domain}/inbox"
         response = requests.post(url, data=document, headers=headers)

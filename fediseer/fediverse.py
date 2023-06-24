@@ -1,6 +1,7 @@
 import requests
 from loguru import logger
 from pythorhead import Lemmy
+from fediseer.consts import FEDISEER_VERSION
 
 def get_lemmy_admins(domain):
     requested_lemmy = Lemmy(f"https://{domain}")
@@ -36,11 +37,11 @@ def get_nodeinfo(domain):
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Sec-GPC": "1",
-            "User-Agent": "Fediseer/0.5",
+            "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
         }
-        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=4).json()
+        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=3).json()
         headers["Sec-Fetch-Site"] = "cross-site"
-        nodeinfo = requests.get(wellknown['links'][0]['href'], headers=headers, timeout=2).json()
+        nodeinfo = requests.get(wellknown['links'][0]['href'], headers=headers, timeout=3).json()
         return nodeinfo
     except Exception as err:
         logger.debug(err)
