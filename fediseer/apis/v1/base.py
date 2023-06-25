@@ -34,6 +34,7 @@ class Suspicions(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("activity_suspicion", required=False, default=20, type=int, help="How many users per local post+comment to consider suspicious", location="args")
+    get_parser.add_argument("active_suspicion", required=False, default=500, type=int, help="How many users per active users to consider suspicious", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
@@ -45,7 +46,7 @@ class Suspicions(Resource):
         '''A List with the details of all suspicious instances
         '''
         self.args = self.get_parser.parse_args()
-        sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion)
+        sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion, self.args.active_suspicion)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in sus_instances])},200
         if self.args.domains:

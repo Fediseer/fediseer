@@ -16,8 +16,8 @@ class Models:
             'total_users': fields.Integer(description="The total amount of users registered in that instance"),
             'active_users_monthly': fields.Integer(description="The amount of active users monthly."),
             'signup': fields.Boolean(default=False,description="True when subscriptions are open, else False"),
-            'activity_suspicion': fields.Float(description="Local Comments+Posts per User. Higher is worse"),
-            'activity_suspicion': fields.Float(description="Local Comments+Posts per User. Higher is worse"),
+            'activity_suspicion': fields.Float(description="Local Comments+Posts per user. Higher is worse"),
+            'active_users_suspicion': fields.Float(description="Monthly active users per user. Higher is worse"),
         })
         self.response_model_model_Suspicions_get = api.model('SuspiciousInstances', {
             'instances': fields.List(fields.Nested(self.response_model_suspicious_instances)),
@@ -39,10 +39,4 @@ class Models:
             'instances': fields.List(fields.Nested(self.response_model_instances)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
-        })
-        self.response_model_model_Suspicions_get = api.model('SuspiciousInstances', {
-            'self': fields.Nested(self.response_model_instances),
-            'guaranteed': fields.List(fields.Nested(self.response_model_instances)),
-            'endorsed': fields.List(fields.String(description="The suspicious domains as a list.")),
-            'endorsing': fields.String(description="The suspicious domains as a csv."),
         })
