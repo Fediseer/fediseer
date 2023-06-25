@@ -69,7 +69,11 @@ def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 5
                 # print(node)
 
             # check active users (monthly is a lot lower than total users)
-            if node["total_users"] / node["active_users_monthly"] > active_suspicious:
+            local_active_monthly_users = node["active_users_monthly"]
+            # Avoid division by 0
+            if local_active_monthly_users == 0:
+                local_active_monthly_users= 0.5
+            if node["total_users"] / local_active_monthly_users > active_suspicious:
                 is_bad = True
                 # print(node)
 
@@ -83,6 +87,7 @@ def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 5
                     "active_users_monthly": node["active_users_monthly"],
                     "signup": node["signup"],
                     "activity_suspicion": node["total_users"] / local_activity,
+                    "active_users_suspicion": node["total_users"] / local_active_monthly_users,
                 }
                 bad_nodes.append(bad_node)
         return bad_nodes

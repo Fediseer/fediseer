@@ -16,8 +16,8 @@ class Models:
             'total_users': fields.Integer(description="The total amount of users registered in that instance"),
             'active_users_monthly': fields.Integer(description="The amount of active users monthly."),
             'signup': fields.Boolean(default=False,description="True when subscriptions are open, else False"),
-            'activity_suspicion': fields.Float(description="Local Comments+Posts per User. Higher is worse"),
-            'activity_suspicion': fields.Float(description="Local Comments+Posts per User. Higher is worse"),
+            'activity_suspicion': fields.Float(description="Local Comments+Posts per user. Higher is worse"),
+            'active_users_suspicion': fields.Float(description="Monthly active users per user. Higher is worse"),
         })
         self.response_model_model_Suspicions_get = api.model('SuspiciousInstances', {
             'instances': fields.List(fields.Nested(self.response_model_suspicious_instances)),
@@ -28,6 +28,7 @@ class Models:
             'id': fields.Integer(description="The instance id", example=1),
             'domain': fields.String(description="The instance domain", example="lemmy.dbzer0.com"),
             'software': fields.String(description="The fediverse software running in this instance", example="lemmy"),
+            'claimed': fields.Integer(description="How many admins from this instance has claimed it."),
             'open_registrations': fields.Boolean(description="The instance uptime pct. 100% and thousand of users is unlikely"),
             'email_verify': fields.Boolean(description="The amount of local posts in that instance"),
             'approvals': fields.Integer(description="The amount of endorsements this instance has given out"),
