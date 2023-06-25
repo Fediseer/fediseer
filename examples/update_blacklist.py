@@ -23,7 +23,7 @@ if lemmy.log_in(USERNAME, PASSWORD) is False:
     raise Exception("Could not log in to lemmy")
 
 print("Fetching suspicions")
-sus = requests.get(f"https://fediseer.com/api/v1/instances?activity_suspicion={ACTIVITY_SUSPICION}&active_suspicion={MONTHLY_ACTIVITY_SUSPICION}domains=true", timeout=5).json()
+sus = requests.get(f"https://fediseer.com/api/v1/instances?activity_suspicion={ACTIVITY_SUSPICION}&active_suspicion={MONTHLY_ACTIVITY_SUSPICION}&domains=true", timeout=5).json()
 defed = blacklist | set(sus["domains"])
 # I need to retrieve the site info because it seems if "RequireApplication" is set
 # We need to always re-set the application_question. 
