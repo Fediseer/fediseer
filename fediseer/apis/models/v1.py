@@ -39,3 +39,9 @@ class Models:
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
+        self.response_model_model_Suspicions_get = api.model('SuspiciousInstances', {
+            'self': fields.Nested(self.response_model_instances),
+            'guaranteed': fields.List(fields.Nested(self.response_model_instances)),
+            'endorsed': fields.List(fields.String(description="The suspicious domains as a list.")),
+            'endorsing': fields.String(description="The suspicious domains as a csv."),
+        })
