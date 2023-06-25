@@ -79,6 +79,7 @@ class Instance(db.Model):
             "id": self.id,
             "domain": self.domain,
             "software": self.software,
+            "claimed": len(self.admins),
             "open_registrations": self.open_registrations,
             "email_verify": self.email_verify,
             "endorsements": len(self.endorsements),
