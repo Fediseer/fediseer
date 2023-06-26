@@ -79,14 +79,14 @@ class Guarantees(Resource):
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if len(instance.guarantors) == 0:
             raise e.Forbidden("Only guaranteed instances can guarantee others.")
-        if len(instance.guarantors) >= 20 and instance.id != 0:
+        if len(instance.guarantees) >= 20 and instance.id != 0:
             raise e.Forbidden("You cannot guarantee for more than 20 instances")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
-        target_instance = database.find_instance_by_domain(domain=domain)
+        target_instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
         if not target_instance:
-            raise e.BadRequest("Instance to endorse not found")        
+            raise e.NotFound(f"Something went wrong trying to register this instance.")
         if database.get_guarantee(target_instance.id,instance.id):
             return {"message":'OK'}, 200
         gdomain = target_instance.get_guarantor_domain()

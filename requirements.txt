@@ -13,5 +13,5 @@ flask_sqlalchemy==3.0.2
 SQLAlchemy~=1.4.44
 psycopg2-binary
 regex
-pythorhead>=0.6.0
+pythorhead>=0.8.2
 bleach

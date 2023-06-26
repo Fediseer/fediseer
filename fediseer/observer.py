@@ -1,8 +1,8 @@
 import requests
 from loguru import logger
+from fediseer.consts import FEDISEER_VERSION
 
-
-def retrieve_suspicious_instances(activity_suspicion = 20, activity_suspicion_low = 0.001, active_suspicious = 500):
+def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 500, activity_suspicion_low = 0.001):
     # GraphQL query
     query = '''
     {
@@ -29,7 +29,7 @@ def retrieve_suspicious_instances(activity_suspicion = 20, activity_suspicion_lo
 
     # Request headers
     headers = {
-        'User-Agent': 'Lemmy Overseer / mail@dbzer0.com',
+        'User-Agent': f'Fediseer/{FEDISEER_VERSION}',
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -69,14 +69,18 @@ def retrieve_suspicious_instances(activity_suspicion = 20, activity_suspicion_lo
             if node["total_users"] / local_activity > activity_suspicion:
                 is_bad = True
                 # print(node)
-            
+
             # posts+comments could be much higher than total users
             if node["total_users"] / local_activity < activity_suspicion_low:
                 is_bad = True
                 # print(node)
 
             # check active users (monthly is a lot lower than total users)
-            if node["total_users"] / node["active_users_monthly"] > active_suspicious:
+            local_active_monthly_users = node["active_users_monthly"]
+            # Avoid division by 0
+            if local_active_monthly_users == 0:
+                local_active_monthly_users= 0.5
+            if node["total_users"] / local_active_monthly_users > active_suspicious:
                 is_bad = True
                 # print(node)
 
@@ -90,6 +94,7 @@ def retrieve_suspicious_instances(activity_suspicion = 20, activity_suspicion_lo
                     "active_users_monthly": node["active_users_monthly"],
                     "signup": node["signup"],
                     "activity_suspicion": node["total_users"] / local_activity,
+                    "active_users_suspicion": node["total_users"] / local_active_monthly_users,
                 }
                 bad_nodes.append(bad_node)
         return bad_nodes

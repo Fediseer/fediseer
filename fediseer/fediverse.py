@@ -1,6 +1,7 @@
 import requests
 from loguru import logger
 from pythorhead import Lemmy
+from fediseer.consts import FEDISEER_VERSION
 
 def get_lemmy_admins(domain):
     requested_lemmy = Lemmy(f"https://{domain}")
@@ -12,10 +13,10 @@ def get_lemmy_admins(domain):
 
 def get_mastodon_admins(domain):
     try:
-        site = requests(f"https://{domain}/api/v2/instance").json()
+        site = requests.get(f"https://{domain}/api/v2/instance").json()
         return [site["contact"]["account"]["username"]]
     except Exception as err:
-        logger.warning(f"Error retrieving mastodon site info for {domain}")
+        logger.warning(f"Error retrieving mastodon site info for {domain}: {err}")
         return None
 
 def get_admin_for_software(software: str, domain: str):
@@ -24,14 +25,23 @@ def get_admin_for_software(software: str, domain: str):
         "mastodon": get_mastodon_admins,
     }
     if software not in software_map:
-        return None
+        return []
     return software_map[software](domain)
 
 
 def get_nodeinfo(domain):
     try:
-        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", timeout=2).json()
-        nodeinfo = requests.get(wellknown['links'][0]['href'], timeout=2).json()
+        headers = {
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Sec-GPC": "1",
+            "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
+        }
+        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=3).json()
+        headers["Sec-Fetch-Site"] = "cross-site"
+        nodeinfo = requests.get(wellknown['links'][0]['href'], headers=headers, timeout=3).json()
         return nodeinfo
     except Exception as err:
         return None

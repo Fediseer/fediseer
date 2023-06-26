@@ -55,9 +55,9 @@ def wellknown_redirect():
 @logger.catch(reraise=True)
 @OVERSEER.route('/inbox', methods=['POST'])
 def inbox():
-    query_string = request.query_string.decode()
-    print(query_string)
     # Access the JSON payload
     json_payload = request.get_json()
-    print(json_payload)
+    actor = json_payload["actor"]
+    message = json_payload["object"]["content"]
+    logger.info(f"Shared Inbox Received: From: {actor} | {message}")
     return 'ok', 200
