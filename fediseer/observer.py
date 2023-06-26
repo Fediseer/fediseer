@@ -2,7 +2,7 @@ import requests
 from loguru import logger
 from fediseer.consts import FEDISEER_VERSION
 
-def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 500, activity_suspicion_low = 0.001):
+def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 500, activity_suspicion_low = 400):
     # GraphQL query
     query = '''
     {
@@ -71,7 +71,7 @@ def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 5
                 # print(node)
 
             # posts+comments could be much higher than total users
-            if node["total_users"] / local_activity < activity_suspicion_low:
+            if local_activity / node["total_users"] < activity_suspicion_low:
                 is_bad = True
                 # print(node)
 
