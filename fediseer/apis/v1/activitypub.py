@@ -47,6 +47,8 @@ class Inbox(Resource):
         actor = json_payload["actor"]
         if json_payload.get("Type") == "Follow":
             logger.info(f"Fediseer is now followed from: {actor}")
+        elif json_payload.get("Type") == "Delete":
+            pass
         else:
             try:
                 message = json_payload["object"]["content"]
