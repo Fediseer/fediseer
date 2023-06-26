@@ -71,7 +71,7 @@ def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 5
                 # print(node)
 
             # posts+comments could be much higher than total users
-            if local_activity / node["total_users"] < activity_suspicion_low:
+            if local_activity / node["total_users"] > activity_suspicion_low:
                 is_bad = True
                 # print(node)
 
