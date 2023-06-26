@@ -8,6 +8,7 @@ import uuid
 import copy
 import os
 import secrets
+import markdown
 import fediseer.exceptions as e
 from pythorhead import Lemmy
 from loguru import logger
@@ -44,6 +45,7 @@ class ActivityPubPM:
     def send_fediseer_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
         document["to"] =  [f"https://lemmy.dbzer0.com/u/db0"]
+        document["object"]["content"] = markdown.markdown(message)
         document["object"]["type"] = "ChatMessage"
         document["object"]["mediaType"] = "text/html"
         document["object"]["to"] = [f"https://lemmy.dbzer0.com/u/db0"]
@@ -51,11 +53,12 @@ class ActivityPubPM:
             "content": message,
             "mediaType": "text/markdown",
         }
-        return self.send_pm(document, message, domain)
+        return self.send_pm(document, domain)
 
     def send_lemmy_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
         document["to"] =  [f"https://{domain}/u/{username}"]
+        document["object"]["content"] = markdown.markdown(message)
         document["object"]["type"] = "ChatMessage"
         document["object"]["mediaType"] = "text/html"
         document["object"]["to"] = [f"https://{domain}/u/{username}"]
@@ -63,17 +66,24 @@ class ActivityPubPM:
             "content": message,
             "mediaType": "text/markdown",
         }
-        return self.send_pm(document, message, domain)
+        return self.send_pm(document, domain)
 
     def send_mastodon_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
+        document["object"]["content"] = markdown.markdown(message)
         document["object"]["type"] = "Note"
-        document["object"]["to"] = [f"https://{domain}/u/{username}"]
-        return self.send_pm(document, message, domain)
+        document["object"]["to"] = f"https://{domain}/users/{username}"
+        document["object"]["tag"] = [
+			{
+			  "type": "Mention",
+			  "to": f"@{username}",
+			  "href": f"https://{domain}/users/{username}"
+			}
+		]
+        return self.send_pm(document, domain)
 
-    def send_pm(self, document, message, domain):
+    def send_pm(self, document, domain):
         document["id"] = f"https://fediseer.com/{uuid.uuid4()}"
-        document["object"]["content"] = message
         document["object"]["id"] = f"https://fediseer.com/{uuid.uuid4()}"
         document["object"]["published"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         document = json.dumps(document, indent=4)
