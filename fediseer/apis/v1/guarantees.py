@@ -105,7 +105,7 @@ class Guarantees(Resource):
         db.session.add(new_endorsement)
         db.session.commit()
         activitypub_pm.pm_admins(
-            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.",
+            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.\n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service.",
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,

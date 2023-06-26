@@ -1,8 +1,8 @@
 # Fediseer
 
-This is a [FOSS service](https://github.com/db0/fediseer) to help Fediverse instances detect and avoid suspcicious instances
+This is a [FOSS service](https://github.com/db0/fediseer) to help Fediverse instances detect and avoid suspicious instances.
 
-[Release Devlog](https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/)
+[What is Fediseer](https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/) devlog
 
 ## Scope 
 
@@ -12,10 +12,14 @@ However using the endorsement system, you can create a further customized whitel
 
 ## REST API
 
-[Full Documentation](/api)
+[Full API Documentation](/api)
+
+## Community
+
+* [Fediverse Community](https://lemmy.dbzer0.com/c/fediseer)
 
 ## Credits
 
 These are the people who made this software possible.
 
-* [Db0](https://dbzer0.com) - Development and Maintenance
+* [Db0](https://dbzer0.com) - Development and Maintenance.
