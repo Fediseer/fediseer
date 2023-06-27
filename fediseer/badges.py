@@ -26,7 +26,7 @@ def generate_guarantee_badge(domain: str, guarantor: str):
         left_title=domain,
         right_title="Guarantor",
         left_link="https://fediseer.com",
-        right_link=f"https://fediseer.com/api/v1/whitelist/{domain}",
+        right_link=f"https://fediseer.com/api/v1/endorsements/{domain}",
     )
     return guarantee_badge
 

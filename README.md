@@ -20,4 +20,4 @@ Example:
 `/v1/badges/endorsements/{domain}.svg` will give you an badge of endorsements, providing a count of how many other the fediverse domains guaranteed for yours
 
 Example:
-    ![](http://fediseer.com/api/v1/badges/endorsements/lemmy.dbzer0.com.svg)
+    [![](http://fediseer.com/api/v1/badges/endorsements/lemmy.dbzer0.com.svg)](https://fediseer.com/api/v1/endorsements/lemmy.dbzer0.com.svg)
