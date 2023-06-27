@@ -23,6 +23,7 @@ def get_admin_for_software(software: str, domain: str):
     software_map = {
         "lemmy": get_lemmy_admins,
         "mastodon": get_mastodon_admins,
+        "friendica": get_mastodon_admins,
     }
     if software not in software_map:
         return []
@@ -41,7 +42,7 @@ def get_nodeinfo(domain):
         }
         wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=3).json()
         headers["Sec-Fetch-Site"] = "cross-site"
-        nodeinfo = requests.get(wellknown['links'][0]['href'], headers=headers, timeout=3).json()
+        nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=3).json()
         return nodeinfo
     except Exception as err:
         return None
