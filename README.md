@@ -15,9 +15,9 @@ You can retrieve and display a badge for your fediverse domain by requesting a .
 `/v1/badges/guarantees/{domain}.svg` will give you an badge of guarantee, mentioning the domains which guaranteed for your domain
 
 Example:
-![](http://fediseer.com/api/v1/badges/guarantees/fediseer.com.svg)
+![](http://fediseer.com/api/v1/badges/guarantees/lemmy.dbzer0.com.svg)
 
 `/v1/badges/endorsements/{domain}.svg` will give you an badge of endorsements, providing a count of how many other the fediverse domains guaranteed for yours
 
 Example:
-![](http://fediseer.com/api/v1/badges/endorsements/fediseer.com.svg)
+![](http://fediseer.com/api/v1/badges/endorsements/lemmy.dbzer0.com.svg)
