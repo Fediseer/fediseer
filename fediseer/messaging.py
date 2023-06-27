@@ -38,6 +38,7 @@ class ActivityPubPM:
         software_map = {
             "lemmy": self.send_lemmy_pm,
             "mastodon": self.send_mastodon_pm,
+            "friendica": self.send_mastodon_pm,
             "fediseer": self.send_fediseer_pm,
         }
         return software_map[software](message, username, domain)
@@ -45,7 +46,7 @@ class ActivityPubPM:
     def send_fediseer_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
         document["to"] =  [f"https://lemmy.dbzer0.com/u/db0"]
-        document["object"]["content"] = markdown.markdown(message)
+        document["object"]["content"] = message
         document["object"]["type"] = "ChatMessage"
         document["object"]["mediaType"] = "text/html"
         document["object"]["to"] = [f"https://lemmy.dbzer0.com/u/db0"]
@@ -58,7 +59,7 @@ class ActivityPubPM:
     def send_lemmy_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
         document["to"] =  [f"https://{domain}/u/{username}"]
-        document["object"]["content"] = markdown.markdown(message)
+        document["object"]["content"] = message
         document["object"]["type"] = "ChatMessage"
         document["object"]["mediaType"] = "text/html"
         document["object"]["to"] = [f"https://{domain}/u/{username}"]
@@ -70,6 +71,7 @@ class ActivityPubPM:
 
     def send_mastodon_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
+        document["@context"] = "https://www.w3.org/ns/activitystreams"
         document["object"]["content"] = markdown.markdown(message)
         document["object"]["type"] = "Note"
         document["object"]["to"] = f"https://{domain}/users/{username}"
@@ -87,6 +89,7 @@ class ActivityPubPM:
         document["object"]["id"] = f"https://fediseer.com/{uuid.uuid4()}"
         document["object"]["published"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         document = json.dumps(document, indent=4)
+        logger.critical(document)
         digest = hashlib.sha256(document.encode('utf-8')).digest()
         encoded_digest = base64.b64encode(digest).decode('utf-8')
         digest_header = "SHA-256=" + encoded_digest
@@ -112,6 +115,7 @@ class ActivityPubPM:
         }
         url = f"https://{domain}/inbox"
         response = requests.post(url, data=document, headers=headers)
+        logger.critical(response.text)
         return response.ok
 
     def pm_new_api_key(self, domain: str, username: str, software: str, requestor = None):
