@@ -45,6 +45,7 @@ class Inbox(Resource):
         self.args = self.post_parser.parse_args()
         json_payload = request.get_json()
         actor = json_payload["actor"]
+        logger.info(json_payload.get("Type"))
         if json_payload.get("Type") == "Follow":
             logger.info(f"Fediseer is now followed from: {actor}")
         elif json_payload.get("Type") == "Delete":
