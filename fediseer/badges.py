@@ -18,7 +18,7 @@ def generate_guarantee_badge(domain: str, guarantor: str):
         left_color = "red"
         right_text="None"
     guarantee_badge = badge(
-        left_text="Guarantee", 
+        left_text="Guarantor", 
         right_text=right_text, 
         left_color=left_color,
         logo=embed_guarantee,
