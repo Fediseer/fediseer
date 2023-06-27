@@ -38,6 +38,7 @@ class ActivityPubPM:
         software_map = {
             "lemmy": self.send_lemmy_pm,
             "mastodon": self.send_mastodon_pm,
+            "friendica": self.send_mastodon_pm,
             "fediseer": self.send_fediseer_pm,
         }
         return software_map[software](message, username, domain)
