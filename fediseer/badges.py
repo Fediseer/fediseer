@@ -16,7 +16,7 @@ def generate_guarantee_badge(domain: str, guarantor: str):
     right_color = "DarkOliveGreen"
     right_text=guarantor
     if guarantor is None:
-        left_color = "DarkRed"
+        right_color = "DarkRed"
         right_text="None"
     guarantee_badge = badge(
         left_text="Guarantor", 
@@ -37,7 +37,7 @@ def generate_endorsements_badge(domain: str, count: int):
     right_color = "DarkOliveGreen"
     right_text=str(count)
     if count == 0:
-        left_color = "DarkRed"
+        right_color = "DarkRed"
     endorsements_badge = badge(
         left_text="Endorsements", 
         right_text=right_text, 
