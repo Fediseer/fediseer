@@ -12,8 +12,8 @@ with open('fediseer/assets/thumb-up.svg', 'rb') as file:
     embed_endorsement = f"data:image/svg+xml;base64,{base64_data}"    
 
 def generate_guarantee_badge(domain: str, guarantor: str):
-    left_color = "DimGray"
-    right_color = "SeaGreen"
+    left_color = "DarkSlateGray "
+    right_color = "DarkOliveGreen"
     right_text=guarantor
     if guarantor is None:
         left_color = "DarkRed"
@@ -33,7 +33,7 @@ def generate_guarantee_badge(domain: str, guarantor: str):
     return guarantee_badge
 
 def generate_endorsements_badge(domain: str, count: int):
-    left_color = "DimGray"
+    left_color = "DarkSlateGray "
     right_color = "DarkOliveGreen"
     right_text=str(count)
     if count == 0:
