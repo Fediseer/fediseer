@@ -12,15 +12,17 @@ with open('fediseer/assets/thumb-up.svg', 'rb') as file:
     embed_endorsement = f"data:image/svg+xml;base64,{base64_data}"    
 
 def generate_guarantee_badge(domain: str, guarantor: str):
-    left_color = "SeaGreen"
+    left_color = "DimGray"
+    right_color = "SeaGreen"
     right_text=guarantor
     if guarantor is None:
-        left_color = "red"
+        left_color = "DarkRed"
         right_text="None"
     guarantee_badge = badge(
         left_text="Guarantor", 
         right_text=right_text, 
         left_color=left_color,
+        right_color=right_color,
         logo=embed_guarantee,
         whole_title="Fediseer Guarantee",
         left_title=domain,
@@ -31,14 +33,16 @@ def generate_guarantee_badge(domain: str, guarantor: str):
     return guarantee_badge
 
 def generate_endorsements_badge(domain: str, count: int):
-    left_color = "DarkOliveGreen"
+    left_color = "DimGray"
+    right_color = "DarkOliveGreen"
     right_text=str(count)
     if count == 0:
-        left_color = "red"
+        left_color = "DarkRed"
     endorsements_badge = badge(
         left_text="Endorsements", 
         right_text=right_text, 
         left_color=left_color,
+        right_color=right_color,
         logo=embed_endorsement,
         whole_title="Fediseer Endorsements",
         left_title=domain,
