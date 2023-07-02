@@ -97,15 +97,15 @@ class Guarantees(Resource):
             guarantor_id=instance.id,
         )
         db.session.add(new_guarantee)
-        # Guaranteed instances get their automatic first endorsement
-        new_endorsement = Endorsement(
-            approving_id=instance.id,
-            endorsed_id=target_instance.id,
-        )
-        db.session.add(new_endorsement)
+        # # Guaranteed instances get their automatic first endorsement
+        # new_endorsement = Endorsement(
+        #     approving_id=instance.id,
+        #     endorsed_id=target_instance.id,
+        # )
+        # db.session.add(new_endorsement)
         db.session.commit()
         activitypub_pm.pm_admins(
-            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. This also comes with your first endorsement.\n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service.",
+            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service.",
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,
@@ -153,7 +153,7 @@ class Guarantees(Resource):
             return {"message":'OK'}, 200
         if database.has_recent_rejection(target_instance.id,instance.id):
             raise e.Forbidden("You cannot remove your guarantee from the same instance within 24 hours")
-        # Removing a guarantee removes the endorsement
+        # Removing a guarantee removes any endorsement from the same instance
         endorsement = database.get_endorsement(target_instance.id,instance.id)
         if endorsement:
             db.session.delete(endorsement)
