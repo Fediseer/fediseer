@@ -8,7 +8,7 @@ from fediseer.routes import *
 from fediseer.apis import apiv1
 from fediseer.argparser import args
 from fediseer.consts import FEDISEER_VERSION
-
+import hashlib
 
 OVERSEER.register_blueprint(apiv1)
 
@@ -19,4 +19,6 @@ def after_request(response):
     response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, PUT, DELETE, PATCH"
     response.headers["Access-Control-Allow-Headers"] = "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, apikey, Client-Agent, X-Fields"
     response.headers["Fediseer-Node"] = f"{socket.gethostname()}:{args.port}:{FEDISEER_VERSION}"
+    etag = hashlib.sha1(response.get_data()).hexdigest()
+    response.headers["ETag"] = etag
     return response
