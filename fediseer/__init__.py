@@ -19,6 +19,9 @@ def after_request(response):
     response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS, PUT, DELETE, PATCH"
     response.headers["Access-Control-Allow-Headers"] = "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, apikey, Client-Agent, X-Fields"
     response.headers["Fediseer-Node"] = f"{socket.gethostname()}:{args.port}:{FEDISEER_VERSION}"
-    etag = hashlib.sha1(response.get_data()).hexdigest()
+    try:
+        etag = hashlib.sha1(response.get_data()).hexdigest()
+    except RuntimeError:
+        etag = "Runtime Error"
     response.headers["ETag"] = etag
     return response
