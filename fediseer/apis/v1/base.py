@@ -23,6 +23,8 @@ handle_bad_request = api.errorhandler(e.BadRequest)(e.handle_bad_requests)
 handle_forbidden = api.errorhandler(e.Forbidden)(e.handle_bad_requests)
 handle_unauthorized = api.errorhandler(e.Unauthorized)(e.handle_bad_requests)
 handle_not_found = api.errorhandler(e.NotFound)(e.handle_bad_requests)
+handle_internal_server_error = api.errorhandler(e.InternalServerError)(e.handle_bad_requests)
+handle_service_unavailable = api.errorhandler(e.ServiceUnavailable)(e.handle_bad_requests)
 
 # Used to for the flask limiter, to limit requests per url paths
 def get_request_path():
@@ -46,7 +48,10 @@ class Suspicions(Resource):
         '''A List with the details of all suspicious instances
         '''
         self.args = self.get_parser.parse_args()
-        sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion, self.args.active_suspicion)
+        try:
+            sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion, self.args.active_suspicion)
+        except Exception as err:
+            raise e.ServiceUnavailable("Could not retrieve list from Fediseer Observer. Please try again later")
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in sus_instances])},200
         if self.args.domains:
