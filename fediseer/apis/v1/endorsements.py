@@ -70,7 +70,7 @@ class Endorsements(Resource):
         '''
         self.args = self.put_parser.parse_args()
         if not self.args.apikey:
-            raise e.Unauthorized("You must provide the API key that was PM'd to your overctrl.dbzer0.com account")
+            raise e.Unauthorized("You must provide the API key that was PM'd to your admin account")
         instance = database.find_instance_by_api_key(self.args.apikey)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
@@ -121,7 +121,7 @@ class Endorsements(Resource):
         '''
         self.args = self.delete_parser.parse_args()
         if not self.args.apikey:
-            raise e.Unauthorized("You must provide the API key that was PM'd to your overctrl.dbzer0.com account")
+            raise e.Unauthorized("You must provide the API key that was PM'd to your admin account")
         instance = database.find_instance_by_api_key(self.args.apikey)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
