@@ -12,7 +12,7 @@ However using the endorsement system, you can create a further customized whitel
 
 ## REST API
 
-[Full API Documentation](/api)
+[Full API Documentation](/api/)
 
 ## Community
 

@@ -10,7 +10,7 @@ from loguru import logger
 
 if __name__ == "__main__":
     # Only setting this for the WSGI logs
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s', level=logging.WARNING)
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s', level=logging.DEBUG)
     from waitress import serve
 
     logger.init("WSGI Server", status="Starting")
