@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload
 from fediseer.flask import db, SQLITE_MODE
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure
 from fediseer.classes.user import Claim, User
 
 def get_all_instances(min_endorsements = 0, min_guarantors = 1):
@@ -62,6 +62,36 @@ def get_all_approving_instances_by_endorsed_id(endorsed_ids):
         Instance.id
     )
     return query.all()
+
+def get_all_censured_instances_by_censuring_id(censuring_ids):
+    query = db.session.query(
+        Instance
+    ).outerjoin(
+        Instance.endorsements,
+    ).options(
+        joinedload(Instance.endorsements),
+    ).filter(
+        Censure.approving_id.in_(censuring_ids)
+    ).group_by(
+        Instance.id
+    )
+    return query.all()
+
+def get_all_censuring_instances_by_censured_id(censured_ids):
+    query = db.session.query(
+        Instance
+    ).outerjoin(
+        Instance.approvals,
+    ).options(
+        joinedload(Instance.approvals),
+    ).filter(
+        Censure.endorsed_id.in_(censured_ids)
+    ).group_by(
+        Instance.id
+    )
+    return query.all()
+
+
 
 def get_all_guaranteed_instances_by_guarantor_id(guarantor_id):
     query = db.session.query(
@@ -177,6 +207,13 @@ def get_endorsement(instance_id, endorsing_instance_id):
     query = Endorsement.query.filter_by(
         endorsed_id=instance_id,
         approving_id=endorsing_instance_id,
+    )
+    return query.first()
+
+def get_censure(instance_id, censuring_instance_id):
+    query = Censure.query.filter_by(
+        censured_id=instance_id,
+        censuring_id=censuring_instance_id,
     )
     return query.first()
 

@@ -13,7 +13,7 @@ uuid_column_type = lambda: UUID(as_uuid=True) if not SQLITE_MODE else db.String(
 
 # This is used to know when last time an instance removed their guarantee from another to prevent trolling/spamming
 # By someone adding/removing guarantees
-class RejectionRecord(db.Model):   
+class RejectionRecord(db.Model):
     __tablename__ = "rejection_records"
     __table_args__ = (UniqueConstraint('rejector_id', 'rejected_id', name='endoresements_rejector_id_rejected_id'),)
     id = db.Column(db.Integer, primary_key=True)
@@ -48,11 +48,21 @@ class Endorsement(db.Model):
     endorsed_instance = db.relationship("Instance", back_populates="endorsements", foreign_keys=[endorsed_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+class Censure(db.Model):
+    __tablename__ = "censures"
+    __table_args__ = (UniqueConstraint('censuring_id', 'censured_id', name='censures_censuring_id_censured_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    censuring_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    censuring_instance = db.relationship("Instance", back_populates="censures_given", foreign_keys=[censuring_id])
+    censured_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    censured_instance = db.relationship("Instance", back_populates="censures_received", foreign_keys=[censured_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
 
 class Instance(db.Model):
     __tablename__ = "instances"
 
-    id = db.Column(db.Integer, primary_key=True) 
+    id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(255), unique=True, nullable=False, index=True)
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -64,6 +74,8 @@ class Instance(db.Model):
 
     approvals = db.relationship("Endorsement", back_populates="approving_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.approving_id])
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
+    censures_given = db.relationship("Censure", back_populates="censuring_instance", cascade="all, delete-orphan", foreign_keys=[Censure.censuring_id])
+    censures_received = db.relationship("Censure", back_populates="censured_instance", cascade="all, delete-orphan", foreign_keys=[Censure.censured_id])
     guarantees = db.relationship("Guarantee", back_populates="guarantor_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guarantor_id])
     guarantors = db.relationship("Guarantee", back_populates="guaranteed_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guaranteed_id])
     rejections = db.relationship("RejectionRecord", back_populates="rejector_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejector_id])
@@ -108,8 +120,7 @@ class Instance(db.Model):
     def set_as_oprhan(self):
         self.oprhan_since = datetime.utcnow()
         db.session.commit()
-    
+
     def unset_as_orphan(self):
         self.oprhan_since = None
         db.session.commit()
-        
