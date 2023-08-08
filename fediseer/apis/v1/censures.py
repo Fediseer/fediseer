@@ -17,6 +17,7 @@ class CensuresGiven(Resource):
         and the results will be a set of all their censures together.
         '''
         domains_list = domains_csv.split(',')
+        logger.info(domains_list)
         self.args = self.get_parser.parse_args()
         instances = database.find_multiple_instance_by_domains(domains_list)
         if not instances:
