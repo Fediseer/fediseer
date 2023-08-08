@@ -1,6 +1,7 @@
 import fediseer.apis.v1.base as base
 import fediseer.apis.v1.whitelist as whitelist
 import fediseer.apis.v1.endorsements as endorsements
+import fediseer.apis.v1.censures as censures
 import fediseer.apis.v1.guarantees as guarantees
 import fediseer.apis.v1.activitypub as activitypub
 import fediseer.apis.v1.badges as badges
@@ -15,6 +16,8 @@ api.add_resource(whitelist.Whitelist, "/whitelist")
 api.add_resource(whitelist.WhitelistDomain, "/whitelist/<string:domain>")
 api.add_resource(endorsements.Endorsements, "/endorsements/<string:domain>")
 api.add_resource(endorsements.Approvals, "/approvals/<string:domains_csv>")
+api.add_resource(censures.Censures, "/censures/<string:domain>")
+api.add_resource(censures.CensuresGiven, "/censures_given/<string:domains_csv>")
 api.add_resource(guarantees.Guarantors, "/guarantors/<string:domain>")
 api.add_resource(guarantees.Guarantees, "/guarantees/<string:domain>")
 api.add_resource(badges.GuaranteeBadge, "/badges/guarantees/<string:domain>.svg")
