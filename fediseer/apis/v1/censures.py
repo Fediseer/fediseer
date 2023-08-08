@@ -1,5 +1,5 @@
 from fediseer.apis.v1.base import *
-from fediseer.classes.instance import Censure
+from fediseer.classes.instance import Censure,Endorsement
 
 class CensuresGiven(Resource):
     get_parser = reqparse.RequestParser()
@@ -89,6 +89,8 @@ class Censures(Resource):
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         if not target_instance:
             raise e.BadRequest("Instance to censure not found")
+        if database.get_endorsement(target_instance.id,instance.id):
+            raise e.BadRequest("You can't censure an instance you've endorsed! Please withdraw the endorsement first.")
         if database.get_censure(target_instance.id,instance.id):
             return {"message":'OK'}, 200
         new_censure = Censure(

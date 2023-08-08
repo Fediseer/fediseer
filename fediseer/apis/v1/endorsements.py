@@ -1,5 +1,5 @@
 from fediseer.apis.v1.base import *
-from fediseer.classes.instance import Endorsement
+from fediseer.classes.instance import Endorsement,Censure
 
 class Approvals(Resource):
     get_parser = reqparse.RequestParser()
@@ -91,6 +91,8 @@ class Endorsements(Resource):
             raise e.Forbidden("Not Guaranteed instances can be endorsed. Please guarantee for them, or find someone who will.")
         if not target_instance:
             raise e.BadRequest("Instance to endorse not found")
+        if database.get_censure(target_instance.id,instance.id):
+            raise e.BadRequest("You can't endorse an instance you've censured! Please withdraw the censure first.")
         if database.get_endorsement(target_instance.id,instance.id):
             return {"message":'OK'}, 200
         new_endorsement = Endorsement(
