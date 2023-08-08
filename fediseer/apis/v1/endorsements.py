@@ -11,12 +11,12 @@ class Approvals(Resource):
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
-    def get(self, domains):
+    def get(self, domains_csv):
         '''Display all endorsements given out by one or more domains
         You can pass a comma-separated list of domain names and the results will be a set of all their
         endorsements together.
         '''
-        domains_list = domains.split(',')
+        domains_list = domains_csv.split(',')
         self.args = self.get_parser.parse_args()
         instances = database.find_multiple_instance_by_domains(domains_list)
         if not instances:
