@@ -11,22 +11,25 @@ class Approvals(Resource):
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
-    def get(self, domain):
-        '''Display all endorsements given by a specific domain
+    def get(self, domains):
+        '''Display all endorsements given out by one or more domains
+        You can pass a comma-separated list of domain names and the results will be a set of all their
+        endorsements together.
         '''
+        domains_list = domains.split(',')
         self.args = self.get_parser.parse_args()
-        instance = database.find_instance_by_domain(domain)
-        if not instance:
-            raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
+        instances = database.find_multiple_instance_by_domains(domains_list)
+        if not instances:
+            raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
         instance_details = []
-        for instance in database.get_all_endorsed_instances_by_approving_id(instance.id):
+        for instance in database.get_all_endorsed_instances_by_approving_id([instance.id for instance in instances]):
             instance_details.append(instance.get_details())
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
         if self.args.domains:
             return {"domains": [instance["domain"] for instance in instance_details]},200
         return {"instances": instance_details},200
-    
+
 class Endorsements(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")

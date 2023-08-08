@@ -35,7 +35,7 @@ def get_all_instances(min_endorsements = 0, min_guarantors = 1):
     return query.all()
 
 
-def get_all_endorsed_instances_by_approving_id(approving_id):
+def get_all_endorsed_instances_by_approving_id(approving_ids):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -43,13 +43,13 @@ def get_all_endorsed_instances_by_approving_id(approving_id):
     ).options(
         joinedload(Instance.endorsements),
     ).filter(
-        Endorsement.approving_id == approving_id
+        Endorsement.approving_id.in_(approving_ids)
     ).group_by(
         Instance.id
     )
     return query.all()
 
-def get_all_approving_instances_by_endorsed_id(endorsed_id):
+def get_all_approving_instances_by_endorsed_id(endorsed_ids):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -57,7 +57,7 @@ def get_all_approving_instances_by_endorsed_id(endorsed_id):
     ).options(
         joinedload(Instance.approvals),
     ).filter(
-        Endorsement.endorsed_id == endorsed_id
+        Endorsement.endorsed_id.in_(endorsed_ids)
     ).group_by(
         Instance.id
     )
@@ -154,6 +154,12 @@ def find_user_by_account(user_account):
 
 def find_instance_by_domain(domain):
     instance = Instance.query.filter_by(domain=domain).first()
+    return instance
+
+def find_multiple_instance_by_domains(domains):
+    instance = Instance.query.filter(
+        Instance.domain.in_(domains)
+    ).all()
     return instance
 
 def find_authenticated_instance(domain,api_key):
