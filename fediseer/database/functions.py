@@ -71,13 +71,13 @@ def get_all_censured_instances_by_censuring_id(censuring_ids):
     ).options(
         joinedload(Instance.endorsements),
     ).filter(
-        Censure.approving_id.in_(censuring_ids)
+        Censure.censuring_id.in_(censuring_ids)
     ).group_by(
         Instance.id
     )
     return query.all()
 
-def get_all_censuring_instances_by_censured_id(censured_ids):
+def get_all_censuring_instances_by_censured_id(censured_id):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -85,7 +85,7 @@ def get_all_censuring_instances_by_censured_id(censured_ids):
     ).options(
         joinedload(Instance.approvals),
     ).filter(
-        Censure.endorsed_id.in_(censured_ids)
+        Censure.censured_id == censured_id
     ).group_by(
         Instance.id
     )
