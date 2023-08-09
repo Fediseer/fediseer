@@ -8,6 +8,10 @@ The currently running instance is on https://fediseer.com
 
 See devlog: https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/
 
+# Libraries
+
+We provide a Python library to interact programmatically with the fediseer api: [Pythonseer](https://github.com/db0/pythonseer)
+
 # Badges
 
 You can retrieve and display a badge for your fediverse domain by requesting a .svg for it on a special endpoint

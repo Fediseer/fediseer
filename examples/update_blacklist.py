@@ -1,6 +1,8 @@
 import requests
 
 from pythorhead import Lemmy
+from pythonseer import Fediseer
+from pythonseer.types import FormatType
 
 # Your own instance's domain
 LEMMY_DOMAIN = "lemmy.dbzer0.com"
@@ -13,8 +15,7 @@ MONTHLY_ACTIVITY_SUSPICION = 500
 # Extra domains you can block. You can just delete the contents if you want to only block suspicious domains
 blacklist = {
     "truthsocial.com",
-    "exploding-heads.com",
-    "lemmygrad.ml",
+    "threads.net",
 }
 
 
@@ -22,11 +23,18 @@ lemmy = Lemmy(f"https://{LEMMY_DOMAIN}")
 if lemmy.log_in(USERNAME, PASSWORD) is False:
     raise Exception("Could not log in to lemmy")
 
+fediseer = Fediseer()
 print("Fetching suspicions")
-sus = requests.get(f"https://fediseer.com/api/v1/instances?activity_suspicion={ACTIVITY_SUSPICION}&active_suspicion={MONTHLY_ACTIVITY_SUSPICION}&domains=true", timeout=5).json()
-defed = blacklist | set(sus["domains"])
+sus = fediseer.suspicions.get(
+    activity_suspicion=ACTIVITY_SUSPICION,
+    active_suspicion=MONTHLY_ACTIVITY_SUSPICION,
+    format=FormatType.LIST
+)
+print("Fetching censures")
+censures = fediseer.censure.get_given(LEMMY_DOMAIN, FormatType.LIST)
+defed = blacklist | set(censures["domains"]) | set(sus["domains"])
 # I need to retrieve the site info because it seems if "RequireApplication" is set
-# We need to always re-set the application_question. 
+# We need to always re-set the application_question.
 # So we retrieve it from the existing site, to set the same value
 site = lemmy.site.get()
 application_question = None

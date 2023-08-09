@@ -4,7 +4,7 @@ This is a [FOSS service](https://github.com/db0/fediseer) to help Fediverse inst
 
 [What is Fediseer](https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/) devlog
 
-## Scope 
+## Scope
 
 This Fediseer is focused around anti-spam verification. We make no judgement on the content of the guaranteed communities other than they have been verified to not be fake spam instances and are making a good effort to block spam accounts.
 
@@ -13,6 +13,10 @@ However using the endorsement system, you can create a further customized whitel
 ## REST API
 
 [Full API Documentation](/api/)
+
+## Libraries
+
+* [Pythonseer](https://github.com/db0/pythonseer) (Python)
 
 ## Community
 

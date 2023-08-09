@@ -127,7 +127,7 @@ class WhitelistDomain(Resource):
                 requestor = user.username
                 instance_to_reset = database.find_instance_by_account(f"@{self.args.regenerate_key}@{domain}")
                 if instance != instance_to_reset and user.username != "fediseer":
-                    raise e.BadRequest("Only other admins or the fediseer can request API key reset for others.")
+                    raise e.BadRequest("Only other admins of the same instance or the fediseer can request API key reset for others.")
                 instance = instance_to_reset
                 user = database.find_user_by_account(f"@{self.args.regenerate_key}@{domain}")
             new_key = activitypub_pm.pm_new_api_key(domain, self.args.regenerate_key, instance.software, requestor=requestor)
