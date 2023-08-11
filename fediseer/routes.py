@@ -32,7 +32,7 @@ def index():
     """
     return(head + markdown(
         findex,
-        extensions=['markdown.extensions.toc']
+        extensions=['toc']
     ))
 
 @logger.catch(reraise=True)
