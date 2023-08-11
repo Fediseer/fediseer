@@ -26,7 +26,7 @@ class Guarantors(Resource):
         if self.args.domains:
             return {"domains": [guaranteed["domain"] for guaranteed in instance_details]},200
         return {"instances": instance_details},200
-    
+
 class Guarantees(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -105,7 +105,7 @@ class Guarantees(Resource):
         # db.session.add(new_endorsement)
         db.session.commit()
         activitypub_pm.pm_admins(
-            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service.",
+            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service. Replies will not be read.\nPlease contact @db0@lemmy.dbzer0.com for further inquiries.",
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,

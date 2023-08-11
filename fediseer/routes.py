@@ -23,7 +23,7 @@ def index():
         }
         </style>
     """
-    
+
     head = f"""<head>
     <title>Fediseer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,6 +31,33 @@ def index():
     </head>
     """
     return(head + markdown(findex))
+
+@logger.catch(reraise=True)
+@OVERSEER.route('/faq')
+# @cache.cached(timeout=300)
+def faq():
+    with open(f'fediseer/templates/faq.md') as md_file:
+        md = md_file.read()
+
+    style = """<style>
+        body {
+            max-width: 120ex;
+            margin: 0 auto;
+            color: #333333;
+            line-height: 1.4;
+            font-family: sans-serif;
+            padding: 1em;
+        }
+        </style>
+    """
+
+    head = f"""<head>
+    <title>Fediseer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {style}
+    </head>
+    """
+    return(head + markdown(md))
 
 @logger.catch(reraise=True)
 @OVERSEER.route('/.well-known/webfinger')
