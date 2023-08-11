@@ -103,7 +103,7 @@ class Endorsements(Resource):
         db.session.commit()
         if not database.has_recent_endorsement(target_instance.id):
             activitypub_pm.pm_admins(
-                message=f"Your instance has just been endorsed by {instance.domain}",
+                message=f"Your instance has just been [endorsed](https://fediseer.com/faq#what-is-an-endorsement) by {instance.domain}",
                 domain=target_instance.domain,
                 software=target_instance.software,
                 instance=target_instance,

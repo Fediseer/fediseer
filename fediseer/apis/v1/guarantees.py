@@ -105,7 +105,7 @@ class Guarantees(Resource):
         # db.session.add(new_endorsement)
         db.session.commit()
         activitypub_pm.pm_admins(
-            message=f"Congratulations! Your instance has just been guaranteed by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service. Replies will not be read.\nPlease contact @db0@lemmy.dbzer0.com for further inquiries.",
+            message=f"Congratulations! Your instance has just been [guaranteed](https://fediseer.com/faq#what-is-a-guarantee) by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service. Replies will not be read.\nPlease contact @db0@lemmy.dbzer0.com for further inquiries.",
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,
@@ -169,8 +169,8 @@ class Guarantees(Resource):
             db.session.add(rejection)
         db.session.commit()
         activitypub_pm.pm_admins(
-            message=f"Attention! You guarantor instance {instance.domain} has withdrawn their backing.\n\n"
-                    "IMPORTANT: The instances you vouched for are still considered guaraneed but cannot guarantee or endorse others"
+            message=f"Attention! You guarantor instance {instance.domain} has withdrawn their [guarantee](https://fediseer.com/faq#what-is-a-guarantee).\n\n"
+                    "IMPORTANT: The instances you vouched for are still considered guaranteed but cannot guarantee or endorse others"
                     "If you find a new guarantor then your guarantees will be reactivated!.\n\n"
                     "Note that if you do not find a guarantor within 7 days, all your guarantees and endorsements will be removed.",
             domain=target_instance.domain,
