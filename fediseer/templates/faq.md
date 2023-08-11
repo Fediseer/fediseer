@@ -2,6 +2,8 @@
 
 This document will attempt to provide some definitions and answers to common questions around the fediseer.
 
+[TOC]
+
 ## What is the Fediseer?
 
 The fediseer is a service for the fediverse which attempts to provide a crowdsourced human-curated spam/ham classification of fediverse instances as well as provide a public space to specify approval/disapproval of other instances.
@@ -67,5 +69,3 @@ Not only that, but the fediseer is free and open source software, allowing anyon
 ## Doesn't this make the fediseer an authority on the fediverse?
 
 The fediseer is designed to be completely crowd-sourced as pertains to the chain of trust. The admin of the fediseer does not control what people guarantee, endorse or censure. The various instance admins are driving the chain of trust.
-
-

@@ -30,7 +30,10 @@ def index():
     {style}
     </head>
     """
-    return(head + markdown(findex))
+    return(head + markdown(
+        findex,
+        extensions=['Table of Contents']
+    ))
 
 @logger.catch(reraise=True)
 @OVERSEER.route('/faq')
