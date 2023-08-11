@@ -30,10 +30,7 @@ def index():
     {style}
     </head>
     """
-    return(head + markdown(
-        findex,
-        extensions=['toc']
-    ))
+    return(head + markdown(findex))
 
 @logger.catch(reraise=True)
 @OVERSEER.route('/faq')
@@ -60,7 +57,8 @@ def faq():
     {style}
     </head>
     """
-    return(head + markdown(md))
+    return(head + markdown(md, extensions=['toc']
+))
 
 @logger.catch(reraise=True)
 @OVERSEER.route('/.well-known/webfinger')
