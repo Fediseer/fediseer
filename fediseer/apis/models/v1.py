@@ -40,3 +40,6 @@ class Models:
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
+        self.input_censures_modify = api.model('ModifyCensure', {
+            'reasons': fields.String(required=False, description="The reason for this censure. No profanity or hate speech allowed!", example="csam"),
+        })

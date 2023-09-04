@@ -1,5 +1,6 @@
 from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Censure,Endorsement
+from fediseer.utils import sanitize_string
 
 class CensuresGiven(Resource):
     get_parser = reqparse.RequestParser()
@@ -59,9 +60,10 @@ class Censures(Resource):
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    put_parser.add_argument("reason", default=None, type=str, required=False, location="json")
 
 
-    @api.expect(put_parser)
+    @api.expect(put_parser,models.input_censures_modify)
     @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
@@ -93,13 +95,56 @@ class Censures(Resource):
             raise e.BadRequest("You can't censure an instance you've endorsed! Please withdraw the endorsement first.")
         if database.get_censure(target_instance.id,instance.id):
             return {"message":'OK'}, 200
+    
+        reason = self.args.reason
+        if reason is not None:
+            reason = sanitize_string(reason)
         new_censure = Censure(
             censuring_id=instance.id,
             censured_id=target_instance.id,
+            reason=reason,
         )
         db.session.add(new_censure)
         db.session.commit()
         logger.info(f"{instance.domain} Censured {domain}")
+        return {"message":'Changed'}, 200
+
+
+    patch_parser = reqparse.RequestParser()
+    patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
+    patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    patch_parser.add_argument("reason", default=None, type=str, required=False, location="json")
+
+
+    @api.expect(put_parser,models.input_censures_modify)
+    @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
+    @api.response(400, 'Bad Request', models.response_model_error)
+    @api.response(401, 'Invalid API Key', models.response_model_error)
+    @api.response(403, 'Not Guaranteed', models.response_model_error)
+    @api.response(404, 'Instance not registered', models.response_model_error)
+    def put(self, domain):
+        '''Modify an instance's Censure
+        '''
+        self.args = self.patch_parser.parse_args()
+        if not self.args.apikey:
+            raise e.Unauthorized("You must provide the API key that was PM'd to your admin account")
+        instance = database.find_instance_by_api_key(self.args.apikey)
+        if not instance:
+            raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        target_instance = database.find_instance_by_domain(domain=domain)
+        if not target_instance:
+            raise e.BadRequest("Instance from which to modify censure not found")
+        censure = database.get_censure(target_instance.id,instance.id)
+        if not censure:
+            raise e.BadRequest(f"No censure found for {domain} from {instance.domain}")
+        reason = self.args.reason
+        if reason is not None:
+            reason = sanitize_string(reason)
+        if censure.reason == reason:
+            return {"message":'OK'}, 200
+        censure.reason = reason
+        db.session.commit()
+        logger.info(f"{instance.domain} Modfied censure for {domain}")
         return {"message":'Changed'}, 200
 
 
