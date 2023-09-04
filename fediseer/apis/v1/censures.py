@@ -54,8 +54,12 @@ class Censures(Resource):
         if not instance:
             raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
         instance_details = []
-        for instance in database.get_all_censuring_instances_by_censured_id(instance.id):
-            instance_details.append(instance.get_details())
+        for c_instance in database.get_all_censuring_instances_by_censured_id(instance.id):
+            censures = database.get_all_censure_reasons_for_censured_id(instance.id, [c_instance.id])
+            c_instance_details = c_instance.get_details()
+            if len(censures) > 0:
+                c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
+            instance_details.append(c_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
         if self.args.domains:
