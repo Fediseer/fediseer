@@ -23,12 +23,17 @@ class CensuresGiven(Resource):
         if not instances:
             raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
         instance_details = []
-        for instance in database.get_all_censured_instances_by_censuring_id([instance.id for instance in instances]):
-            instance_details.append(instance.get_details())
+        for c_instance in database.get_all_censured_instances_by_censuring_id([instance.id for instance in instances]):
+            censures = database.get_all_censure_reasons_for_censured_id(c_instance.id, [instance.id for instance in instances])
+            c_instance_details = c_instance.get_details()
+            if len(censures) > 0:
+                c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
+            instance_details.append(c_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
         if self.args.domains:
             return {"domains": [instance["domain"] for instance in instance_details]},200
+        
         return {"instances": instance_details},200
 
 class Censures(Resource):
@@ -63,7 +68,7 @@ class Censures(Resource):
     put_parser.add_argument("reason", default=None, type=str, required=False, location="json")
 
 
-    @api.expect(put_parser,models.input_censures_modify)
+    @api.expect(put_parser,models.input_censures_modify, validate=True)
     @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
@@ -116,13 +121,13 @@ class Censures(Resource):
     patch_parser.add_argument("reason", default=None, type=str, required=False, location="json")
 
 
-    @api.expect(put_parser,models.input_censures_modify)
+    @api.expect(patch_parser,models.input_censures_modify, validate=True)
     @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(403, 'Not Guaranteed', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
-    def put(self, domain):
+    def patch(self, domain):
         '''Modify an instance's Censure
         '''
         self.args = self.patch_parser.parse_args()
@@ -140,6 +145,7 @@ class Censures(Resource):
         reason = self.args.reason
         if reason is not None:
             reason = sanitize_string(reason)
+        logger.debug([censure.reason,reason])
         if censure.reason == reason:
             return {"message":'OK'}, 200
         censure.reason = reason
