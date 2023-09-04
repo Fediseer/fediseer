@@ -34,9 +34,13 @@ class Models:
             'approvals': fields.Integer(description="The amount of endorsements this instance has given out"),
             'endorsements': fields.Integer(description="The amount of endorsements this instance has received"),
             'guarantor': fields.String(description="The domain of the instance which guaranteed this instance.", example="fediseer.com"),
+            'censure_reasons': fields.List(fields.String(description="The reasons instances have given for censuring this instance")),
         })
         self.response_model_model_Whitelist_get = api.model('WhitelistedInstances', {
             'instances': fields.List(fields.Nested(self.response_model_instances)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
+        })
+        self.input_censures_modify = api.model('ModifyCensure', {
+            'reason': fields.String(required=False, description="The reason for this censure. No profanity or hate speech allowed!", example="csam"),
         })

@@ -91,6 +91,16 @@ def get_all_censuring_instances_by_censured_id(censured_id):
     )
     return query.all()
 
+def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
+    query = Censure.query.filter(
+        and_(
+            Censure.censured_id == censured_id,
+            Censure.censuring_id.in_(censuring_ids),
+            Censure.reason != None
+        )
+    ).with_entities(Censure.reason)
+    return query.all()
+
 
 
 def get_all_guaranteed_instances_by_guarantor_id(guarantor_id):
