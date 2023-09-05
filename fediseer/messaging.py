@@ -130,6 +130,19 @@ class ActivityPubPM:
             raise e.BadRequest("API Key PM failed")
         return api_key
 
+    def pm_new_key_notification(self, domain: str, username: str, software: str, requestor: str):
+        api_key = secrets.token_urlsafe(16)
+        pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key was provided in the response already\n"
+        logger.info(f"user '{requestor}' reset the API key for {username}@{domain} on the response.")
+        if not self.send_pm_to_right_software(
+            message=pm_content,
+            username=username,
+            domain=domain,
+            software=software
+        ):
+            raise e.BadRequest("API Key PM failed")
+        return api_key
+
 
     def pm_admins(self, message: str, domain: str, software: str, instance):
         if software not in SUPPORTED_SOFTWARE:
