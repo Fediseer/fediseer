@@ -118,7 +118,7 @@ class ActivityPubPM:
     def pm_new_api_key(self, domain: str, username: str, software: str, requestor = None):
         api_key = secrets.token_urlsafe(16)
         if requestor:
-            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}\n**Please purge this message after storing the API key**"
+            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}\n\n**Please purge this message after storing the API key**"
         else:
             pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the [Fediseer](https://fediseer.com).\n\n**Please purge this message after storing the API key**"
         if not self.send_pm_to_right_software(
