@@ -44,3 +44,7 @@ class Models:
         self.input_censures_modify = api.model('ModifyCensure', {
             'reason': fields.String(required=False, description="The reason for this censure. No profanity or hate speech allowed!", example="csam"),
         })
+        self.response_model_api_key = api.model('SimpleResponse', {
+            "message": fields.String(default='OK',required=True, description="The result of this operation."),
+            "new_key": fields.String(default=None,required=False, description="The new API key"),
+        })
