@@ -48,3 +48,7 @@ class Models:
             "message": fields.String(default='OK',required=True, description="The result of this operation."),
             "new_key": fields.String(default=None,required=False, description="The new API key"),
         })
+        self.input_api_key_reset = api.model('ApiKeyResetInput', {
+            'admin_username': fields.String(required=False, description="If a username is given, their API key will be reset. Otherwise the user's whose API key was provided will be reset. This allows can be initiated by other instance admins or the fediseer.", example="admin"),
+            'return_new_key': fields.Boolean(required=False, default=False, description="If True, the key will be returned as part of the response instead of PM'd. Fediseer will still PM a notification to the target admin account."),
+        })

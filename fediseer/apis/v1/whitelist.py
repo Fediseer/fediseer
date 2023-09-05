@@ -105,10 +105,10 @@ class WhitelistDomain(Resource):
     patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     patch_parser.add_argument("admin_username", required=False, type=str, help="If a username is given, their API key will be reset. Otherwise the user's whose API key was provided will be reset. This allows can be initiated by other instance admins or the fediseer.", location="json")
-    patch_parser.add_argument("return_new_key", default=False, required=False, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
+    patch_parser.add_argument("return_new_key", default=False, required=True, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
 
 
-    @api.expect(patch_parser)
+    @api.expect(patch_parser,models.input_api_key_reset, validate=True)
     @api.marshal_with(models.response_model_api_key_reset, code=200, description='Instances', skip_none=True)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(403, 'Instance Not Registered', models.response_model_error)
