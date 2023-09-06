@@ -60,7 +60,7 @@ class Suspicions(Resource):
 
 
 
-def ensure_instance_registered(domain):        
+def ensure_instance_registered(domain, allow_unreachable=False):        
     if domain.endswith("test.dbzer0.com"):
         # Fake instances for testing chain of trust
         requested_lemmy = Lemmy(f"https://{domain}")
@@ -75,7 +75,18 @@ def ensure_instance_registered(domain):
     else:
         nodeinfo = get_nodeinfo(domain)
         if not nodeinfo:
-            raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
+            if not allow_unreachable:
+                raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
+            else:
+                software = "unknown"
+                if "*" in domain:
+                    software = "wildcard"
+                nodeinfo = {
+                    "openRegistrations": False,
+                    "software": {
+                        "name": software
+                    }
+                }
         software = nodeinfo["software"]["name"]
         if software == "lemmy":
             requested_lemmy = Lemmy(f"https://{domain}")

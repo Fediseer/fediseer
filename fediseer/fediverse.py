@@ -8,7 +8,7 @@ def get_lemmy_admins(domain):
     site = requested_lemmy.site.get()
     if not site:
         logger.warning(f"Error retrieving mastodon site info for {domain}")
-        return None
+        raise Exception(f"Error retrieving mastodon site info for {domain}")
     return [a["person"]["name"] for a in site["admins"]]
 
 def get_mastodon_admins(domain):
@@ -17,13 +17,18 @@ def get_mastodon_admins(domain):
         return [site["contact"]["account"]["username"]]
     except Exception as err:
         logger.warning(f"Error retrieving mastodon site info for {domain}: {err}")
-        return None
+        raise Exception(f"Error retrieving mastodon site info for {domain}: {err}")
+
+def get_unknown_admins(domain):
+    return []
 
 def get_admin_for_software(software: str, domain: str):
     software_map = {
         "lemmy": get_lemmy_admins,
         "mastodon": get_mastodon_admins,
         "friendica": get_mastodon_admins,
+        "unknown": get_unknown_admins,
+        "wildcard": get_unknown_admins,
     }
     if software not in software_map:
         return []
