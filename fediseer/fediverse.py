@@ -12,11 +12,16 @@ def get_lemmy_admins(domain):
     return [a["person"]["name"] for a in site["admins"]]
 
 def get_mastodon_admins(domain):
+    site = None
     try:
-        site = requests.get(f"https://{domain}/api/v2/instance").json()
-        return [site["contact"]["account"]["username"]]
+        site = requests.get(f"https://{domain}/api/v2/instance")
+        site_json = site.json()
+        return [site_json["contact"]["account"]["username"]]
     except Exception as err:
-        logger.warning(f"Error retrieving mastodon site info for {domain}: {err}")
+        if site is not None:
+            logger.warning(f"Error retrieving mastodon site info for {domain}: {err}. Request text: {site.text()}")
+        else:
+            logger.warning(f"Error retrieving mastodon site info for {domain}: {err}")
         raise Exception(f"Error retrieving mastodon site info for {domain}: {err}")
 
 def get_unknown_admins(domain):
