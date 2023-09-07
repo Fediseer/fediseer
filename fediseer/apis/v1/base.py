@@ -100,7 +100,10 @@ def ensure_instance_registered(domain, allow_unreachable=False):
         else:
             open_registrations = nodeinfo["openRegistrations"]
             email_verify = False
-            admin_usernames = get_admin_for_software(software, domain)
+            try:
+                admin_usernames = get_admin_for_software(software, domain)
+            except:
+                admin_usernames = []
     instance = database.find_instance_by_domain(domain)
     if instance:
         return instance, nodeinfo, admin_usernames
