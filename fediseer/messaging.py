@@ -149,7 +149,10 @@ class ActivityPubPM:
             return None
         admins = database.find_admins_by_instance(instance)
         if not admins:
-            admins = get_admin_for_software(software, domain)
+            try:
+                admins = get_admin_for_software(software, domain)
+            except Exception as err:
+                raise e.BadRequest(f"Failed to retrieve admin list: {err}")
         else:
             admins = [a.username for a in admins]
         if not admins:
