@@ -57,7 +57,7 @@ def generate_client_id():
     return secrets.token_urlsafe(16)
 
 def sanitize_string(text):
-    santxt = bleach.clean(text).lstrip().rstrip()
+    santxt = bleach.clean(text).strip()
     return santxt
 
 def hash_api_key(unhashed_api_key):

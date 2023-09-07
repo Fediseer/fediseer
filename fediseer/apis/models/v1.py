@@ -41,6 +41,15 @@ class Models:
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
+        self.response_model_instances_censured = api.inherit('CensuredInstanceDetails', self.response_model_instances, {
+            'censure_reasons': fields.List(fields.String(description="The reasons instances have given for censuring this instance")),
+            'censure_count': fields.Integer(description="The amount of censures this instance has received from the reference instances"),
+        })
+        self.response_model_model_Censures_get = api.model('CensuredInstances', {
+            'instances': fields.List(fields.Nested(self.response_model_instances_censured)),
+            'domains': fields.List(fields.String(description="The instance domains as a list.")),
+            'csv': fields.String(description="The instance domains as a csv."),
+        })
         self.input_censures_modify = api.model('ModifyCensure', {
             'reason': fields.String(required=False, description="The reason for this censure. No profanity or hate speech allowed!", example="csam"),
         })

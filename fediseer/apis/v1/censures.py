@@ -7,10 +7,12 @@ class CensuresGiven(Resource):
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
+    get_parser.add_argument("min_censures", required=False, default=1, type=int, help="Limit to this amount of censures of more", location="args")
+    get_parser.add_argument("reasons_csv", required=False, type=str, help="Only retrieve censures where their reasons include any of the text in this csv", location="args")
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
-    @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
+    @api.marshal_with(models.response_model_model_Censures_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def get(self, domains_csv):
         '''Display all censures given out by one or more domains
@@ -26,8 +28,23 @@ class CensuresGiven(Resource):
         for c_instance in database.get_all_censured_instances_by_censuring_id([instance.id for instance in instances]):
             censures = database.get_all_censure_reasons_for_censured_id(c_instance.id, [instance.id for instance in instances])
             c_instance_details = c_instance.get_details()
-            if len(censures) > 0:
-                c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
+            censure_count = len(censures)
+            skip_instance = False
+            if self.args.reasons_csv:
+                reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
+                for r in reasons_filter:
+                    reason_filter_counter = 0
+                    for censure_reason in censures:
+                        if r in censure_reason.reason.lower():
+                            reason_filter_counter += 1
+                    if reason_filter_counter < self.args.min_censures:
+                        skip_instance = True
+            elif censure_count < self.args.min_censures:
+                skip_instance = True
+            if skip_instance:
+                continue
+            c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
+            c_instance_details["censure_count"] = censure_count
             instance_details.append(c_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
@@ -44,7 +61,7 @@ class Censures(Resource):
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
-    @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
+    @api.marshal_with(models.response_model_model_Censures_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def get(self, domain):
         '''Display all censures received by a specific domain
