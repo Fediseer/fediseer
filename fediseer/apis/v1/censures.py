@@ -19,11 +19,13 @@ class CensuresGiven(Resource):
         You can pass a comma-separated list of domain names
         and the results will be a set of all their censures together.
         '''
-        domains_list = domains_csv.split(',')
         self.args = self.get_parser.parse_args()
+        domains_list = domains_csv.split(',')
         instances = database.find_multiple_instance_by_domains(domains_list)
         if not instances:
             raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
+        if self.args.min_censures > len(domains_list):
+            raise e.BadRequest(f"You cannot request more censures than the amount of reference domains")
         instance_details = []
         for c_instance in database.get_all_censured_instances_by_censuring_id([instance.id for instance in instances]):
             censures = database.get_all_censure_reasons_for_censured_id(c_instance.id, [instance.id for instance in instances])

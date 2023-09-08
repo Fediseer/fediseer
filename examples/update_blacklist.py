@@ -17,6 +17,19 @@ blacklist = {
     "truthsocial.com",
     "threads.net",
 }
+# If you (don't) want to combine your own censures, with the ones from other trusted instances, adjust the list below.
+# The censures will be the combined list from your own domain and any domains specified below.
+trusted_instances = [
+    "lemmings.world",
+]
+# If you want to only block based on specific filters as specified by the admins who have censured them
+# You can provide them in a list below. Any instance marked with that filter from your trusted instances
+# Will be added. Others will be ignored
+# Sample has been provided below
+# reason_filters = ["loli","csam","bigotry"]
+reason_filters = []
+# If you want to only censure instances which have been marked by more than 1 trusted instance, then increase the number below
+min_censures = 1
 
 
 lemmy = Lemmy(f"https://{LEMMY_DOMAIN}")
@@ -31,7 +44,14 @@ sus = fediseer.suspicions.get(
     format=FormatType.LIST
 )
 print("Fetching censures")
-censures = fediseer.censure.get_given(LEMMY_DOMAIN, FormatType.LIST)
+trusted_instances.append(LEMMY_DOMAIN)
+
+censures = fediseer.censure.get_given(
+    domain_set = set(trusted_instances), 
+    reasons = reason_filters, 
+    min_censures = min_censures, 
+    format = FormatType.LIST,
+)
 defed = blacklist | set(censures["domains"]) | set(sus["domains"])
 # I need to retrieve the site info because it seems if "RequireApplication" is set
 # We need to always re-set the application_question.
