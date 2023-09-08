@@ -27,8 +27,9 @@ class CensuresGiven(Resource):
         instance_details = []
         for c_instance in database.get_all_censured_instances_by_censuring_id([instance.id for instance in instances]):
             censures = database.get_all_censure_reasons_for_censured_id(c_instance.id, [instance.id for instance in instances])
-            c_instance_details = c_instance.get_details()
             censure_count = len(censures)
+            censures = [c for c in censures if c.reason is not None]
+            c_instance_details = c_instance.get_details()
             skip_instance = False
             if self.args.reasons_csv:
                 reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
@@ -73,6 +74,7 @@ class Censures(Resource):
         instance_details = []
         for c_instance in database.get_all_censuring_instances_by_censured_id(instance.id):
             censures = database.get_all_censure_reasons_for_censured_id(instance.id, [c_instance.id])
+            censures = [c for c in censures if c.reason is not None]
             c_instance_details = c_instance.get_details()
             if len(censures) > 0:
                 c_instance_details["censure_reasons"] = [censure.reason for censure in censures]

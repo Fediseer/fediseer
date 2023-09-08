@@ -96,7 +96,6 @@ def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
         and_(
             Censure.censured_id == censured_id,
             Censure.censuring_id.in_(censuring_ids),
-            Censure.reason != None
         )
     ).with_entities(Censure.reason)
     return query.all()
