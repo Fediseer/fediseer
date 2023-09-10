@@ -72,6 +72,8 @@ class Instance(db.Model):
     open_registrations = db.Column(db.Boolean, unique=False, nullable=False, index=True)
     email_verify = db.Column(db.Boolean, unique=False, nullable=False, index=True)
     software = db.Column(db.String(50), unique=False, nullable=False, index=True)
+    sysadmins = db.Column(db.Integer, unique=False, nullable=True)
+    moderators = db.Column(db.Integer, unique=False, nullable=True)
 
     approvals = db.relationship("Endorsement", back_populates="approving_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.approving_id])
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
@@ -98,6 +100,8 @@ class Instance(db.Model):
             "endorsements": len(self.endorsements),
             "approvals": len(self.approvals),
             "guarantor": self.get_guarantor_domain(),
+            "sysadmins": self.sysadmins,
+            "moderators": self.moderators,
         }
         return ret_dict
 

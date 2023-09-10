@@ -35,6 +35,8 @@ class Models:
             'endorsements': fields.Integer(description="The amount of endorsements this instance has received"),
             'guarantor': fields.String(description="The domain of the instance which guaranteed this instance.", example="fediseer.com"),
             'censure_reasons': fields.List(fields.String(description="The reasons instances have given for censuring this instance")),
+            'sysadmins': fields.Integer(required=False, default=None, description="The count of system administrators in this instance as reported by its admins."),
+            'moderators': fields.Integer(required=False, default=None, description="The count of community moderators in this instance as reported by its admins."),
         })
         self.response_model_model_Whitelist_get = api.model('WhitelistedInstances', {
             'instances': fields.List(fields.Nested(self.response_model_instances)),
@@ -60,4 +62,6 @@ class Models:
         self.input_api_key_reset = api.model('ApiKeyResetInput', {
             'admin_username': fields.String(required=False, description="If a username is given, their API key will be reset. Otherwise the user's whose API key was provided will be reset. This allows can be initiated by other instance admins or the fediseer.", example="admin"),
             'return_new_key': fields.Boolean(required=False, default=False, description="If True, the key will be returned as part of the response instead of PM'd. Fediseer will still PM a notification to the target admin account."),
+            'sysadmins': fields.Integer(required=False, default=None, min=0, max=100, description="Report how many system administrators this instance currently has."),
+            'moderators': fields.Integer(required=False, default=None, min=0, max=1000, description="Report how many instance moderators this instance currently has."),
         })

@@ -1,0 +1,2 @@
+ALTER TABLE instances ADD COLUMN sysadmins INTEGER;
+ALTER TABLE instances ADD COLUMN moderators INTEGER;

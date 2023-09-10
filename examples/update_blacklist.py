@@ -1,12 +1,15 @@
 import requests
-
+import os
+from dotenv import load_dotenv
 from pythorhead import Lemmy
 from pythonseer import Fediseer
 from pythonseer.types import FormatType
 
+load_dotenv()
 # Your own instance's domain
 LEMMY_DOMAIN = "lemmy.dbzer0.com"
 USERNAME = "username"
+# You can write your password here, or add it to the LEMMY_PASSWORD env var, or add LEMMY_PASSWORD to a .env file
 PASSWORD = "password"
 # If there's this many registered users per local post+comments, this site will be considered suspicious
 ACTIVITY_SUSPICION = 20
@@ -16,6 +19,9 @@ MONTHLY_ACTIVITY_SUSPICION = 500
 blacklist = {
     "truthsocial.com",
     "threads.net",
+}
+# Add instances in here which want to ensure are not added in your blocklist
+whitelist = {
 }
 # If you (don't) want to combine your own censures, with the ones from other trusted instances, adjust the list below.
 # The censures will be the combined list from your own domain and any domains specified below.
@@ -31,9 +37,9 @@ reason_filters = []
 # If you want to only censure instances which have been marked by more than 1 trusted instance, then increase the number below
 min_censures = 1
 
-
+password = os.getenv("LEMMY_PASSWORD", PASSWORD)
 lemmy = Lemmy(f"https://{LEMMY_DOMAIN}")
-if lemmy.log_in(USERNAME, PASSWORD) is False:
+if lemmy.log_in(USERNAME, password) is False:
     raise Exception("Could not log in to lemmy")
 
 fediseer = Fediseer()
@@ -52,7 +58,7 @@ censures = fediseer.censure.get_given(
     min_censures = min_censures, 
     format = FormatType.LIST,
 )
-defed = blacklist | set(censures["domains"]) | set(sus["domains"])
+defed = (blacklist | set(censures["domains"]) | set(sus["domains"])) - whitelist
 # I need to retrieve the site info because it seems if "RequireApplication" is set
 # We need to always re-set the application_question.
 # So we retrieve it from the existing site, to set the same value

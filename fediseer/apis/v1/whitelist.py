@@ -105,7 +105,9 @@ class WhitelistDomain(Resource):
     patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     patch_parser.add_argument("admin_username", required=False, type=str, help="If a username is given, their API key will be reset. Otherwise the user's whose API key was provided will be reset. This allows can be initiated by other instance admins or the fediseer.", location="json")
-    patch_parser.add_argument("return_new_key", default=False, required=True, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
+    patch_parser.add_argument("return_new_key", default=False, required=False, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
+    patch_parser.add_argument("sysadmins", default=None, required=False, type=int, help="How many sysadmins this instance has.", location="json")
+    patch_parser.add_argument("moderators", default=None, required=False, type=int, help="How many moderators this instance has.", location="json")
 
 
     @api.expect(patch_parser,models.input_api_key_reset, validate=True)
@@ -123,6 +125,14 @@ class WhitelistDomain(Resource):
             raise e.Forbidden("You have not yet claimed an instance. Use the POST method to do so.")
         instance = database.find_instance_by_user(user)
         requestor_instance = instance
+        changed = False
+        new_key = None
+        if self.args.sysadmins is not None and instance.sysadmins != self.args.sysadmins:
+            instance.sysadmins = self.args.sysadmins
+            changed = True
+        if self.args.moderators is not None and instance.moderators != self.args.moderators:
+            instance.moderators = self.args.moderators
+            changed = True
         if self.args.admin_username:
             requestor = None
             if self.args.admin_username != user.username or user.username == "fediseer":
@@ -142,11 +152,15 @@ class WhitelistDomain(Resource):
             else:
                 new_key = activitypub_pm.pm_new_api_key(domain, self.args.admin_username, instance.software, requestor=requestor)
             user.api_key = hash_api_key(new_key)
-            db.session.commit()
-            if self.args.return_new_key:
+            changed = True
+        db.session.commit()
+        if changed is True:
+            if self.args.return_new_key and new_key is True:
                 return {"message": "Changed", "new_key": new_key},200
             else:
                 return {"message": "Changed"},200
+        else:
+            return {"message": "OK"},200
 
     delete_parser = reqparse.RequestParser()
     delete_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
