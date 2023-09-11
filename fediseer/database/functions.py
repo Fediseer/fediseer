@@ -326,4 +326,4 @@ def get_reports(
     page = page - 1
     if page < 1:
         page = 1
-    return query.order_by(Report.created.desc()).offset(10 * (page - 1)).limit(10).all()
+    return query.order_by(Report.created.desc()).offset(10 * page).limit(10).all()
