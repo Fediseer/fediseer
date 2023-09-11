@@ -8,7 +8,7 @@ Please check our [FAQ](/faq) for further questions.
 
 ## GUI
 
-You can find the official GUI at [https://gui.fediseer.com/](gui.fediseer.com)
+You can find the official GUI at [gui.fediseer.com](https://gui.fediseer.com/)
 
 ## Scope
 
