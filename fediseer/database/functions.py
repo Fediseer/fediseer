@@ -323,4 +323,4 @@ def get_reports(
     if report_activity is not None:
         query = query.filter(Report.report_activity == report_activity.name
     )
-    return query.offset(10 * (page - 1)).limit(10).all()
+    return query.order_by(Report.created.desc()).offset(10 * (page - 1)).limit(10).all()

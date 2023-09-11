@@ -6,6 +6,7 @@ import fediseer.apis.v1.guarantees as guarantees
 import fediseer.apis.v1.activitypub as activitypub
 import fediseer.apis.v1.badges as badges
 import fediseer.apis.v1.find as find
+import fediseer.apis.v1.report as report
 from fediseer.apis.v1.base import api
 
 api.add_resource(base.Suspicions, "/instances")
@@ -22,3 +23,4 @@ api.add_resource(guarantees.Guarantors, "/guarantors/<string:domain>")
 api.add_resource(guarantees.Guarantees, "/guarantees/<string:domain>")
 api.add_resource(badges.GuaranteeBadge, "/badges/guarantees/<string:domain>.svg")
 api.add_resource(badges.EndorsementBadge, "/badges/endorsements/<string:domain>.svg")
+api.add_resource(report.Report, "/reports/<int:page>")
