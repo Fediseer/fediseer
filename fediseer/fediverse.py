@@ -5,7 +5,11 @@ from fediseer.consts import FEDISEER_VERSION
 
 def get_lemmy_admins(domain):
     requested_lemmy = Lemmy(f"https://{domain}")
-    site = requested_lemmy.site.get()
+    try:
+        site = requested_lemmy.site.get()
+    except Exception as err:
+        logger.error(f"Error retrieving mastodon site info for {domain}: {err}")
+        raise err
     if not site:
         logger.error(f"Error retrieving mastodon site info for {domain}")
         raise Exception(f"Error retrieving mastodon site info for {domain}")
