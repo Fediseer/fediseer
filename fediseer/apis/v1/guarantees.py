@@ -1,5 +1,7 @@
 from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Guarantee, Endorsement, RejectionRecord
+from fediseer.classes.reports import Report
+from fediseer import enums
 
 class Guarantors(Resource):
     get_parser = reqparse.RequestParser()
@@ -103,6 +105,13 @@ class Guarantees(Resource):
         #     endorsed_id=target_instance.id,
         # )
         # db.session.add(new_endorsement)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.GUARANTEE,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         activitypub_pm.pm_admins(
             message=f"Congratulations! Your instance has just been [guaranteed](https://fediseer.com/faq#what-is-a-guarantee) by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service. Replies will not be read.\nPlease contact @db0@lemmy.dbzer0.com for further inquiries.",
@@ -167,6 +176,13 @@ class Guarantees(Resource):
                 rejector_id=instance.id,
             )
             db.session.add(rejection)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.GUARANTEE,
+            report_activity=enums.ReportActivity.DELETED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         try:
             activitypub_pm.pm_admins(
