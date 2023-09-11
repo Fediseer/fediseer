@@ -7,7 +7,7 @@ def get_lemmy_admins(domain):
     requested_lemmy = Lemmy(f"https://{domain}")
     site = requested_lemmy.site.get()
     if not site:
-        logger.warning(f"Error retrieving mastodon site info for {domain}")
+        logger.error(f"Error retrieving mastodon site info for {domain}")
         raise Exception(f"Error retrieving mastodon site info for {domain}")
     return [a["person"]["name"] for a in site["admins"]]
 
@@ -19,9 +19,9 @@ def get_mastodon_admins(domain):
         return [site_json["contact"]["account"]["username"]]
     except Exception as err:
         if site is not None:
-            logger.warning(f"Error retrieving mastodon site info for {domain}: {err}. Request text: {site.text()}")
+            logger.error(f"Error retrieving mastodon site info for {domain}: {err}. Request text: {site.text()}")
         else:
-            logger.warning(f"Error retrieving mastodon site info for {domain}: {err}")
+            logger.error(f"Error retrieving mastodon site info for {domain}: {err}")
         raise Exception(f"Error retrieving mastodon site info for {domain}: {err}")
 
 def get_unknown_admins(domain):

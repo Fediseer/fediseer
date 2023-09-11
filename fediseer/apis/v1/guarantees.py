@@ -168,23 +168,31 @@ class Guarantees(Resource):
             )
             db.session.add(rejection)
         db.session.commit()
-        activitypub_pm.pm_admins(
-            message=f"Attention! You guarantor instance {instance.domain} has withdrawn their [guarantee](https://fediseer.com/faq#what-is-a-guarantee).\n\n"
-                    "IMPORTANT: The instances you vouched for are still considered guaranteed but cannot guarantee or endorse others"
-                    "If you find a new guarantor then your guarantees will be reactivated!.\n\n"
-                    "Note that if you do not find a guarantor within 7 days, all your guarantees and endorsements will be removed.",
-            domain=target_instance.domain,
-            software=target_instance.software,
-            instance=target_instance,
-        )
+        try:
+            activitypub_pm.pm_admins(
+                message=f"Attention! You guarantor instance {instance.domain} has withdrawn their [guarantee](https://fediseer.com/faq#what-is-a-guarantee).\n\n"
+                        "IMPORTANT: The instances you vouched for are still considered guaranteed but cannot guarantee or endorse others"
+                        "If you find a new guarantor then your guarantees will be reactivated!.\n\n"
+                        "Note that if you do not find a guarantor within 7 days, all your guarantees and endorsements will be removed.",
+                domain=target_instance.domain,
+                software=target_instance.software,
+                instance=target_instance,
+            )
+        # We do not want a missing instance to prevent us from removing a guarantee
+        except:
+            pass
         orphan_ids = database.get_guarantee_chain(target_instance.id)
         for orphan in database.get_instances_by_ids(orphan_ids):
-            activitypub_pm.pm_admins(
-                message=f"Attention! You guarantor chain has been broken because {instance.domain} has withdrawn their backing from {domain}.\n\nIMPORTANT: All your guarantees will be deleted unless the chain is repaired or you find a new guarantor within 24hours!",
-                domain=orphan.domain,
-                software=orphan.software,
-                instance=orphan,
-            )
+            try:
+                activitypub_pm.pm_admins(
+                    message=f"Attention! You guarantor chain has been broken because {instance.domain} has withdrawn their backing from {domain}.\n\nIMPORTANT: All your guarantees will be deleted unless the chain is repaired or you find a new guarantor within 24hours!",
+                    domain=orphan.domain,
+                    software=orphan.software,
+                    instance=orphan,
+                )
+            # We do not want a missing instance to prevent us from removing a guarantee
+            except:
+                pass
             orphan.set_as_oprhan()
         logger.info(f"{instance.domain} Withdrew guarantee from {domain}")
         return {"message":'Changed'}, 200
