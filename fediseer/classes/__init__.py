@@ -9,6 +9,7 @@ from fediseer.utils import hash_api_key
 from fediseer.classes.instance import Instance, Guarantee
 from fediseer.classes.user import User, Claim
 import fediseer.classes.user
+import fediseer.classes.reports
 
 with OVERSEER.app_context():
 

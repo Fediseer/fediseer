@@ -1,4 +1,5 @@
 from flask_restx import fields
+from fediseer import enums
 
 class Models:
     def __init__(self,api):
@@ -64,4 +65,11 @@ class Models:
             'return_new_key': fields.Boolean(required=False, default=False, description="If True, the key will be returned as part of the response instead of PM'd. Fediseer will still PM a notification to the target admin account."),
             'sysadmins': fields.Integer(required=False, default=None, min=0, max=100, description="Report how many system administrators this instance currently has."),
             'moderators': fields.Integer(required=False, default=None, min=0, max=1000, description="Report how many instance moderators this instance currently has."),
+        })
+        self.response_model_reports = api.model('ActivityReport', {
+            'source_domain': fields.String(description="The instance domain which initiated this activity", example="lemmy.dbzer0.com"),
+            'target_domain': fields.String(description="The instance domain which was the target of this activity", example="lemmy.dbzer0.com"),
+            'report_type': fields.String(description="The type of report activity", enum=[e.name for e in enums.ReportType]),
+            'report_activity': fields.String(description="The activity reported", enum=[e.name for e in enums.ReportActivity]),
+            'created': fields.DateTime(description="The date this record was added"),
         })

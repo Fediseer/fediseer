@@ -10,6 +10,8 @@ from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
 from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure
 from fediseer.classes.user import Claim, User
+from fediseer.classes.reports import Report
+from fediseer import enums
 
 def get_all_instances(min_endorsements = 0, min_guarantors = 1):
     query = db.session.query(
@@ -300,3 +302,25 @@ def get_instances_by_ids(instance_ids):
         Instance.id.in_(instance_ids)
     )
     return query
+
+def get_reports(
+        source_instances: list = None,
+        target_instances: list = None,
+        report_type: enums.ReportType = None,
+        report_activity: enums.ReportActivity = None,
+        page: int = 1,
+    ):
+    query = Report.query
+    if source_instances is not None and len(source_instances) > 0:
+        query = query.filter(Report.source_domain.in_(source_instances)
+    )
+    if target_instances is not None and len(target_instances) > 0:
+        query = query.filter(Report.target_domain.in_(target_instances)
+    )
+    if report_type is not None:
+        query = query.filter(Report.report_type == report_type.name
+    )
+    if report_activity is not None:
+        query = query.filter(Report.report_activity == report_activity.name
+    )
+    return query.order_by(Report.created.desc()).offset(10 * (page - 1)).limit(10).all()

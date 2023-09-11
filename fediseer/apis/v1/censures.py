@@ -1,6 +1,8 @@
 from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Censure,Endorsement
 from fediseer.utils import sanitize_string
+from fediseer.classes.reports import Report
+from fediseer import enums
 
 class CensuresGiven(Resource):
     get_parser = reqparse.RequestParser()
@@ -135,6 +137,13 @@ class Censures(Resource):
             reason=reason,
         )
         db.session.add(new_censure)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.CENSURE,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         logger.info(f"{instance.domain} Censured {domain}")
         return {"message":'Changed'}, 200
@@ -174,6 +183,13 @@ class Censures(Resource):
         if censure.reason == reason:
             return {"message":'OK'}, 200
         censure.reason = reason
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.CENSURE,
+            report_activity=enums.ReportActivity.MODIFIED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         logger.info(f"{instance.domain} Modfied censure for {domain}")
         return {"message":'Changed'}, 200
@@ -204,6 +220,13 @@ class Censures(Resource):
         if not censure:
             return {"message":'OK'}, 200
         db.session.delete(censure)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.CENSURE,
+            report_activity=enums.ReportActivity.DELETED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         logger.info(f"{instance.domain} Withdrew censure from {domain}")
         return {"message":'Changed'}, 200

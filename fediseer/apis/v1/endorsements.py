@@ -1,5 +1,7 @@
 from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Endorsement,Censure
+from fediseer.classes.reports import Report
+from fediseer import enums
 
 class Approvals(Resource):
     get_parser = reqparse.RequestParser()
@@ -100,6 +102,13 @@ class Endorsements(Resource):
             endorsed_id=target_instance.id,
         )
         db.session.add(new_endorsement)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.ENDORSEMENT,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         if not database.has_recent_endorsement(target_instance.id):
             activitypub_pm.pm_admins(
@@ -137,6 +146,13 @@ class Endorsements(Resource):
         if not endorsement:
             return {"message":'OK'}, 200
         db.session.delete(endorsement)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=target_instance.domain,
+            report_type=enums.ReportType.ENDORSEMENT,
+            report_activity=enums.ReportActivity.DELETED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         activitypub_pm.pm_admins(
             message=f"Oh no. {instance.domain} has just withdrawn the endorsement of your instance",
