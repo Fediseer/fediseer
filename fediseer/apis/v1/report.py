@@ -9,11 +9,12 @@ class Report(Resource):
     get_parser.add_argument("target_domains_csv", required=False, default=None, type=str, help="A csv of target domains for which to filter", location="args")
     get_parser.add_argument("report_type", required=False, default=None, type=str, help=f"The activity of report to filer {[e.name for e in enums.ReportType]}", location="args")
     get_parser.add_argument("report_activity", required=False, default=None, type=str, help=f"The activity of report to filer {[e.name for e in enums.ReportActivity]}", location="args")
+    get_parser.add_argument("page", required=False, default=1, type=int, help=f"The page of reports to display.", location="args")
 
     @api.expect(get_parser)
     @api.marshal_with(models.response_model_reports, code=200, description='Report', as_list=True)
     @api.response(400, 'Validation Error', models.response_model_error)
-    def get(self,page=1):
+    def get(self):
         '''Retrieve instance information via API Key at 10 results per page
         '''
         self.args = self.get_parser.parse_args()
@@ -40,7 +41,7 @@ class Report(Resource):
             target_instances = target_domains,
             report_type=report_type,
             report_activity=report_activity,
-            page=page,
+            page=self.args.page,
         )
         report_response = []
         for r in reports:
