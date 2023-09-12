@@ -73,5 +73,5 @@ class Models:
             'target_domain': fields.String(description="The instance domain which was the target of this activity", example="lemmy.dbzer0.com"),
             'report_type': fields.String(description="The type of report activity", enum=[e.name for e in enums.ReportType]),
             'report_activity': fields.String(description="The activity reported", enum=[e.name for e in enums.ReportActivity]),
-            'created': fields.DateTime(description="The date this record was added",),
+            'created': fields.DateTime(description="The date this record was added"),
         })

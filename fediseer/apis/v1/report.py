@@ -51,7 +51,8 @@ class Report(Resource):
                     'target_domain': r.target_domain,
                     'report_type': r.report_type.name,
                     'report_activity': r.report_activity.name,
-                    'created': r.created,
+                    'created': r.created.isoformat() + 'Z',
                 }
             )
+        logger.debug(report_response)
         return report_response,200
