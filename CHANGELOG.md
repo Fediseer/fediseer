@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.11.0
+
+* Can now provide evidence for censures
+
 # 0.10.0
 
 Added `/api/v1/reports` endpoint which can show and filter recent actions on the fediseer

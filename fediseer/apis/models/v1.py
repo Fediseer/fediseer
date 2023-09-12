@@ -56,7 +56,7 @@ class Models:
         })
         self.input_censures_modify = api.model('ModifyCensure', {
             'reason': fields.String(required=False, description="The reason for this censure. No profanity or hate speech allowed!", example="csam"),
-            'evidence': fields.String(required=False, description="The evidence for this censure. Typically URL but can be a long form of anything you feel appropriate.", example="https://link.to/your/evidence"),
+            'evidence': fields.String(required=False, description="The evidence for this censure. Typically URL but can be a long form of anything you feel appropriate.", example="https://link.to/your/evidence", max_length=1000),
         })
         self.response_model_api_key_reset = api.model('ApiKeyReset', {
             "message": fields.String(default='OK',required=True, description="The result of this operation."),
@@ -73,5 +73,5 @@ class Models:
             'target_domain': fields.String(description="The instance domain which was the target of this activity", example="lemmy.dbzer0.com"),
             'report_type': fields.String(description="The type of report activity", enum=[e.name for e in enums.ReportType]),
             'report_activity': fields.String(description="The activity reported", enum=[e.name for e in enums.ReportActivity]),
-            'created': fields.DateTime(description="The date this record was added"),
+            'created': fields.DateTime(description="The date this record was added",),
         })
