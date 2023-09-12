@@ -49,6 +49,7 @@ class CensuresGiven(Resource):
             if skip_instance:
                 continue
             c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
+            c_instance_details["censure_evidence"] = [censure.evidence for censure in censures if censure.evidence is not None]
             c_instance_details["censure_count"] = censure_count
             instance_details.append(c_instance_details)
         if self.args.csv:
@@ -82,6 +83,7 @@ class Censures(Resource):
             c_instance_details = c_instance.get_details()
             if len(censures) > 0:
                 c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
+                c_instance_details["censure_evidence"] = [censure.evidence for censure in censures if censure.evidence is not None]
             instance_details.append(c_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
@@ -93,6 +95,7 @@ class Censures(Resource):
     put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     put_parser.add_argument("reason", default=None, type=str, required=False, location="json")
+    put_parser.add_argument("evidence", default=None, type=str, required=False, location="json")
 
 
     @api.expect(put_parser,models.input_censures_modify, validate=True)
@@ -131,10 +134,14 @@ class Censures(Resource):
         reason = self.args.reason
         if reason is not None:
             reason = sanitize_string(reason)
+        evidence = self.args.evidence
+        if evidence is not None:
+            evidence = sanitize_string(evidence)
         new_censure = Censure(
             censuring_id=instance.id,
             censured_id=target_instance.id,
             reason=reason,
+            evidence=evidence,
         )
         db.session.add(new_censure)
         new_report = Report(
@@ -153,6 +160,7 @@ class Censures(Resource):
     patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     patch_parser.add_argument("reason", default=None, type=str, required=False, location="json")
+    patch_parser.add_argument("evidence", default=None, type=str, required=False, location="json")
 
 
     @api.expect(patch_parser,models.input_censures_modify, validate=True)
@@ -176,13 +184,21 @@ class Censures(Resource):
         censure = database.get_censure(target_instance.id,instance.id)
         if not censure:
             raise e.BadRequest(f"No censure found for {domain} from {instance.domain}")
+        changed = False
         reason = self.args.reason
         if reason is not None:
             reason = sanitize_string(reason)
-        logger.debug([censure.reason,reason])
-        if censure.reason == reason:
+            if censure.reason != reason:
+                censure.reason = reason
+                changed = True
+        evidence = self.args.evidence
+        if evidence is not None:
+            evidence = sanitize_string(evidence)
+            if censure.evidence != evidence:
+                censure.evidence = evidence
+                changed = True
+        if changed is False:
             return {"message":'OK'}, 200
-        censure.reason = reason
         new_report = Report(
             source_domain=instance.domain,
             target_domain=target_instance.domain,

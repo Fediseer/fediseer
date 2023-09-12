@@ -53,6 +53,7 @@ class Censure(db.Model):
     __table_args__ = (UniqueConstraint('censuring_id', 'censured_id', name='censures_censuring_id_censured_id'),)
     id = db.Column(db.Integer, primary_key=True)
     reason = db.Column(db.String(255), unique=False, nullable=True, index=False)
+    evidence = db.Column(db.Text, unique=False, nullable=True, index=False)
     censuring_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
     censuring_instance = db.relationship("Instance", back_populates="censures_given", foreign_keys=[censuring_id])
     censured_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
