@@ -34,18 +34,35 @@ class CensuresGiven(Resource):
             censure_count = len(censures)
             censures = [c for c in censures if c.reason is not None]
             c_instance_details = c_instance.get_details()
-            skip_instance = False
+            skip_instance = True
             if self.args.reasons_csv:
                 reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
+                reasons_filter = set(reasons_filter)
+                if "__all_pedos__" in reasons_filter:
+                    reasons_filter.add("csam")
+                    reasons_filter.add("loli")
+                    reasons_filter.add("shota")
+                    reasons_filter.add("pedophil")
+                if "__all_bigots__" in reasons_filter:
+                    reasons_filter.add("racism")
+                    reasons_filter.add("sexism")
+                    reasons_filter.add("transphobia")
+                    reasons_filter.add("homophobia")
+                    reasons_filter.add("islamophobia")
+                    reasons_filter.add("nazi")
+                    reasons_filter.add("fascist")
+                    reasons_filter.add("hate speech")
+                    reasons_filter.add("bigotry")
                 for r in reasons_filter:
                     reason_filter_counter = 0
-                    for censure_reason in censures:
-                        if r in censure_reason.reason.lower():
+                    for censure in censures:
+                        if r in censure.reason.lower():
                             reason_filter_counter += 1
-                    if reason_filter_counter < self.args.min_censures:
-                        skip_instance = True
-            elif censure_count < self.args.min_censures:
-                skip_instance = True
+                    if reason_filter_counter >= self.args.min_censures:
+                        skip_instance = False
+                        break
+            elif censure_count >= self.args.min_censures:
+                skip_instance = False
             if skip_instance:
                 continue
             c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
