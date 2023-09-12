@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload
 from fediseer.flask import db, SQLITE_MODE
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
@@ -102,6 +102,47 @@ def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
     ).with_entities(
         Censure.reason,
         Censure.evidence,
+    )
+    return query.all()
+
+
+def get_all_dubious_instances_by_hesitant_id(hesitant_ids):
+    query = db.session.query(
+        Instance
+    ).outerjoin(
+        Instance.hesitations_received,
+    ).options(
+        joinedload(Instance.hesitations_received),
+    ).filter(
+        Hesitation.hesitant_id.in_(hesitant_ids)
+    ).group_by(
+        Instance.id
+    )
+    return query.all()
+
+def get_all_hesitant_instances_by_dubious_id(dubious_id):
+    query = db.session.query(
+        Instance
+    ).outerjoin(
+        Instance.hesitations_given,
+    ).options(
+        joinedload(Instance.hesitations_given),
+    ).filter(
+        Hesitation.dubious_id == dubious_id
+    ).group_by(
+        Instance.id
+    )
+    return query.all()
+
+def get_all_hesitation_reasons_for_dubious_id(dubious_id, hesitant_ids):
+    query = Hesitation.query.filter(
+        and_(
+            Hesitation.dubious_id == dubious_id,
+            Hesitation.hesitant_id.in_(hesitant_ids),
+        )
+    ).with_entities(
+        Hesitation.reason,
+        Hesitation.evidence,
     )
     return query.all()
 
@@ -228,6 +269,13 @@ def get_censure(instance_id, censuring_instance_id):
     query = Censure.query.filter_by(
         censured_id=instance_id,
         censuring_id=censuring_instance_id,
+    )
+    return query.first()
+
+def get_hesitation(instance_id, hesitant_instance_id):
+    query = Hesitation.query.filter_by(
+        dubious_id=instance_id,
+        hesitant_id=hesitant_instance_id,
     )
     return query.first()
 

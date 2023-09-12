@@ -54,5 +54,4 @@ class Report(Resource):
                     'created': r.created.isoformat() + 'Z',
                 }
             )
-        logger.debug(report_response)
         return report_response,200

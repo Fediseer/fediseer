@@ -60,6 +60,18 @@ class Censure(db.Model):
     censured_instance = db.relationship("Instance", back_populates="censures_received", foreign_keys=[censured_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+class Hesitation(db.Model):
+    __tablename__ = "hesitations"
+    __table_args__ = (UniqueConstraint('hesitant_id', 'dubious_id', name='hesitations_hesitant_id_dubious_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    reason = db.Column(db.String(255), unique=False, nullable=True, index=False)
+    evidence = db.Column(db.Text, unique=False, nullable=True, index=False)
+    hesitant_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    hesitating_instance = db.relationship("Instance", back_populates="hesitations_given", foreign_keys=[hesitant_id])
+    dubious_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    dubious_instance = db.relationship("Instance", back_populates="hesitations_received", foreign_keys=[dubious_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
 
 class Instance(db.Model):
     __tablename__ = "instances"
@@ -80,6 +92,8 @@ class Instance(db.Model):
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
     censures_given = db.relationship("Censure", back_populates="censuring_instance", cascade="all, delete-orphan", foreign_keys=[Censure.censuring_id])
     censures_received = db.relationship("Censure", back_populates="censured_instance", cascade="all, delete-orphan", foreign_keys=[Censure.censured_id])
+    hesitations_given = db.relationship("Hesitation", back_populates="hesitating_instance", cascade="all, delete-orphan", foreign_keys=[Hesitation.hesitant_id])
+    hesitations_received = db.relationship("Hesitation", back_populates="dubious_instance", cascade="all, delete-orphan", foreign_keys=[Hesitation.dubious_id])
     guarantees = db.relationship("Guarantee", back_populates="guarantor_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guarantor_id])
     guarantors = db.relationship("Guarantee", back_populates="guaranteed_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guaranteed_id])
     rejections = db.relationship("RejectionRecord", back_populates="rejector_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejector_id])

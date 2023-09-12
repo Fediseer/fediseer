@@ -54,9 +54,19 @@ class Models:
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
-        self.input_censures_modify = api.model('ModifyCensure', {
-            'reason': fields.String(required=False, description="The reason for this censure. No profanity or hate speech allowed!", example="csam"),
-            'evidence': fields.String(required=False, description="The evidence for this censure. Typically URL but can be a long form of anything you feel appropriate.", example="https://link.to/your/evidence", max_length=1000),
+        self.response_model_dubious_instances = api.inherit('DubiousInstanceDetails', self.response_model_instances, {
+            'hesitation_reasons': fields.List(fields.String(description="The reasons instances have given for hesitating against this instance")),
+            'hesitation_evidence': fields.List(fields.String(description="Evidence justifying this hesitation, typically should be one or more URLs.")),
+            'hesitation_count': fields.Integer(description="The amount of hesitations this instance has received from the reference instances"),
+        })
+        self.response_model_model_Hesitations_get = api.model('DubiousInstances', {
+            'instances': fields.List(fields.Nested(self.response_model_dubious_instances)),
+            'domains': fields.List(fields.String(description="The instance domains as a list.")),
+            'csv': fields.String(description="The instance domains as a csv."),
+        })
+        self.input_censures_modify = api.model('ModifyCensureHesitations', {
+            'reason': fields.String(required=False, description="The reason for this censure/hesitation. No profanity or hate speech allowed!", example="csam"),
+            'evidence': fields.String(required=False, description="The evidence for this censure/hesitation. Typically URL but can be a long form of anything you feel appropriate.", example="https://link.to/your/evidence", max_length=1000),
         })
         self.response_model_api_key_reset = api.model('ApiKeyReset', {
             "message": fields.String(default='OK',required=True, description="The result of this operation."),

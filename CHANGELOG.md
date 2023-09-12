@@ -1,5 +1,8 @@
 # Changelog
 
+# 0.12.0
+
+* Added hesitations, which signify mistrust against instances. A softer form of censure, to use in silencing or closer attention instead of blocking.
 # 0.11.1
 
 * Fixed censure filtering reasons using "AND" instead of "OR" as join

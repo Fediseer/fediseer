@@ -4,7 +4,7 @@ class ReportType(enum.Enum):
     GUARANTEE = 0
     ENDORSEMENT = 1
     CENSURE = 2
-    RESTRICTION = 3
+    HESITATION = 3
 
 class ReportActivity(enum.Enum):
     ADDED = 0
