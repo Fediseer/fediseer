@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.11.1
+
+* Fixed censure filtering reasons using "AND" instead of "OR" as join
+* Added meta reasons `__all_bigots__` and `__all_pedos__` which will attempt to filter all reasons which fall into them as supergroups
+
 # 0.11.0
 
 * Can now provide evidence for censures
