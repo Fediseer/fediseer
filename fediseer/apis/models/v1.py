@@ -54,6 +54,14 @@ class Models:
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
+        self.response_model_instances_endorsed = api.inherit('EndorsedInstanceDetails', self.response_model_instances, {
+            'endorsement_reasons': fields.List(fields.String(description="The reasons instances have given for endorsing this instance")),
+        })
+        self.response_model_model_Endorsed_get = api.model('EndorsedInstances', {
+            'instances': fields.List(fields.Nested(self.response_model_instances_endorsed)),
+            'domains': fields.List(fields.String(description="The instance domains as a list.")),
+            'csv': fields.String(description="The instance domains as a csv."),
+        })
         self.response_model_dubious_instances = api.inherit('DubiousInstanceDetails', self.response_model_instances, {
             'hesitation_reasons': fields.List(fields.String(description="The reasons instances have given for hesitating against this instance")),
             'hesitation_evidence': fields.List(fields.String(description="Evidence justifying this hesitation, typically should be one or more URLs.")),
@@ -63,6 +71,9 @@ class Models:
             'instances': fields.List(fields.Nested(self.response_model_dubious_instances)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
+        })
+        self.input_endorsements_modify = api.model('ModifyEndorsements', {
+            'reason': fields.String(required=False, description="The reason for this endorsement. No profanity or hate speech allowed!", example="I just think they're neat."),
         })
         self.input_censures_modify = api.model('ModifyCensureHesitations', {
             'reason': fields.String(required=False, description="The reason for this censure/hesitation. No profanity or hate speech allowed!", example="csam"),

@@ -42,6 +42,7 @@ class Endorsement(db.Model):
     __tablename__ = "endorsements"
     __table_args__ = (UniqueConstraint('approving_id', 'endorsed_id', name='endoresements_approving_id_endorsed_id'),)
     id = db.Column(db.Integer, primary_key=True)
+    reason = db.Column(db.String(255), unique=False, nullable=True, index=False)
     approving_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
     approving_instance = db.relationship("Instance", back_populates="approvals", foreign_keys=[approving_id])
     endorsed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)

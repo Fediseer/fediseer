@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.13.0
+
+* Can now add reasons to endorsements. Likewise now the `api/v1/approvals` endoint can filter by reasons and min endorsements.
+
 # 0.12.0
 
 * Added hesitations, which signify mistrust against instances. A softer form of censure, to use in silencing or closer attention instead of blocking.

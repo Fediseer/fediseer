@@ -65,6 +65,18 @@ def get_all_approving_instances_by_endorsed_id(endorsed_id):
     )
     return query.all()
 
+def get_all_endorsement_reasons_for_endorsed_id(endorsed_id, approving_ids):
+    query = Endorsement.query.filter(
+        and_(
+            Endorsement.endorsed_id == endorsed_id,
+            Endorsement.approving_id.in_(approving_ids),
+        )
+    ).with_entities(
+        Endorsement.reason,
+    )
+    return query.all()
+
+
 def get_all_censured_instances_by_censuring_id(censuring_ids):
     query = db.session.query(
         Instance
