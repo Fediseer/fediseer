@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.14.0
+
+* Added pm_proxy fields which allow admins to receive PMs from the fediseer via fediseer@botsin.space
+
 # 0.13.0
 
 * Can now add reasons to endorsements. Likewise now the `api/v1/approvals` endoint can filter by reasons and min endorsements.
