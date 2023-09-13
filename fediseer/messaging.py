@@ -161,9 +161,9 @@ class ActivityPubPM:
     
     def pm_new_proxy_switch(self, new_proxy: enums.PMProxy, old_proxy: enums.PMProxy, instance: str, requestor: str):
         if new_proxy == enums.PMProxy.NONE:
-            pm_content = f"user '{requestor}' has switched the fediseer messaging to {instance.domain} not use a proxy (was {old_proxy.name})."
+            pm_content = f"user '{requestor}' has switched the fediseer messaging for {instance.domain} to not use a proxy (was {old_proxy.name})."
         else:
-            pm_content = f"user '{requestor}' has switched the fediseer messaging to {instance.domain} to use a {new_proxy.name} proxy (was {old_proxy.name})."
+            pm_content = f"user '{requestor}' has switched the fediseer messaging for {instance.domain} to use a {new_proxy.name} proxy (was {old_proxy.name})."
         logger.info(f"user '{requestor}' changed instance pm_proxy setting from {old_proxy} to {new_proxy} for {instance.domain}.")
         admins = [a.username for a in database.find_admins_by_instance(instance)]
         for admin_username in admins:
@@ -213,8 +213,7 @@ class ActivityPubPM:
     def mastodon_proxy_pm(self, message, username, domain):
         try:
             self.mastodon.status_post(
-                # status=f"@{username}@{domain} {message}",
-                status=f"@{username}@{domain} {message}", #debug
+                status=f"@{username}@{domain} {message}",
                 visibility="direct",
             )
         except Exception as err:
