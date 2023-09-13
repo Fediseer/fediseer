@@ -9,7 +9,7 @@ class Whitelist(Resource):
     get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
-    get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
+    get_parser.add_argument("domains", required=False, type=str, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
@@ -50,7 +50,7 @@ class WhitelistDomain(Resource):
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     put_parser.add_argument("admin", required=True, type=str, help="The username of the admin who wants to register this domain", location="json")
     put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
-    put_parser.add_argument("use_proxy", required=False, default=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
+    put_parser.add_argument("pm_proxy", required=False, default=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
     @api.expect(put_parser,models.input_instance_claim, validate=True)
@@ -109,7 +109,6 @@ class WhitelistDomain(Resource):
                 domain=guarantor_instance.domain,
                 software=guarantor_instance.software,
                 instance=guarantor_instance,
-                proxy=guarantor_instance.pm_proxy,
             )
         return instance.get_details(),200
 
@@ -120,7 +119,7 @@ class WhitelistDomain(Resource):
     patch_parser.add_argument("return_new_key", default=False, required=False, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
     patch_parser.add_argument("sysadmins", default=None, required=False, type=int, help="How many sysadmins this instance has.", location="json")
     patch_parser.add_argument("moderators", default=None, required=False, type=int, help="How many moderators this instance has.", location="json")
-    patch_parser.add_argument("use_proxy", required=False, default=False, type=bool, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
+    patch_parser.add_argument("pm_proxy", required=False, default=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
     @api.expect(patch_parser,models.input_api_key_reset, validate=True)
@@ -147,8 +146,10 @@ class WhitelistDomain(Resource):
             instance.moderators = self.args.moderators
             changed = True
         if self.args.pm_proxy is not None:
+            logger.debug(self.args.pm_proxy)
             proxy = enums.PMProxy[self.args.pm_proxy]
             if instance.pm_proxy != proxy:
+                activitypub_pm.pm_new_proxy_switch(proxy,instance.pm_proxy,instance,user.username)
                 instance.pm_proxy = proxy
                 changed = True
         if self.args.admin_username:

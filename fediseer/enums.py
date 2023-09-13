@@ -12,4 +12,5 @@ class ReportActivity(enum.Enum):
     MODIFIED = 2
 
 class PMProxy(enum.Enum):
-    MASTODON = 0
+    NONE = 0
+    MASTODON = 1

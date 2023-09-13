@@ -156,11 +156,34 @@ class ActivityPubPM:
             ):
                 raise e.BadRequest("API Key PM failed")
         return api_key
+    
+    def pm_new_proxy_switch(self, new_proxy: enums.PMProxy, old_proxy: enums.PMProxy, instance: str, requestor: str):
+        if new_proxy is None:
+            pm_content = f"user '{requestor}' has switched the fediseer messaging not use a proxy (was {old_proxy})."
+        else:
+            pm_content = f"user '{requestor}' has switched the fediseer messaging to use a {new_proxy.name} proxy (was {old_proxy})."
+        logger.info(f"user '{requestor}' changed instance pm_proxy setting from {old_proxy} to {new_proxy} for {instance.domain}.")
+        admins = [a.username for a in database.find_admins_by_instance(instance)]
+        for admin_username in admins:
+            if instance.domain == "lemmy.dbzer0.com" and admin_username != 'db0': # Debug
+                logger.debug(f"skipping admin {admin_username} for debug")
+                continue
+            for proxy in [new_proxy,old_proxy]:
+                if proxy == enums.PMProxy.MASTODON:
+                    self.mastodon_proxy_pm(pm_content,admin_username,instance.domain)
+                else:
+                    if not self.send_pm_to_right_software(
+                        message=pm_content,
+                        username=admin_username,
+                        domain=instance.domain,
+                        software=instance.software
+                    ):
+                        raise e.BadRequest("API Key PM failed")
 
-
-    def pm_admins(self, message: str, domain: str, software: str, instance, proxy=None):
+    def pm_admins(self, message: str, domain: str, software: str, instance):
         if software not in SUPPORTED_SOFTWARE:
             return None
+        proxy = None
         admins = database.find_admins_by_instance(instance)
         if not admins:
             try:
@@ -169,6 +192,7 @@ class ActivityPubPM:
                 raise e.BadRequest(f"Failed to retrieve admin list: {err}")
         else:
             admins = [a.username for a in admins]
+            proxy = instance.pm_proxy
         if not admins:
             raise e.BadRequest(f"Could not determine admins for {domain}")
         for admin_username in admins:
@@ -188,7 +212,7 @@ class ActivityPubPM:
         try:
             self.mastodon.status_post(
                 # status=f"@{username}@{domain} {message}",
-                status=f"@db0@hachyderm.io @{username}@{domain} {message}", #debug
+                status=f"@{username}@{domain} {message}", #debug
                 visibility="direct",
             )
         except Exception as err:

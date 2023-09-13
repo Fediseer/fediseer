@@ -89,7 +89,7 @@ class Instance(db.Model):
     software = db.Column(db.String(50), unique=False, nullable=False, index=True)
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
-    pm_proxy = db.Column(Enum(enums.PMProxy), nullable=True)
+    pm_proxy = db.Column(Enum(enums.PMProxy), default=enums.PMProxy.NONE, nullable=False)
 
 
     approvals = db.relationship("Endorsement", back_populates="approving_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.approving_id])
