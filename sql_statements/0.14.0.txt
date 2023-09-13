@@ -1,0 +1,3 @@
+CREATE TYPE pmproxy AS ENUM ('MASTODON');
+ALTER TYPE pmproxy ADD VALUE 'NONE';
+ALTER TABLE instances ADD COLUMN pm_proxy pmproxy default 'NONE';

@@ -11,7 +11,6 @@ from fediseer.utils import hash_api_key
 from fediseer.messaging import activitypub_pm
 from pythorhead import Lemmy
 from fediseer.fediverse import get_admin_for_software, get_nodeinfo
-from fediseer.consts import SUPPORTED_SOFTWARE
 
 api = Namespace('v1', 'API Version 1' )
 

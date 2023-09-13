@@ -11,13 +11,16 @@ import secrets
 import markdown
 import fediseer.exceptions as e
 from pythorhead import Lemmy
+from mastodon import Mastodon
 from loguru import logger
 from fediseer.database import functions as database
 from fediseer.consts import SUPPORTED_SOFTWARE, FEDISEER_VERSION
 from fediseer.fediverse import get_admin_for_software
+from fediseer import enums
 
-class ActivityPubPM:
+class ActivityPubPM:    
     private_key = None
+    mastodon = None
     def __init__(self):
         with open('private.pem', 'rb') as file:
             private_key_data = file.read()
@@ -34,6 +37,11 @@ class ActivityPubPM:
             },
         }
 
+        self.mastodon = Mastodon(
+            access_token = 'pytooter_usercred.secret',
+            api_base_url = f"https://{os.environ['MASTODON_INSTANCE']}"
+        )
+
     def send_pm_to_right_software(self, message, username, domain, software):
         software_map = {
             "lemmy": self.send_lemmy_pm,
@@ -41,7 +49,9 @@ class ActivityPubPM:
             "friendica": self.send_mastodon_pm,
             "fediseer": self.send_fediseer_pm,
         }
-        return software_map[software](message, username, domain)
+        if software in software_map:
+            return software_map[software](message, username, domain)
+        raise e.BadRequest("This software does not have direct PM implemented. Please retry using a MASTODON pm_proxy setting.")
 
     def send_fediseer_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
@@ -115,56 +125,98 @@ class ActivityPubPM:
         response = requests.post(url, data=document, headers=headers)
         return response.ok
 
-    def pm_new_api_key(self, domain: str, username: str, software: str, requestor = None):
+    def pm_new_api_key(self, domain: str, username: str, software: str, requestor = None, proxy = None):
         api_key = secrets.token_urlsafe(16)
         if requestor:
-            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}\n\n**Please purge this message after storing the API key**"
+            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}\n\n**Please purge this message after storing the API key or use the Fediseer API to generate a new API key without PM**"
         else:
-            pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the [Fediseer](https://fediseer.com).\n\n**Please purge this message after storing the API key**"
-        if not self.send_pm_to_right_software(
-            message=pm_content,
-            username=username,
-            domain=domain,
-            software=software
-        ):
-            raise e.BadRequest("API Key PM failed")
+            pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the [Fediseer](https://fediseer.com).\n\n**Please purge this message after storing the API key or use the Fediseer API to generate a new API key without PM**"
+        if proxy == enums.PMProxy.MASTODON:
+            self.mastodon_proxy_pm(pm_content,username,domain)
+        else:
+            if not self.send_pm_to_right_software(
+                message=pm_content,
+                username=username,
+                domain=domain,
+                software=software
+            ):
+                raise e.BadRequest("API Key PM failed")
         return api_key
 
-    def pm_new_key_notification(self, domain: str, username: str, software: str, requestor: str):
+    def pm_new_key_notification(self, domain: str, username: str, software: str, requestor: str, proxy = None):
         api_key = secrets.token_urlsafe(16)
         pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key was provided in the response already\n"
         logger.info(f"user '{requestor}' reset the API key for {username}@{domain} on the response.")
-        if not self.send_pm_to_right_software(
-            message=pm_content,
-            username=username,
-            domain=domain,
-            software=software
-        ):
-            raise e.BadRequest("API Key PM failed")
+        if proxy == enums.PMProxy.MASTODON:
+            self.mastodon_proxy_pm(pm_content,username,domain)
+        else:
+            if not self.send_pm_to_right_software(
+                message=pm_content,
+                username=username,
+                domain=domain,
+                software=software
+            ):
+                raise e.BadRequest("API Key PM failed")
         return api_key
-
+    
+    def pm_new_proxy_switch(self, new_proxy: enums.PMProxy, old_proxy: enums.PMProxy, instance: str, requestor: str):
+        if new_proxy == enums.PMProxy.NONE:
+            pm_content = f"user '{requestor}' has switched the fediseer messaging for {instance.domain} to not use a proxy (was {old_proxy.name})."
+        else:
+            pm_content = f"user '{requestor}' has switched the fediseer messaging for {instance.domain} to use a {new_proxy.name} proxy (was {old_proxy.name})."
+        logger.info(f"user '{requestor}' changed instance pm_proxy setting from {old_proxy} to {new_proxy} for {instance.domain}.")
+        admins = [a.username for a in database.find_admins_by_instance(instance)]
+        for admin_username in admins:
+            if instance.domain == "lemmy.dbzer0.com" and admin_username != 'db0': # Debug
+                logger.debug(f"skipping admin {admin_username} for debug")
+                continue
+            for proxy in [new_proxy,old_proxy]:
+                if proxy == enums.PMProxy.MASTODON:
+                    self.mastodon_proxy_pm(pm_content,admin_username,instance.domain)
+                else:
+                    if not self.send_pm_to_right_software(
+                        message=pm_content,
+                        username=admin_username,
+                        domain=instance.domain,
+                        software=instance.software
+                    ):
+                        raise e.BadRequest("API Key PM failed")
 
     def pm_admins(self, message: str, domain: str, software: str, instance):
-        if software not in SUPPORTED_SOFTWARE:
-            return None
+        proxy = None
         admins = database.find_admins_by_instance(instance)
         if not admins:
             try:
                 admins = get_admin_for_software(software, domain)
             except Exception as err:
+                if software not in SUPPORTED_SOFTWARE:
+                    logger.warning(f"Failed to figure out admins from {software}: {domain}")
                 raise e.BadRequest(f"Failed to retrieve admin list: {err}")
         else:
             admins = [a.username for a in admins]
+            proxy = instance.pm_proxy
         if not admins:
             raise e.BadRequest(f"Could not determine admins for {domain}")
         for admin_username in admins:
-            if not self.send_pm_to_right_software(
-                message=message,
-                username=admin_username,
-                domain=domain,
-                software=software
-            ):
-                raise e.BadRequest("Admin PM Failed")
+            if proxy == enums.PMProxy.MASTODON:
+                self.mastodon_proxy_pm(message,admin_username,domain)
+            else:
+                if not self.send_pm_to_right_software(
+                    message=message,
+                    username=admin_username,
+                    domain=domain,
+                    software=software
+                ):
+                    raise e.BadRequest("Admin PM Failed")
 
+
+    def mastodon_proxy_pm(self, message, username, domain):
+        try:
+            self.mastodon.status_post(
+                status=f"@{username}@{domain} {message}",
+                visibility="direct",
+            )
+        except Exception as err:
+            raise e.BadRequest(f"PM via Mastodon Proxy Failed: {err}")
 
 activitypub_pm = ActivityPubPM()

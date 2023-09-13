@@ -1,6 +1,7 @@
 from fediseer.apis.v1.base import *
 from fediseer.messaging import activitypub_pm
 from fediseer.classes.user import User, Claim
+from fediseer import enums
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -8,7 +9,7 @@ class Whitelist(Resource):
     get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
-    get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
+    get_parser.add_argument("domains", required=False, type=str, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
@@ -49,9 +50,10 @@ class WhitelistDomain(Resource):
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     put_parser.add_argument("admin", required=True, type=str, help="The username of the admin who wants to register this domain", location="json")
     put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
+    put_parser.add_argument("pm_proxy", required=False, default=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
-    @api.expect(put_parser)
+    @api.expect(put_parser,models.input_instance_claim, validate=True)
     @api.marshal_with(models.response_model_instances, code=200, description='Instances')
     @api.response(400, 'Bad Request', models.response_model_error)
     def put(self, domain):
@@ -76,7 +78,16 @@ class WhitelistDomain(Resource):
         existing_claim = database.find_claim(f"@{self.args.admin}@{domain}")
         if existing_claim:
             raise e.Forbidden(f"You have already claimed this instance as this admin. Please use the PATCH method to reset your API key.")
-        api_key = activitypub_pm.pm_new_api_key(domain, self.args.admin, instance.software)
+        if self.args.pm_proxy is not None:
+            proxy = enums.PMProxy[self.args.pm_proxy]
+            if instance.pm_proxy != proxy:
+                instance.pm_proxy = proxy
+        api_key = activitypub_pm.pm_new_api_key(
+            domain=domain, 
+            username=self.args.admin, 
+            software=instance.software,
+            proxy=instance.pm_proxy,
+        )
         if not api_key:
             raise e.BadRequest("Failed to generate API Key")
         new_user = User(
@@ -93,12 +104,15 @@ class WhitelistDomain(Resource):
         db.session.add(new_claim)
         db.session.commit()
         if guarantor_instance:
-            activitypub_pm.pm_admins(
-                message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
-                domain=guarantor_instance.domain,
-                software=guarantor_instance.software,
-                instance=guarantor_instance,
-            )
+            try:
+                activitypub_pm.pm_admins(
+                    message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
+                    domain=guarantor_instance.domain,
+                    software=guarantor_instance.software,
+                    instance=guarantor_instance,
+                )
+            except:
+                pass
         return instance.get_details(),200
 
     patch_parser = reqparse.RequestParser()
@@ -108,6 +122,7 @@ class WhitelistDomain(Resource):
     patch_parser.add_argument("return_new_key", default=False, required=False, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
     patch_parser.add_argument("sysadmins", default=None, required=False, type=int, help="How many sysadmins this instance has.", location="json")
     patch_parser.add_argument("moderators", default=None, required=False, type=int, help="How many moderators this instance has.", location="json")
+    patch_parser.add_argument("pm_proxy", required=False, default=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
     @api.expect(patch_parser,models.input_api_key_reset, validate=True)
@@ -133,6 +148,13 @@ class WhitelistDomain(Resource):
         if self.args.moderators is not None and instance.moderators != self.args.moderators:
             instance.moderators = self.args.moderators
             changed = True
+        if self.args.pm_proxy is not None:
+            logger.debug(self.args.pm_proxy)
+            proxy = enums.PMProxy[self.args.pm_proxy]
+            if instance.pm_proxy != proxy:
+                activitypub_pm.pm_new_proxy_switch(proxy,instance.pm_proxy,instance,user.username)
+                instance.pm_proxy = proxy
+                changed = True
         if self.args.admin_username:
             requestor = None
             if self.args.admin_username != user.username or user.username == "fediseer":
@@ -148,9 +170,21 @@ class WhitelistDomain(Resource):
             if self.args.return_new_key:
                 if requestor is None:
                     requestor = f"{user.username}@{requestor_instance.domain}"
-                new_key = activitypub_pm.pm_new_key_notification(domain, self.args.admin_username, instance.software, requestor=requestor)
+                new_key = activitypub_pm.pm_new_key_notification(
+                    domain=domain, 
+                    username=self.args.admin_username, 
+                    software=instance.software, 
+                    requestor=requestor,
+                    proxy=instance.pm_proxy,
+                )
             else:
-                new_key = activitypub_pm.pm_new_api_key(domain, self.args.admin_username, instance.software, requestor=requestor)
+                new_key = activitypub_pm.pm_new_api_key(
+                    domain=domain, 
+                    username=self.args.admin_username, 
+                    software=instance.software, 
+                    requestor=requestor,
+                    proxy=instance.pm_proxy,
+                )
             user.api_key = hash_api_key(new_key)
             changed = True
         db.session.commit()

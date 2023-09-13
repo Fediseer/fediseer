@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from loguru import logger
 from fediseer.flask import db, SQLITE_MODE
+from fediseer import enums
 
 uuid_column_type = lambda: UUID(as_uuid=True) if not SQLITE_MODE else db.String(36)
 
@@ -82,12 +83,14 @@ class Instance(db.Model):
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     oprhan_since = db.Column(db.DateTime, nullable=True)
-
+    
     open_registrations = db.Column(db.Boolean, unique=False, nullable=False, index=True)
     email_verify = db.Column(db.Boolean, unique=False, nullable=False, index=True)
     software = db.Column(db.String(50), unique=False, nullable=False, index=True)
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
+    pm_proxy = db.Column(Enum(enums.PMProxy), default=enums.PMProxy.NONE, nullable=False)
+
 
     approvals = db.relationship("Endorsement", back_populates="approving_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.approving_id])
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
