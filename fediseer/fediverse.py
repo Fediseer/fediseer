@@ -20,6 +20,9 @@ def get_mastodon_admins(domain):
     try:
         site = requests.get(f"https://{domain}/api/v2/instance")
         site_json = site.json()
+        if "contact" not in site_json or "account" not in site_json["contact"] or "username" not in site_json["contact"]["account"]:
+            logger.error(f"No admin contact is specified for {domain}.")
+            raise Exception(f"No admin contact is specified for {domain}.")
         return [site_json["contact"]["account"]["username"]]
     except Exception as err:
         if site is not None:

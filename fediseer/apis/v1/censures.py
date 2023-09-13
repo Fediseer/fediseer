@@ -224,7 +224,7 @@ class Censures(Resource):
         )
         db.session.add(new_report)
         db.session.commit()
-        logger.info(f"{instance.domain} Modfied censure for {domain}")
+        logger.info(f"{instance.domain} modIfied censure for {domain}")
         return {"message":'Changed'}, 200
 
 

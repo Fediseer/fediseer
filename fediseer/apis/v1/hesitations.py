@@ -209,7 +209,7 @@ class Hesitations(Resource):
         )
         db.session.add(new_report)
         db.session.commit()
-        logger.info(f"{instance.domain} Modfied hesitation for {domain}")
+        logger.info(f"{instance.domain} modIfied hesitation for {domain}")
         return {"message":'Changed'}, 200
 
 
