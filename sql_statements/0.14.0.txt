@@ -1,0 +1,2 @@
+CREATE TYPE pmproxy AS ENUM ('MASTODON');
+ALTER TABLE instances ADD COLUMN pm_proxy pmproxy;

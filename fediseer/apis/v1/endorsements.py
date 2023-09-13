@@ -150,6 +150,7 @@ class Endorsements(Resource):
                 domain=target_instance.domain,
                 software=target_instance.software,
                 instance=target_instance,
+                proxy=target_instance.pm_proxy,
             )
         logger.info(f"{instance.domain} Endorsed {domain}")
         return {"message":'Changed'}, 200
@@ -241,6 +242,7 @@ class Endorsements(Resource):
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,
+            proxy=target_instance.pm_proxy,
         )
         logger.info(f"{instance.domain} Withdrew endorsement from {domain}")
         return {"message":'Changed'}, 200

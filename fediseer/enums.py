@@ -10,3 +10,6 @@ class ReportActivity(enum.Enum):
     ADDED = 0
     DELETED = 1
     MODIFIED = 2
+
+class PMProxy(enum.Enum):
+    MASTODON = 0

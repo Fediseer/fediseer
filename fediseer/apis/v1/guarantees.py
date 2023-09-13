@@ -118,6 +118,7 @@ class Guarantees(Resource):
             domain=target_instance.domain,
             software=target_instance.software,
             instance=target_instance,
+            proxy=target_instance.pm_proxy,
         )
         orphan_ids = database.get_guarantee_chain(target_instance.id)
         for orphan in database.get_instances_by_ids(orphan_ids):
@@ -126,6 +127,7 @@ class Guarantees(Resource):
                 domain=orphan.domain,
                 software=orphan.software,
                 instance=orphan,
+                proxy=orphan.pm_proxy,
             )
             orphan.unset_as_orphan()
         logger.info(f"{instance.domain} Guaranteed for {domain}")
@@ -193,6 +195,7 @@ class Guarantees(Resource):
                 domain=target_instance.domain,
                 software=target_instance.software,
                 instance=target_instance,
+                proxy=target_instance.pm_proxy,
             )
         # We do not want a missing instance to prevent us from removing a guarantee
         except:
@@ -205,6 +208,7 @@ class Guarantees(Resource):
                     domain=orphan.domain,
                     software=orphan.software,
                     instance=orphan,
+                    proxy=orphan.pm_proxy,
                 )
             # We do not want a missing instance to prevent us from removing a guarantee
             except:

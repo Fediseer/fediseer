@@ -135,3 +135,5 @@ fediseer*.bz2
 fediseer.db
 private.pem
 public.pem
+
+pytooter*
