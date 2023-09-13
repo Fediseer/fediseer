@@ -49,7 +49,9 @@ class ActivityPubPM:
             "friendica": self.send_mastodon_pm,
             "fediseer": self.send_fediseer_pm,
         }
-        return software_map[software](message, username, domain)
+        if software in software_map:
+            return software_map[software](message, username, domain)
+        raise e.BadRequest("This software does not have direct PM implemented. Please retry using a MASTODON pm_proxy setting.")
 
     def send_fediseer_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
@@ -158,10 +160,10 @@ class ActivityPubPM:
         return api_key
     
     def pm_new_proxy_switch(self, new_proxy: enums.PMProxy, old_proxy: enums.PMProxy, instance: str, requestor: str):
-        if new_proxy is None:
-            pm_content = f"user '{requestor}' has switched the fediseer messaging not use a proxy (was {old_proxy})."
+        if new_proxy == enums.PMProxy.NONE:
+            pm_content = f"user '{requestor}' has switched the fediseer messaging to {instance.domain} not use a proxy (was {old_proxy.name})."
         else:
-            pm_content = f"user '{requestor}' has switched the fediseer messaging to use a {new_proxy.name} proxy (was {old_proxy})."
+            pm_content = f"user '{requestor}' has switched the fediseer messaging to {instance.domain} to use a {new_proxy.name} proxy (was {old_proxy.name})."
         logger.info(f"user '{requestor}' changed instance pm_proxy setting from {old_proxy} to {new_proxy} for {instance.domain}.")
         admins = [a.username for a in database.find_admins_by_instance(instance)]
         for admin_username in admins:
@@ -181,14 +183,14 @@ class ActivityPubPM:
                         raise e.BadRequest("API Key PM failed")
 
     def pm_admins(self, message: str, domain: str, software: str, instance):
-        if software not in SUPPORTED_SOFTWARE:
-            return None
         proxy = None
         admins = database.find_admins_by_instance(instance)
         if not admins:
             try:
                 admins = get_admin_for_software(software, domain)
             except Exception as err:
+                if software not in SUPPORTED_SOFTWARE:
+                    logger.warning(f"Failed to figure out admins from {software}: {domain}")
                 raise e.BadRequest(f"Failed to retrieve admin list: {err}")
         else:
             admins = [a.username for a in admins]

@@ -3,4 +3,9 @@ SUPPORTED_SOFTWARE = [
     "lemmy",
     "mastodon",
     "friendica",
+    "pleroma",
+    "akkoma",
+    "firefish",
+    "iceshrimp",
+    "misskey",
 ]

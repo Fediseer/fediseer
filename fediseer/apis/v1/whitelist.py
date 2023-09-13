@@ -104,12 +104,15 @@ class WhitelistDomain(Resource):
         db.session.add(new_claim)
         db.session.commit()
         if guarantor_instance:
-            activitypub_pm.pm_admins(
-                message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
-                domain=guarantor_instance.domain,
-                software=guarantor_instance.software,
-                instance=guarantor_instance,
-            )
+            try:
+                activitypub_pm.pm_admins(
+                    message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
+                    domain=guarantor_instance.domain,
+                    software=guarantor_instance.software,
+                    instance=guarantor_instance,
+                )
+            except:
+                pass
         return instance.get_details(),200
 
     patch_parser = reqparse.RequestParser()

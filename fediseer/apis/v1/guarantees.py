@@ -113,20 +113,26 @@ class Guarantees(Resource):
         )
         db.session.add(new_report)
         db.session.commit()
-        activitypub_pm.pm_admins(
-            message=f"Congratulations! Your instance has just been [guaranteed](https://fediseer.com/faq#what-is-a-guarantee) by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service. Replies will not be read.\nPlease contact @db0@lemmy.dbzer0.com for further inquiries.",
-            domain=target_instance.domain,
-            software=target_instance.software,
-            instance=target_instance,
-        )
+        try:
+            activitypub_pm.pm_admins(
+                message=f"Congratulations! Your instance has just been [guaranteed](https://fediseer.com/faq#what-is-a-guarantee) by {instance.domain}. \n\nThis is an automated PM by the [Fediseer](https://fediseer.com) service. Replies will not be read.\nPlease contact @db0@lemmy.dbzer0.com for further inquiries.",
+                domain=target_instance.domain,
+                software=target_instance.software,
+                instance=target_instance,
+            )
+        except:
+            pass
         orphan_ids = database.get_guarantee_chain(target_instance.id)
         for orphan in database.get_instances_by_ids(orphan_ids):
-            activitypub_pm.pm_admins(
-                message=f"Phew! You guarantor chain has been repaired as {instance.domain} has guaranteed for {domain}.",
-                domain=orphan.domain,
-                software=orphan.software,
-                instance=orphan,
-            )
+            try:
+                activitypub_pm.pm_admins(
+                    message=f"Phew! You guarantor chain has been repaired as {instance.domain} has guaranteed for {domain}.",
+                    domain=orphan.domain,
+                    software=orphan.software,
+                    instance=orphan,
+                )
+            except:
+                pass
             orphan.unset_as_orphan()
         logger.info(f"{instance.domain} Guaranteed for {domain}")
         return {"message":'Changed'}, 200
