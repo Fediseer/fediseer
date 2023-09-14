@@ -189,7 +189,7 @@ class WhitelistDomain(Resource):
             changed = True
         db.session.commit()
         if changed is True:
-            if self.args.return_new_key and new_key is True:
+            if self.args.return_new_key and new_key is not None:
                 return {"message": "Changed", "new_key": new_key},200
             else:
                 return {"message": "Changed"},200
