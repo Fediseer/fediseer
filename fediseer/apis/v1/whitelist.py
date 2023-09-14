@@ -72,7 +72,7 @@ class WhitelistDomain(Resource):
                 raise e.BadRequest(f"Requested guarantor domain {self.args.guarantor} is not registered with the Fediseer yet!")
         if self.args.admin not in admin_usernames:
             if len(admin_usernames) == 0:
-                raise e.Unauthorized(f"We have not implemented admin lookup and messaging for this fediverse software at this point, so this instance cannot be claimed. Please consider sending a PR to add this functionality.")
+                raise e.Unauthorized(f"We could not discover any admins for this instance software. Please Ensure your software exposes this info. If it's exposed in a novel manner, consider sending us a PR to be able to retrieve this infomation.")
             else:
                 raise e.Forbidden(f"Only admins of that {instance.software} are allowed to claim it.")
         existing_claim = database.find_claim(f"@{self.args.admin}@{domain}")

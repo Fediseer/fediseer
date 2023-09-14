@@ -16,13 +16,14 @@ ACTIVITY_SUSPICION = 20
 # If there's this many registered users per active monthly user, this site will be considered suspicious
 MONTHLY_ACTIVITY_SUSPICION = 500
 # Extra domains you can block. You can just delete the contents if you want to only block suspicious domains
-blacklist = {
+blacklist = [
     "truthsocial.com",
     "threads.net",
-}
+]
 # Add instances in here which want to ensure are not added in your blocklist
-whitelist = {
-}
+# 
+whitelist = [
+]
 # If you (don't) want to combine your own censures, with the ones from other trusted instances, adjust the list below.
 # The censures will be the combined list from your own domain and any domains specified below.
 trusted_instances = [
@@ -58,7 +59,7 @@ censures = fediseer.censure.get_given(
     min_censures = min_censures, 
     format = FormatType.LIST,
 )
-defed = (blacklist | set(censures["domains"]) | set(sus["domains"])) - whitelist
+defed = (set(blacklist) | set(censures["domains"]) | set(sus["domains"])) - set(whitelist)
 # I need to retrieve the site info because it seems if "RequireApplication" is set
 # We need to always re-set the application_question.
 # So we retrieve it from the existing site, to set the same value
