@@ -96,6 +96,7 @@ def get_admin_for_software(software: str, domain: str):
         "akkoma": get_pleroma_admins,
         "firefish": get_misskey_admins,
         "iceshrimp": get_misskey_admins,
+        "mitra": get_misskey_admins,
         "misskey": get_misskey_admins,
         "unknown": get_unknown_admins,
         "wildcard": get_unknown_admins,

@@ -1,5 +1,5 @@
-FEDISEER_VERSION = "0.14.0"
-SUPPORTED_SOFTWARE = [
+FEDISEER_VERSION = "0.14.1"
+SUPPORTED_SOFTWARE = {
     "lemmy",
     "mastodon",
     "friendica",
@@ -8,4 +8,5 @@ SUPPORTED_SOFTWARE = [
     "firefish",
     "iceshrimp",
     "misskey",
-]
+    "mitra",
+}

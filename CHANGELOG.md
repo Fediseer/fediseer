@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.14.1
+
+* Fixed a bug with returning the reset API key on response
+
 # 0.14.0
 
 * Added pm_proxy fields which allow admins to receive PMs from the fediseer via fediseer@botsin.space
