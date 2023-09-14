@@ -128,9 +128,9 @@ class ActivityPubPM:
     def pm_new_api_key(self, domain: str, username: str, software: str, requestor = None, proxy = None):
         api_key = secrets.token_urlsafe(16)
         if requestor:
-            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}\n\n**Please purge this message after storing the API key or use the Fediseer API to generate a new API key without PM**"
+            pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key is\n\n{api_key}\n\n**Please [reset your key manually](https://gui.fediseer.com/instances/edit/reset-token) or purge this message after storing the API key**"
         else:
-            pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the [Fediseer](https://fediseer.com).\n\n**Please purge this message after storing the API key or use the Fediseer API to generate a new API key without PM**"
+            pm_content = f"Your API Key for domain {domain} is\n\n{api_key}\n\nUse this to perform operations on the [Fediseer](https://fediseer.com).\n\n**Please [reset your key manually](https://gui.fediseer.com/instances/edit/reset-token) or purge this message after storing the API key**"
         if proxy == enums.PMProxy.MASTODON:
             self.mastodon_proxy_pm(pm_content,username,domain)
         else:
@@ -145,7 +145,7 @@ class ActivityPubPM:
 
     def pm_new_key_notification(self, domain: str, username: str, software: str, requestor: str, proxy = None):
         api_key = secrets.token_urlsafe(16)
-        pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key was provided in the response already\n"
+        pm_content = f"user '{requestor}' has initiated an API Key reset for your domain {domain} on the [Fediseer](https://fediseer.com)\n\nThe new API key was provided in the response already.\n"
         logger.info(f"user '{requestor}' reset the API key for {username}@{domain} on the response.")
         if proxy == enums.PMProxy.MASTODON:
             self.mastodon_proxy_pm(pm_content,username,domain)
