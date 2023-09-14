@@ -1,5 +1,6 @@
-import requests
 import os
+import json
+import sys
 from dotenv import load_dotenv
 from pythorhead import Lemmy
 from pythonseer import Fediseer
@@ -37,6 +38,8 @@ trusted_instances = [
 reason_filters = []
 # If you want to only censure instances which have been marked by more than 1 trusted instance, then increase the number below
 min_censures = 1
+# Change this to the number of changes over which this script will ask for manual confirmation
+changes_warning_threshold = 10
 
 password = os.getenv("LEMMY_PASSWORD", PASSWORD)
 lemmy = Lemmy(f"https://{LEMMY_DOMAIN}")
@@ -60,6 +63,26 @@ censures = fediseer.censure.get_given(
     format = FormatType.LIST,
 )
 defed = (set(blacklist) | set(censures["domains"]) | set(sus["domains"])) - set(whitelist)
+try:
+    with open("previous_defed.json", 'r') as file:
+        prev_defed = set(json.loads(file.read()))
+except FileNotFoundError:
+    prev_defed = set()
+if len(defed - prev_defed) > 0:
+    print(f"New blocks to add {defed - prev_defed}")
+if len(prev_defed - defed) > 0:
+    print(f"blocks that will be removed {prev_defed - defed}")
+if len(defed - prev_defed) + len(prev_defed - defed) == 0:
+    print("No changes to do in blocklist")
+    sys.exit()
+if len(defed - prev_defed) + len(prev_defed - defed) >= changes_warning_threshold:
+    if input(
+        f"\n### WARNING ###\n"
+        f"You are about to do {changes_warning_threshold} of more changes to your blocklist. "
+        "Proceed? (Y/n)",
+    ) not in ["y", "Y", "", "yes"]:
+        print("Aborting run")
+        sys.exit()
 # I need to retrieve the site info because it seems if "RequireApplication" is set
 # We need to always re-set the application_question.
 # So we retrieve it from the existing site, to set the same value
@@ -78,3 +101,6 @@ else:
         blocked_instances=list(defed),
         )
 print("Edit Successful")
+with open("previous_defed.json", 'w') as file:
+    file.write(json.dumps(list(defed),indent=4))
+print("Stored previous defed list to disk file 'previous_defed.json'")
