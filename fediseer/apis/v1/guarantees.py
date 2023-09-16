@@ -1,5 +1,5 @@
 from fediseer.apis.v1.base import *
-from fediseer.classes.instance import Guarantee, Endorsement, RejectionRecord
+from fediseer.classes.instance import Guarantee, RejectionRecord, Solicitation
 from fediseer.classes.reports import Report
 from fediseer import enums
 
@@ -99,12 +99,7 @@ class Guarantees(Resource):
             guarantor_id=instance.id,
         )
         db.session.add(new_guarantee)
-        # # Guaranteed instances get their automatic first endorsement
-        # new_endorsement = Endorsement(
-        #     approving_id=instance.id,
-        #     endorsed_id=target_instance.id,
-        # )
-        # db.session.add(new_endorsement)
+        database.delete_all_solicitation_by_source(target_instance.id)
         new_report = Report(
             source_domain=instance.domain,
             target_domain=target_instance.domain,
@@ -172,6 +167,22 @@ class Guarantees(Resource):
         endorsement = database.get_endorsement(target_instance.id,instance.id)
         if endorsement:
             db.session.delete(endorsement)
+        # Orphaned instances are automatically put into the solicitation list
+        new_solicitation = Solicitation(
+            comment="Orphaned instance!",
+            source_id=target_instance.id,
+            target_id=None,
+            created=guarantee.created,
+        )
+        db.session.add(new_solicitation)
+        solicitation_report = Report(
+            source_domain=instance.domain,
+            target_domain=instance.domain,
+            report_type=enums.ReportType.SOLICITATION,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(solicitation_report)
+
         db.session.delete(guarantee)
         rejection_record = database.get_rejection_record(instance.id,target_instance.id)
         if rejection_record:
@@ -188,6 +199,7 @@ class Guarantees(Resource):
             report_type=enums.ReportType.GUARANTEE,
             report_activity=enums.ReportActivity.DELETED,
         )
+
         db.session.add(new_report)
         db.session.commit()
         try:

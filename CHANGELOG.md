@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.15.0
+
+* Added solicitation. Now you can see which instances are requesting guarantees
+* Orphaned instances will automatically receive an open solicitation
+
 # 0.14.1
 
 * Fixed a bug with returning the reset API key on response

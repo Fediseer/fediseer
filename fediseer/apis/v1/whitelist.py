@@ -2,6 +2,8 @@ from fediseer.apis.v1.base import *
 from fediseer.messaging import activitypub_pm
 from fediseer.classes.user import User, Claim
 from fediseer import enums
+from fediseer.classes.instance import Solicitation
+from fediseer.classes.reports import Report
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -9,7 +11,7 @@ class Whitelist(Resource):
     get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
-    get_parser.add_argument("domains", required=False, type=str, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
+    get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
@@ -49,7 +51,7 @@ class WhitelistDomain(Resource):
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     put_parser.add_argument("admin", required=True, type=str, help="The username of the admin who wants to register this domain", location="json")
-    put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
+    put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of another guaranteed instance. They will receive a PM to validate you and you will be added to the solicitations list.", location="json")
     put_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
@@ -102,11 +104,31 @@ class WhitelistDomain(Resource):
             instance_id = instance.id,
         )
         db.session.add(new_claim)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=instance.domain,
+            report_type=enums.ReportType.CLAIM,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(new_report)
         db.session.commit()
-        if guarantor_instance:
+        if guarantor_instance and not instance.is_guaranteed():
+            new_solicitation = Solicitation(
+                source_id=instance.id,
+                target_id=guarantor_instance.id,
+            )
+            db.session.add(new_solicitation)
+            solicitation_report = Report(
+                source_domain=instance.domain,
+                target_domain=guarantor_instance.domain,
+                report_type=enums.ReportType.SOLICITATION,
+                report_activity=enums.ReportActivity.ADDED,
+            )
+            db.session.add(solicitation_report)
+            db.session.commit()
             try:
                 activitypub_pm.pm_admins(
-                    message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
+                    message=f"New instance {instance.domain} was just registered with the Fediseer and have solicited [your guarantee](https://gui.fediseer.com/guarantees/guarantee)!",
                     domain=guarantor_instance.domain,
                     software=guarantor_instance.software,
                     instance=guarantor_instance,

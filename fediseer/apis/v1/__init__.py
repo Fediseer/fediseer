@@ -1,5 +1,6 @@
 import fediseer.apis.v1.base as base
 import fediseer.apis.v1.whitelist as whitelist
+import fediseer.apis.v1.solicitations as solicitations
 import fediseer.apis.v1.endorsements as endorsements
 import fediseer.apis.v1.censures as censures
 import fediseer.apis.v1.hesitations as hesitations
@@ -15,6 +16,7 @@ api.add_resource(find.FindInstance, "/find_instance")
 api.add_resource(activitypub.User, "/user/<string:username>")
 api.add_resource(activitypub.Inbox, "/inbox/<string:username>")
 api.add_resource(whitelist.Whitelist, "/whitelist")
+api.add_resource(solicitations.Solicitations, "/solicitations")
 api.add_resource(whitelist.WhitelistDomain, "/whitelist/<string:domain>")
 api.add_resource(endorsements.Endorsements, "/endorsements/<string:domain>")
 api.add_resource(endorsements.Approvals, "/approvals/<string:domains_csv>")

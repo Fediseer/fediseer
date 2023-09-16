@@ -5,6 +5,8 @@ class ReportType(enum.Enum):
     ENDORSEMENT = 1
     CENSURE = 2
     HESITATION = 3
+    CLAIM = 4
+    SOLICITATION = 5
 
 class ReportActivity(enum.Enum):
     ADDED = 0

@@ -85,7 +85,7 @@ class Models:
         })
         self.input_instance_claim = api.model('ClaimInstanceInput', {
             'admin': fields.String(required=True, min_length=1, description="The username of the admin who wants to register this domain", example="admin"),
-            'guarantor': fields.String(required=False, description="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", example="admin"),
+            'guarantor': fields.String(required=False, description="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", example="lemmy.dbzer0.com"),
             'pm_proxy': fields.String(required=False, enum=[e.name for e in enums.PMProxy], description="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to 'MASTODON' to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance."),
         })
         self.input_api_key_reset = api.model('ApiKeyResetInput', {
@@ -101,4 +101,17 @@ class Models:
             'report_type': fields.String(description="The type of report activity", enum=[e.name for e in enums.ReportType]),
             'report_activity': fields.String(description="The activity reported", enum=[e.name for e in enums.ReportActivity]),
             'created': fields.DateTime(description="The date this record was added"),
+        })
+        self.input_solicit = api.model('SolicitInput', {
+            'guarantor': fields.String(required=False, description="The domain of the instance to solicit for a guarantee. They will receive a PM to guarantee for you", example="lemmy.dbzer0.com", min_length=1, max_length=255),
+            'comment': fields.String(required=False, description="You can provide some info about your instance here.", example="Me No Spam!", min_length=1, max_length=1000),
+        })
+
+        self.response_model_instances_soliciting = api.inherit('SolicitingInstanceDetails', self.response_model_instances, {
+            'comment': fields.String(description="The optional comment explaining why this instance deserves a guarantee"),
+        })
+        self.response_model_model_Solicitation_get = api.model('SolicitedInstances', {
+            'instances': fields.List(fields.Nested(self.response_model_instances_soliciting)),
+            'domains': fields.List(fields.String(description="The instance domains as a list.")),
+            'csv': fields.String(description="The instance domains as a csv."),
         })

@@ -18,9 +18,9 @@ class RejectionRecord(db.Model):
     __tablename__ = "rejection_records"
     __table_args__ = (UniqueConstraint('rejector_id', 'rejected_id', name='endoresements_rejector_id_rejected_id'),)
     id = db.Column(db.Integer, primary_key=True)
-    rejector_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    rejector_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     rejector_instance = db.relationship("Instance", back_populates="rejections", foreign_keys=[rejector_id])
-    rejected_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    rejected_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     rejected_instance = db.relationship("Instance", back_populates="rejectors", foreign_keys=[rejected_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     performed = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -32,9 +32,9 @@ class RejectionRecord(db.Model):
 class Guarantee(db.Model):
     __tablename__ = "guarantees"
     id = db.Column(db.Integer, primary_key=True)
-    guarantor_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    guarantor_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     guarantor_instance = db.relationship("Instance", back_populates="guarantees", foreign_keys=[guarantor_id])
-    guaranteed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), unique=True, nullable=False)
+    guaranteed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
     guaranteed_instance = db.relationship("Instance", back_populates="guarantors", foreign_keys=[guaranteed_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -44,9 +44,9 @@ class Endorsement(db.Model):
     __table_args__ = (UniqueConstraint('approving_id', 'endorsed_id', name='endoresements_approving_id_endorsed_id'),)
     id = db.Column(db.Integer, primary_key=True)
     reason = db.Column(db.String(255), unique=False, nullable=True, index=False)
-    approving_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    approving_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     approving_instance = db.relationship("Instance", back_populates="approvals", foreign_keys=[approving_id])
-    endorsed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    endorsed_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     endorsed_instance = db.relationship("Instance", back_populates="endorsements", foreign_keys=[endorsed_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -56,9 +56,9 @@ class Censure(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reason = db.Column(db.String(255), unique=False, nullable=True, index=False)
     evidence = db.Column(db.Text, unique=False, nullable=True, index=False)
-    censuring_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    censuring_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     censuring_instance = db.relationship("Instance", back_populates="censures_given", foreign_keys=[censuring_id])
-    censured_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    censured_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     censured_instance = db.relationship("Instance", back_populates="censures_received", foreign_keys=[censured_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -68,12 +68,22 @@ class Hesitation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reason = db.Column(db.String(255), unique=False, nullable=True, index=False)
     evidence = db.Column(db.Text, unique=False, nullable=True, index=False)
-    hesitant_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    hesitant_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     hesitating_instance = db.relationship("Instance", back_populates="hesitations_given", foreign_keys=[hesitant_id])
-    dubious_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False)
+    dubious_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     dubious_instance = db.relationship("Instance", back_populates="hesitations_received", foreign_keys=[dubious_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+class Solicitation(db.Model):
+    __tablename__ = "solicitations"
+    __table_args__ = (UniqueConstraint('source_id', 'target_id', name='solicitations_source_id_target_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.Text, unique=False, nullable=True, index=False)
+    source_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_instance = db.relationship("Instance", back_populates="solicitations_requested", foreign_keys=[source_id])
+    target_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=True, index=True)
+    target_instance = db.relationship("Instance", back_populates="solicitations_received", foreign_keys=[target_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 class Instance(db.Model):
     __tablename__ = "instances"
@@ -98,6 +108,8 @@ class Instance(db.Model):
     censures_received = db.relationship("Censure", back_populates="censured_instance", cascade="all, delete-orphan", foreign_keys=[Censure.censured_id])
     hesitations_given = db.relationship("Hesitation", back_populates="hesitating_instance", cascade="all, delete-orphan", foreign_keys=[Hesitation.hesitant_id])
     hesitations_received = db.relationship("Hesitation", back_populates="dubious_instance", cascade="all, delete-orphan", foreign_keys=[Hesitation.dubious_id])
+    solicitations_requested = db.relationship("Solicitation", back_populates="source_instance", cascade="all, delete-orphan", foreign_keys=[Solicitation.source_id])
+    solicitations_received = db.relationship("Solicitation", back_populates="target_instance", cascade="all, delete-orphan", foreign_keys=[Solicitation.target_id])
     guarantees = db.relationship("Guarantee", back_populates="guarantor_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guarantor_id])
     guarantors = db.relationship("Guarantee", back_populates="guaranteed_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guaranteed_id])
     rejections = db.relationship("RejectionRecord", back_populates="rejector_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejector_id])
@@ -129,6 +141,9 @@ class Instance(db.Model):
         if len(self.guarantors) == 0:
             return None
         return self.guarantors[0]
+
+    def is_guaranteed(self):
+        return len(self.guarantors) > 0
 
     def get_guarantor(self):
         guarantee = self.get_guarantee()
