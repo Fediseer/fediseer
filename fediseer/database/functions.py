@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload
 from fediseer.flask import db, SQLITE_MODE
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
@@ -391,3 +391,43 @@ def get_reports(
     if page < 0:
         page = 0
     return query.order_by(Report.created.desc()).offset(10 * page).limit(10).all()
+
+
+def get_all_solicitations():
+    query = db.session.query(
+        Instance
+    ).join(
+        Solicitation
+    ).group_by(
+        Instance.id
+    ).having(
+        db.func.count(Instance.solicitations_requested) >= 1,
+    )
+    return query.order_by(Solicitation.created.asc()).all()
+
+def find_solicitation_by_target(source_id, target_id):
+    query = db.session.query(
+        Solicitation
+    ).filter(
+        Solicitation.source_id == source_id,
+        Solicitation.target_id == target_id,
+    )
+    return query.first()
+
+def delete_all_solicitation_by_source(source_id):
+    query = db.session.query(
+        Solicitation
+    ).filter(
+        Solicitation.source_id == source_id,
+    )
+    query.delete()
+
+def has_recent_solicitations(source_id):
+    query = db.session.query(
+        Solicitation
+    ).filter(
+        Solicitation.source_id == source_id,
+        Solicitation.created > datetime.utcnow() - timedelta(hours=24),
+    )
+    return query.count() > 0
+

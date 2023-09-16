@@ -2,6 +2,7 @@ from fediseer.apis.v1.base import *
 from fediseer.messaging import activitypub_pm
 from fediseer.classes.user import User, Claim
 from fediseer import enums
+from fediseer.classes.instance import Solicitation
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -49,7 +50,7 @@ class WhitelistDomain(Resource):
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     put_parser.add_argument("admin", required=True, type=str, help="The username of the admin who wants to register this domain", location="json")
-    put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", location="json")
+    put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of another guaranteed instance. They will receive a PM to validate you and you will be added to the solicitations list.", location="json")
     put_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
@@ -104,9 +105,15 @@ class WhitelistDomain(Resource):
         db.session.add(new_claim)
         db.session.commit()
         if guarantor_instance:
+            new_solicitation = Solicitation(
+                source_id=instance.id,
+                target_id=guarantor_instance.id,
+            )
+            db.session.add(new_solicitation)
+            db.session.commit()
             try:
                 activitypub_pm.pm_admins(
-                    message=f"New instance {domain} was just registered with the Fediseer and have asked you to guarantee for them!",
+                    message=f"New instance {instance.domain} was just registered with the Fediseer and have solicited your guarantee!",
                     domain=guarantor_instance.domain,
                     software=guarantor_instance.software,
                     instance=guarantor_instance,
