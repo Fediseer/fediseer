@@ -2,12 +2,13 @@ from fediseer.apis.v1.base import *
 from fediseer.messaging import activitypub_pm
 from fediseer import enums
 from fediseer.classes.instance import Solicitation
+from fediseer.classes.reports import Report
 
 class Solicitations(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
-    get_parser.add_argument("domains", required=False, type=str, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
+    get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser, query_string=True)
     @cache.cached(timeout=10)
@@ -18,7 +19,9 @@ class Solicitations(Resource):
         self.args = self.get_parser.parse_args()
         instance_details = []
         for instance in database.get_all_solicitations():
-            instance_details.append(instance.get_details())
+            instance_detail = instance.get_details()
+            instance_detail["comment"] = database.find_latest_solicitation_by_source(instance.id).comment
+            instance_details.append(instance_detail)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
         if self.args.domains:
@@ -31,7 +34,7 @@ class Solicitations(Resource):
     post_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of a guaranteeing instance. They will receive a PM to validate you", location="json")
     post_parser.add_argument("comment", required=False, type=str, location="json")
 
-    @api.expect(post_parser,models.input_instance_claim, validate=True)
+    @api.expect(post_parser,models.input_solicit, validate=True)
     @api.marshal_with(models.response_model_simple_response, code=200, description='Instances')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
@@ -43,7 +46,7 @@ class Solicitations(Resource):
         Other guaranteeed instances can review your application and decide to guarantee for you.
         You can optionally provide the domain of an instance to receive a PM requesting for your guarantee
         '''
-        self.args = self.put_parser.parse_args()
+        self.args = self.post_parser.parse_args()
         if not self.args.apikey:
             raise e.Unauthorized("You must provide the API key that was PM'd to your admin account")
         instance = database.find_instance_by_api_key(self.args.apikey)
@@ -71,11 +74,18 @@ class Solicitations(Resource):
             target_id=guarantor_instance.id if guarantor_instance else None,
         )
         db.session.add(new_solicitation)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=guarantor_instance.domain if guarantor_instance else instance.domain,
+            report_type=enums.ReportType.SOLICITATION,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(new_report)
         db.session.commit()
         if guarantor_instance:
             try:
                 activitypub_pm.pm_admins(
-                    message=f"New instance {instance.domain} was just registered with the Fediseer and have solicited your guarantee!",
+                    message=f"New instance {instance.domain} was just registered with the Fediseer and have solicited [your guarantee](https://gui.fediseer.com/guarantees/guarantee)!",
                     domain=guarantor_instance.domain,
                     software=guarantor_instance.software,
                     instance=guarantor_instance,

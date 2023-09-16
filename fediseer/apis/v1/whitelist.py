@@ -3,6 +3,7 @@ from fediseer.messaging import activitypub_pm
 from fediseer.classes.user import User, Claim
 from fediseer import enums
 from fediseer.classes.instance import Solicitation
+from fediseer.classes.reports import Report
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -10,7 +11,7 @@ class Whitelist(Resource):
     get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
-    get_parser.add_argument("domains", required=False, type=str, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
+    get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
@@ -103,17 +104,31 @@ class WhitelistDomain(Resource):
             instance_id = instance.id,
         )
         db.session.add(new_claim)
+        new_report = Report(
+            source_domain=instance.domain,
+            target_domain=instance.domain,
+            report_type=enums.ReportType.CLAIM,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(new_report)
         db.session.commit()
-        if guarantor_instance:
+        if guarantor_instance and not instance.is_guaranteed():
             new_solicitation = Solicitation(
                 source_id=instance.id,
                 target_id=guarantor_instance.id,
             )
             db.session.add(new_solicitation)
+            solicitation_report = Report(
+                source_domain=instance.domain,
+                target_domain=guarantor_instance.domain,
+                report_type=enums.ReportType.SOLICITATION,
+                report_activity=enums.ReportActivity.ADDED,
+            )
+            db.session.add(solicitation_report)
             db.session.commit()
             try:
                 activitypub_pm.pm_admins(
-                    message=f"New instance {instance.domain} was just registered with the Fediseer and have solicited your guarantee!",
+                    message=f"New instance {instance.domain} was just registered with the Fediseer and have solicited [your guarantee](https://gui.fediseer.com/guarantees/guarantee)!",
                     domain=guarantor_instance.domain,
                     software=guarantor_instance.software,
                     instance=guarantor_instance,

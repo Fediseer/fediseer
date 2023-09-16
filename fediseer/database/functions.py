@@ -394,16 +394,25 @@ def get_reports(
 
 
 def get_all_solicitations():
-    query = db.session.query(
-        Instance
-    ).join(
-        Solicitation
+    # Subquery to find the minimum created date for each source_instance
+    subq = db.session.query(
+        Solicitation.source_id,
+        func.min(Solicitation.created).label('oldest_solicitation_date')
     ).group_by(
-        Instance.id
-    ).having(
-        db.func.count(Instance.solicitations_requested) >= 1,
+        Solicitation.source_id
+    ).subquery()
+
+    # Query to retrieve instances with at least one solicitation
+    query = db.session.query(
+        Instance,
+    ).join(
+        subq,
+        Instance.id == subq.c.source_id
+    ).order_by(
+        subq.c.oldest_solicitation_date
     )
-    return query.order_by(Solicitation.created.asc()).all()
+    
+    return query.all()
 
 def find_solicitation_by_target(source_id, target_id):
     query = db.session.query(
@@ -431,3 +440,10 @@ def has_recent_solicitations(source_id):
     )
     return query.count() > 0
 
+def find_latest_solicitation_by_source(source_id):
+    query = db.session.query(
+        Solicitation
+    ).filter(
+        Solicitation.source_id == source_id,
+    )
+    return query.order_by(Solicitation.created.desc()).first()

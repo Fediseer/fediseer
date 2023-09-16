@@ -175,6 +175,14 @@ class Guarantees(Resource):
             created=guarantee.created,
         )
         db.session.add(new_solicitation)
+        solicitation_report = Report(
+            source_domain=instance.domain,
+            target_domain=instance.domain,
+            report_type=enums.ReportType.SOLICITATION,
+            report_activity=enums.ReportActivity.ADDED,
+        )
+        db.session.add(solicitation_report)
+
         db.session.delete(guarantee)
         rejection_record = database.get_rejection_record(instance.id,target_instance.id)
         if rejection_record:

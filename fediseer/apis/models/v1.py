@@ -104,14 +104,14 @@ class Models:
         })
         self.input_solicit = api.model('SolicitInput', {
             'guarantor': fields.String(required=False, description="The domain of the instance to solicit for a guarantee. They will receive a PM to guarantee for you", example="lemmy.dbzer0.com", min_length=1, max_length=255),
-            'comment': fields.String(required=False, description="You can provide some info about your instance here.", example="lemmy.dbzer0.com", min_length=1, max_length=1000),
+            'comment': fields.String(required=False, description="You can provide some info about your instance here.", example="Me No Spam!", min_length=1, max_length=1000),
         })
 
-        self.response_model_instances_censured = api.inherit('SolicitingInstanceDetails', self.response_model_instances, {
+        self.response_model_instances_soliciting = api.inherit('SolicitingInstanceDetails', self.response_model_instances, {
             'comment': fields.String(description="The optional comment explaining why this instance deserves a guarantee"),
         })
         self.response_model_model_Solicitation_get = api.model('SolicitedInstances', {
-            'instances': fields.List(fields.Nested(self.response_model_instances_censured)),
+            'instances': fields.List(fields.Nested(self.response_model_instances_soliciting)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
