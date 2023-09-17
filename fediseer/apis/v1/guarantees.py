@@ -182,8 +182,8 @@ class Guarantees(Resource):
         )
         db.session.add(new_solicitation)
         solicitation_report = Report(
-            source_domain=instance.domain,
-            target_domain=instance.domain,
+            source_domain=target_instance.domain,
+            target_domain=target_instance.domain,
             report_type=enums.ReportType.SOLICITATION,
             report_activity=enums.ReportActivity.ADDED,
         )
