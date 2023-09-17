@@ -93,6 +93,7 @@ class Hesitations(Resource):
             return {"domains": [instance["domain"] for instance in instance_details]},200
         return {"instances": instance_details},200
 
+    decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -120,6 +121,8 @@ class Hesitations(Resource):
             raise e.Forbidden("Only guaranteed instances can hesitation others.")
         if instance.domain == domain:
             raise e.BadRequest("You're a mad lad, but you can't hesitation yourself.")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
@@ -157,7 +160,7 @@ class Hesitations(Resource):
         logger.info(f"{instance.domain} hesitated against {domain}")
         return {"message":'Changed'}, 200
 
-
+    decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     patch_parser = reqparse.RequestParser()
     patch_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     patch_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -180,6 +183,8 @@ class Hesitations(Resource):
         instance = database.find_instance_by_api_key(self.args.apikey)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         target_instance = database.find_instance_by_domain(domain=domain)
         if not target_instance:
             raise e.BadRequest("Instance from which to modify hesitation not found")
@@ -212,7 +217,7 @@ class Hesitations(Resource):
         logger.info(f"{instance.domain} modIfied hesitation for {domain}")
         return {"message":'Changed'}, 200
 
-
+    decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     delete_parser = reqparse.RequestParser()
     delete_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     delete_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -231,6 +236,8 @@ class Hesitations(Resource):
         instance = database.find_instance_by_api_key(self.args.apikey)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         target_instance = database.find_instance_by_domain(domain=domain)
         if not target_instance:
             raise e.BadRequest("Instance from which to withdraw hesitation not found")

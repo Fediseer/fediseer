@@ -56,6 +56,7 @@ class Guarantees(Resource):
         logger.debug(database.get_guarantor_chain(instance.id))
         return {"instances": instance_details},200
 
+    decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -83,6 +84,8 @@ class Guarantees(Resource):
             raise e.Forbidden("Only guaranteed instances can guarantee others.")
         if len(instance.guarantees) >= 20 and instance.id != 0:
             raise e.Forbidden("You cannot guarantee for more than 20 instances")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
@@ -133,6 +136,7 @@ class Guarantees(Resource):
         return {"message":'Changed'}, 200
 
 
+    decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     delete_parser = reqparse.RequestParser()
     delete_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     delete_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -151,6 +155,8 @@ class Guarantees(Resource):
         instance = database.find_instance_by_api_key(self.args.apikey)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         target_instance = database.find_instance_by_domain(domain=domain)
         if not target_instance:
             raise e.BadRequest("Instance from which to withdraw endorsement not found")
@@ -184,7 +190,7 @@ class Guarantees(Resource):
         db.session.add(solicitation_report)
 
         db.session.delete(guarantee)
-        rejection_record = database.get_rejection_record(instance.id,target_instance.id)
+        rejection_recorinstanced = database.get_rejection_record(instance.id,target_instance.id)
         if rejection_record:
             rejection_record.refresh()
         else:

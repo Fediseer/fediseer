@@ -28,6 +28,7 @@ class Solicitations(Resource):
             return {"domains": [instance["domain"] for instance in instance_details]},200
         return {"instances": instance_details},200
 
+    decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     post_parser = reqparse.RequestParser()
     post_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     post_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
@@ -54,6 +55,8 @@ class Solicitations(Resource):
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to claim it?")
         if instance.is_guaranteed():
             raise e.BadRequest(f"Your instance is already guaranteed by {instance.get_guarantor().domain}")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         guarantor_instance = None
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)

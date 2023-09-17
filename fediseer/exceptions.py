@@ -26,6 +26,11 @@ class Locked(wze.Locked):
         self.specific = message
         self.log = log
 
+class TooManyRequests(wze.TooManyRequests):
+    def __init__(self, message, log=None):
+        self.specific = message
+        self.log = log
+
 class InternalServerError(wze.InternalServerError):
     def __init__(self, message, log=None):
         self.specific = message

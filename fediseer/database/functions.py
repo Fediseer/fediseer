@@ -447,3 +447,11 @@ def find_latest_solicitation_by_source(source_id):
         Solicitation.source_id == source_id,
     )
     return query.order_by(Solicitation.created.desc()).first()
+
+def has_too_many_actions_per_min(source_domain):
+    query = Report.query.filter_by(
+        source_domain=source_domain
+    ).filter(
+        Report.created > datetime.utcnow() - timedelta(minutes=1),
+    )
+    return query.count() > 20

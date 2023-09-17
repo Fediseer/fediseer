@@ -11,6 +11,7 @@ from fediseer.utils import hash_api_key
 from fediseer.messaging import activitypub_pm
 from pythorhead import Lemmy
 from fediseer.fediverse import get_admin_for_software, get_nodeinfo
+from fediseer.limiter import limiter
 
 api = Namespace('v1', 'API Version 1' )
 
@@ -22,6 +23,7 @@ handle_bad_request = api.errorhandler(e.BadRequest)(e.handle_bad_requests)
 handle_forbidden = api.errorhandler(e.Forbidden)(e.handle_bad_requests)
 handle_unauthorized = api.errorhandler(e.Unauthorized)(e.handle_bad_requests)
 handle_not_found = api.errorhandler(e.NotFound)(e.handle_bad_requests)
+handle_too_many_requests = api.errorhandler(e.TooManyRequests)(e.handle_bad_requests)
 handle_internal_server_error = api.errorhandler(e.InternalServerError)(e.handle_bad_requests)
 handle_service_unavailable = api.errorhandler(e.ServiceUnavailable)(e.handle_bad_requests)
 
