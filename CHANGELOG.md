@@ -3,6 +3,8 @@
 # 0.15.1
 
 * Added some rate limits. Currently each instance is limited to 20 actions per minute
+* Only claimed instanced get an automatic solicitation
+* Fix report for automatic notification
 
 # 0.15.0
 

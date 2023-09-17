@@ -173,22 +173,22 @@ class Guarantees(Resource):
         endorsement = database.get_endorsement(target_instance.id,instance.id)
         if endorsement:
             db.session.delete(endorsement)
-        # Orphaned instances are automatically put into the solicitation list
-        new_solicitation = Solicitation(
-            comment="Orphaned instance!",
-            source_id=target_instance.id,
-            target_id=None,
-            created=guarantee.created,
-        )
-        db.session.add(new_solicitation)
-        solicitation_report = Report(
-            source_domain=target_instance.domain,
-            target_domain=target_instance.domain,
-            report_type=enums.ReportType.SOLICITATION,
-            report_activity=enums.ReportActivity.ADDED,
-        )
-        db.session.add(solicitation_report)
-
+        # Claimed Orphaned instances are automatically put into the solicitation list
+        if target_instance.is_claimed():
+            new_solicitation = Solicitation(
+                comment="Orphaned instance!",
+                source_id=target_instance.id,
+                target_id=None,
+                created=guarantee.created,
+            )
+            db.session.add(new_solicitation)
+            solicitation_report = Report(
+                source_domain=target_instance.domain,
+                target_domain=target_instance.domain,
+                report_type=enums.ReportType.SOLICITATION,
+                report_activity=enums.ReportActivity.ADDED,
+            )
+            db.session.add(solicitation_report)
         db.session.delete(guarantee)
         rejection_record = database.get_rejection_record(instance.id,target_instance.id)
         if rejection_record:

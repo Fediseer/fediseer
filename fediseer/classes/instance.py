@@ -163,3 +163,6 @@ class Instance(db.Model):
     def unset_as_orphan(self):
         self.oprhan_since = None
         db.session.commit()
+    
+    def is_claimed(self):
+        return len(self.admins) > 0
