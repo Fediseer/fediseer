@@ -88,12 +88,15 @@ class Models:
             'guarantor': fields.String(required=False, description="(Optional) The domain of the guaranteeing instance. They will receive a PM to validate you", example="lemmy.dbzer0.com"),
             'pm_proxy': fields.String(required=False, enum=[e.name for e in enums.PMProxy], description="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to 'MASTODON' to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance."),
         })
-        self.input_api_key_reset = api.model('ApiKeyResetInput', {
+        self.input_instance_modify = api.model('InstanceModify', {
             'admin_username': fields.String(required=False, description="If a username is given, their API key will be reset. Otherwise the user's whose API key was provided will be reset. This allows can be initiated by other instance admins or the fediseer.", example="admin"),
             'return_new_key': fields.Boolean(required=False, default=False, description="If True, the key will be returned as part of the response instead of PM'd. Fediseer will still PM a notification to the target admin account."),
             'sysadmins': fields.Integer(required=False, default=None, min=0, max=100, description="Report how many system administrators this instance currently has."),
             'moderators': fields.Integer(required=False, default=None, min=0, max=1000, description="Report how many instance moderators this instance currently has."),
             'pm_proxy': fields.String(required=False, enum=[e.name for e in enums.PMProxy], description="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to 'MASTODON' to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance."),
+            'visibility_endorsements': fields.String(required=False, enum=[e.name for e in enums.ListVisibility], description="Set this to OPEN, to allow anyone to read your endorsements. Set to ENDORSED to only allow endorsed instances to read your endorsements. Set to PRIVATE to only allow your own admins to read your endorsements."),
+            'visibility_censures': fields.String(required=False, enum=[e.name for e in enums.ListVisibility], description="Set this to OPEN, to allow anyone to read your censures. Set to ENDORSED to only allow endorsed instances to read your censures. Set to PRIVATE to only allow your own admins to read your censures."),
+            'visibility_hesitations': fields.String(required=False, enum=[e.name for e in enums.ListVisibility], description="Set this to OPEN, to allow anyone to read your hesitations. Set to ENDORSED to only allow endorsed instances to read your hesitations. Set to PRIVATE to only allow your own admins to read your hesitations."),
         })
         self.response_model_reports = api.model('ActivityReport', {
             'source_domain': fields.String(description="The instance domain which initiated this activity", example="lemmy.dbzer0.com"),

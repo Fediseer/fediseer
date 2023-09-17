@@ -16,3 +16,8 @@ class ReportActivity(enum.Enum):
 class PMProxy(enum.Enum):
     NONE = 0
     MASTODON = 1
+
+class ListVisibility(enum.Enum):
+    OPEN = 0
+    ENDORSED = 1
+    PRIVATE = 2

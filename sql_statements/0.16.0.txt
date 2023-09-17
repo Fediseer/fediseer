@@ -1,0 +1,4 @@
+CREATE TYPE listvisibility AS ENUM ('OPEN','ENDORSED','PRIVATE');
+ALTER TABLE instances ADD COLUMN visibility_endorsements listvisibility default 'OPEN';
+ALTER TABLE instances ADD COLUMN visibility_censures listvisibility default 'OPEN';
+ALTER TABLE instances ADD COLUMN visibility_hesitations listvisibility default 'OPEN';

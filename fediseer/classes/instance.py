@@ -100,7 +100,9 @@ class Instance(db.Model):
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
     pm_proxy = db.Column(Enum(enums.PMProxy), default=enums.PMProxy.NONE, nullable=False)
-
+    visibility_endorsements = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)
+    visibility_censures = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)
+    visibility_hesitations = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)
 
     approvals = db.relationship("Endorsement", back_populates="approving_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.approving_id])
     endorsements = db.relationship("Endorsement", back_populates="endorsed_instance", cascade="all, delete-orphan", foreign_keys=[Endorsement.endorsed_id])
@@ -166,3 +168,12 @@ class Instance(db.Model):
     
     def is_claimed(self):
         return len(self.admins) > 0
+
+    def is_endorsing(self,instance):
+        return instance in self.approvals
+
+    def is_censuring(self,instance):
+        return instance in self.censures_given
+
+    def is_hesitating(self,instance):
+        return instance in self.hesitations_given

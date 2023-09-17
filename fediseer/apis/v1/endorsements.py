@@ -6,6 +6,7 @@ from fediseer.utils import sanitize_string
 
 class Approvals(Resource):
     get_parser = reqparse.RequestParser()
+    get_parser.add_argument("apikey", type=str, required=False, help="An instance's API key.", location='headers')
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
@@ -16,6 +17,8 @@ class Approvals(Resource):
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Endorsed_get, code=200, description='Instances', skip_none=True)
     @api.response(404, 'Instance not registered', models.response_model_error)
+    @api.response(401, 'API key not found', models.response_model_error)
+    @api.response(403, 'Access Denied', models.response_model_error)
     def get(self, domains_csv):
         '''Display all endorsements given out by one or more domains
         You can pass a comma-separated list of domain names and the results will be a set of all their
@@ -23,9 +26,29 @@ class Approvals(Resource):
         '''
         domains_list = domains_csv.split(',')
         self.args = self.get_parser.parse_args()
-        instances = database.find_multiple_instance_by_domains(domains_list)
-        if not instances:
+        get_instance = None
+        if self.args.apikey:
+            get_instance = database.find_instance_by_api_key(self.args.apikey)
+            if not get_instance:
+                raise e.Unauthorized(f"No Instance found matching provided API key. Please ensure you've typed it correctly")
+        precheck_instances = database.find_multiple_instance_by_domains(domains_list)
+        if not precheck_instances:
             raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
+        instances = []
+        for instance in precheck_instances:
+            if instance.visibility_endorsements == enums.ListVisibility.ENDORSED:
+                if get_instance is None:
+                    continue
+                if instance != get_instance and not instance.is_endorsing(get_instance):
+                    continue
+            if instance.visibility_endorsements == enums.ListVisibility.PRIVATE:
+                if get_instance is None:
+                    continue
+                if instance != get_instance:
+                    continue
+            instances.append(instance)
+        if len(instances) == 0:
+            raise e.Forbidden(f"You do not have access to see these endorsements")
         instance_details = []
         for e_instance in database.get_all_endorsed_instances_by_approving_id([instance.id for instance in instances]):
             endorsements = database.get_all_endorsement_reasons_for_endorsed_id(e_instance.id, [instance.id for instance in instances])
@@ -58,6 +81,7 @@ class Approvals(Resource):
 
 class Endorsements(Resource):
     get_parser = reqparse.RequestParser()
+    get_parser.add_argument("apikey", type=str, required=False, help="An instance's API key.", location='headers')
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
@@ -70,11 +94,30 @@ class Endorsements(Resource):
         '''Display all endorsements received by a specific domain
         '''
         self.args = self.get_parser.parse_args()
+        get_instance = None
+        if self.args.apikey:
+            get_instance = database.find_instance_by_api_key(self.args.apikey)
+            if not get_instance:
+                raise e.Unauthorized(f"No Instance found matching provided API key. Please ensure you've typed it correctly")
         instance = database.find_instance_by_domain(domain)
         if not instance:
             raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
         instance_details = []
-        for e_instance in database.get_all_approving_instances_by_endorsed_id(instance.id):
+        precheck_instances = database.get_all_approving_instances_by_endorsed_id(instance.id)
+        instances = []
+        for instance in precheck_instances:
+            if instance.visibility_endorsements == enums.ListVisibility.ENDORSED:
+                if get_instance is None:
+                    continue
+                if not instance.is_endorsing(get_instance):
+                    continue
+            if instance.visibility_endorsements == enums.ListVisibility.PRIVATE:
+                if get_instance is None:
+                    continue
+                if not instance != get_instance:
+                    continue
+            instances.append(instance)
+        for e_instance in instances:
             endorsements = database.get_all_endorsement_reasons_for_endorsed_id(instance.id, [e_instance.id])
             endorsements = [e for e in endorsements if e.reason is not None]
             e_instance_details = e_instance.get_details()
@@ -139,9 +182,12 @@ class Endorsements(Resource):
             reason=reason,
         )
         db.session.add(new_endorsement)
+        target_domain = target_instance.domain
+        if instance.visibility_endorsements != enums.ListVisibility.OPEN:
+            target_domain = '[REDACTED]'
         new_report = Report(
             source_domain=instance.domain,
-            target_domain=target_instance.domain,
+            target_domain=target_domain,
             report_type=enums.ReportType.ENDORSEMENT,
             report_activity=enums.ReportActivity.ADDED,
         )
@@ -202,9 +248,12 @@ class Endorsements(Resource):
                 changed = True
         if changed is False:
             return {"message":'OK'}, 200
+        target_domain = target_instance.domain
+        if instance.visibility_endorsements != enums.ListVisibility.OPEN:
+            target_domain = '[REDACTED]'
         new_report = Report(
             source_domain=instance.domain,
-            target_domain=target_instance.domain,
+            target_domain=target_domain,
             report_type=enums.ReportType.ENDORSEMENT,
             report_activity=enums.ReportActivity.MODIFIED,
         )
@@ -242,9 +291,12 @@ class Endorsements(Resource):
         if not endorsement:
             return {"message":'OK'}, 200
         db.session.delete(endorsement)
+        target_domain = target_instance.domain
+        if instance.visibility_endorsements != enums.ListVisibility.OPEN:
+            target_domain = '[REDACTED]'
         new_report = Report(
             source_domain=instance.domain,
-            target_domain=target_instance.domain,
+            target_domain=target_domain,
             report_type=enums.ReportType.ENDORSEMENT,
             report_activity=enums.ReportActivity.DELETED,
         )

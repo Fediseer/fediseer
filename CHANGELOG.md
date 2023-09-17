@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.16.0
+
+Allows instances to control the visibility of their endorsements, censures and hesitations by setting their visibility in PATCHing `api/b1/whitelist`
+   * OPEN: Public visibility (Default).
+   * ENDORSED: Only endorsed instances can see that list.
+   * PRIVATE: Only admins from their own instance can see that list.
+
+When a list visibility is not OPEN, the reports will use `[REDACTED]` as the target domain. But this will not affect historical reports.
+
 # 0.15.1
 
 * Added some rate limits. Currently each instance is limited to 20 actions per minute
