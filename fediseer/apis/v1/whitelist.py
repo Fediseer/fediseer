@@ -145,9 +145,12 @@ class WhitelistDomain(Resource):
     patch_parser.add_argument("sysadmins", default=None, required=False, type=int, help="How many sysadmins this instance has.", location="json")
     patch_parser.add_argument("moderators", default=None, required=False, type=int, help="How many moderators this instance has.", location="json")
     patch_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
+    patch_parser.add_argument("visibility_endorsements", required=False, type=str, location="json")
+    patch_parser.add_argument("visibility_censures", required=False, type=str, location="json")
+    patch_parser.add_argument("visibility_hesitations", required=False, type=str, location="json")
 
 
-    @api.expect(patch_parser,models.input_api_key_reset, validate=True)
+    @api.expect(patch_parser,models.input_instance_modify, validate=True)
     @api.marshal_with(models.response_model_api_key_reset, code=200, description='Instances', skip_none=True)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(403, 'Instance Not Registered', models.response_model_error)
@@ -171,11 +174,25 @@ class WhitelistDomain(Resource):
             instance.moderators = self.args.moderators
             changed = True
         if self.args.pm_proxy is not None:
-            logger.debug(self.args.pm_proxy)
             proxy = enums.PMProxy[self.args.pm_proxy]
             if instance.pm_proxy != proxy:
                 activitypub_pm.pm_new_proxy_switch(proxy,instance.pm_proxy,instance,user.username)
                 instance.pm_proxy = proxy
+                changed = True
+        if self.args.visibility_endorsements is not None:
+            visibility = enums.ListVisibility[self.args.visibility_endorsements]
+            if instance.visibility_endorsements != visibility:
+                instance.visibility_endorsements = visibility
+                changed = True
+        if self.args.visibility_censures is not None:
+            visibility = enums.ListVisibility[self.args.visibility_censures]
+            if instance.visibility_censures != visibility:
+                instance.visibility_censures = visibility
+                changed = True
+        if self.args.visibility_hesitations is not None:
+            visibility = enums.ListVisibility[self.args.visibility_hesitations]
+            if instance.visibility_hesitations != visibility:
+                instance.visibility_hesitations = visibility
                 changed = True
         if self.args.admin_username:
             requestor = None
