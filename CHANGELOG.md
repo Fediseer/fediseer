@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.15.1
+
+* Added some rate limits. Currently each instance is limited to 20 actions per minute
+
 # 0.15.0
 
 * Added solicitation. Now you can see which instances are requesting guarantees

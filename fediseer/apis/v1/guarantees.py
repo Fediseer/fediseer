@@ -190,7 +190,7 @@ class Guarantees(Resource):
         db.session.add(solicitation_report)
 
         db.session.delete(guarantee)
-        rejection_recorinstanced = database.get_rejection_record(instance.id,target_instance.id)
+        rejection_record = database.get_rejection_record(instance.id,target_instance.id)
         if rejection_record:
             rejection_record.refresh()
         else:
