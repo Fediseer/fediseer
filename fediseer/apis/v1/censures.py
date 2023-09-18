@@ -35,18 +35,18 @@ class CensuresGiven(Resource):
         if not precheck_instances:
             raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
         instances = []
-        for instance in precheck_instances:
-            if instance.visibility_censures == enums.ListVisibility.ENDORSED:
+        for p_instance in precheck_instances:
+            if p_instance.visibility_censures == enums.ListVisibility.ENDORSED:
                 if get_instance is None:
                     continue
-                if instance != get_instance and not instance.is_endorsing(get_instance):
+                if p_instance != get_instance and not p_instance.is_endorsing(get_instance):
                     continue
-            if instance.visibility_censures == enums.ListVisibility.PRIVATE:
+            if p_instance.visibility_censures == enums.ListVisibility.PRIVATE:
                 if get_instance is None:
                     continue
-                if instance != get_instance:
+                if p_instance != get_instance:
                     continue
-            instances.append(instance)
+            instances.append(p_instance)
         if len(instances) == 0:
             raise e.Forbidden(f"You do not have access to see these censures")
         if self.args.min_censures > len(instances):
@@ -125,18 +125,18 @@ class Censures(Resource):
         instance_details = []
         precheck_instances = database.get_all_censuring_instances_by_censured_id(instance.id)
         instances = []
-        for instance in precheck_instances:
-            if instance.visibility_censures == enums.ListVisibility.ENDORSED:
+        for p_instance in precheck_instances:
+            if p_instance.visibility_censures == enums.ListVisibility.ENDORSED:
                 if get_instance is None:
                     continue
-                if not instance.is_endorsing(get_instance):
+                if not p_instance.is_endorsing(get_instance):
                     continue
-            if instance.visibility_censures == enums.ListVisibility.PRIVATE:
+            if p_instance.visibility_censures == enums.ListVisibility.PRIVATE:
                 if get_instance is None:
                     continue
-                if not instance != get_instance:
+                if not p_instance != get_instance:
                     continue
-            instances.append(instance)
+            instances.append(p_instance)
         for c_instance in instances:
             censures = database.get_all_censure_reasons_for_censured_id(instance.id, [c_instance.id])
             censures = [c for c in censures if c.reason is not None]

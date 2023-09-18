@@ -35,19 +35,18 @@ class HesitationsGiven(Resource):
         if not precheck_instances:
             raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
         instances = []
-        for instance in precheck_instances:
-            if instance.visibility_hesitations == enums.ListVisibility.ENDORSED:
+        for p_instance in precheck_instances:
+            if p_instance.visibility_hesitations == enums.ListVisibility.ENDORSED:
                 if get_instance is None:
                     continue
-                if instance != get_instance and not instance.is_endorsing(get_instance):
+                if p_instance != get_instance and not p_instance.is_endorsing(get_instance):
                     continue
-            if instance.visibility_hesitations == enums.ListVisibility.PRIVATE:
-                logger.debug([instance.visibility_hesitations,instance,get_instance,instance != get_instance])
+            if p_instance.visibility_hesitations == enums.ListVisibility.PRIVATE:
                 if get_instance is None:
                     continue
-                if instance != get_instance:
+                if p_instance != get_instance:
                     continue
-            instances.append(instance)
+            instances.append(p_instance)
         if len(instances) == 0:
             raise e.Forbidden(f"You do not have access to see these hesitations")
         if self.args.min_hesitations > len(instances):
@@ -110,18 +109,18 @@ class Hesitations(Resource):
             raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
         precheck_instances = database.get_all_hesitant_instances_by_dubious_id(instance.id)
         instances = []
-        for instance in precheck_instances:
-            if instance.visibility_endorsements == enums.ListVisibility.ENDORSED:
+        for p_instance in precheck_instances:
+            if p_instance.visibility_endorsements == enums.ListVisibility.ENDORSED:
                 if get_instance is None:
                     continue
-                if not instance.is_endorsing(get_instance):
+                if not p_instance.is_endorsing(get_instance):
                     continue
-            if instance.visibility_endorsements == enums.ListVisibility.PRIVATE:
+            if p_instance.visibility_endorsements == enums.ListVisibility.PRIVATE:
                 if get_instance is None:
                     continue
-                if not instance != get_instance:
+                if not p_instance != get_instance:
                     continue
-            instances.append(instance)
+            instances.append(p_instance)
         instance_details = []
         for c_instance in instances:
             hesitations = database.get_all_hesitation_reasons_for_dubious_id(instance.id, [c_instance.id])
