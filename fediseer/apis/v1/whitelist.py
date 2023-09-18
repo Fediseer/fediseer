@@ -22,7 +22,7 @@ class Whitelist(Resource):
         self.args = self.get_parser.parse_args()
         instance_details = []
         for instance in database.get_all_instances(self.args.endorsements,self.args.guarantors):
-            instance_details.append(instance.get_details())
+            instance_details.append(instance.get_details(show_visibilities=True))
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
         if self.args.domains:
@@ -37,7 +37,7 @@ class WhitelistDomain(Resource):
 
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
-    @api.marshal_with(models.response_model_instances, code=200, description='Instances')
+    @api.marshal_with(models.response_model_instances_visibility, code=200, description='Instances')
     def get(self, domain):
         '''Display info about a specific instance
         '''
@@ -45,7 +45,7 @@ class WhitelistDomain(Resource):
         instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
         if not instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
-        return instance.get_details(),200
+        return instance.get_details(show_visibilities=True),200
 
 
     put_parser = reqparse.RequestParser()

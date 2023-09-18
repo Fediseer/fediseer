@@ -39,8 +39,13 @@ class Models:
             'sysadmins': fields.Integer(required=False, default=None, description="The count of system administrators in this instance as reported by its admins."),
             'moderators': fields.Integer(required=False, default=None, description="The count of community moderators in this instance as reported by its admins."),
         })
+        self.response_model_instances_visibility = api.inherit('InstanceVisibilityDetails', self.response_model_instances, {
+            'visibility_endorsements': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's endorsements. When set to ENDORSED, only endorsed instances can see their endorsements. If set to PRIVATE allow this instance's own admins can see their endorsements."),
+            'visibility_censures': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's censures. When set to ENDORSED, only endorsed instances can see their censures. If set to PRIVATE allow this instance's own admins can see their censures."),
+            'visibility_hesitations': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's hesitations. When set to ENDORSED, only endorsed instances can see their hesitations. If set to PRIVATE allow this instance's own admins can see their hesitations."),
+        })
         self.response_model_model_Whitelist_get = api.model('WhitelistedInstances', {
-            'instances': fields.List(fields.Nested(self.response_model_instances)),
+            'instances': fields.List(fields.Nested(self.response_model_instances_visibility)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })

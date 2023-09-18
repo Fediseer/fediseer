@@ -122,7 +122,7 @@ class Instance(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def get_details(self):
+    def get_details(self,show_visibilities=False):
         ret_dict = {
             "id": self.id,
             "domain": self.domain,
@@ -136,6 +136,10 @@ class Instance(db.Model):
             "sysadmins": self.sysadmins,
             "moderators": self.moderators,
         }
+        if show_visibilities:
+            ret_dict["visibility_endorsements"] = self.visibility_endorsements.name
+            ret_dict["visibility_censures"] = self.visibility_censures.name
+            ret_dict["visibility_hesitations"] = self.visibility_hesitations.name
         return ret_dict
 
 

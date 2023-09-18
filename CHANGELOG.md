@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.16.1
+
+* Fix bug not returning reasons when seeing which instances censured/endorsed/hesitatated against a specific instance
+* Whitelist endpoints now will return the visibility of an instance's lists
+
 # 0.16.0
 
 Allows instances to control the visibility of their endorsements, censures and hesitations by setting their visibility in PATCHing `api/b1/whitelist`
