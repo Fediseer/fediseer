@@ -9,7 +9,7 @@ class FindInstance(Resource):
 
 
     @api.expect(get_parser)
-    @api.marshal_with(models.response_model_instances, code=200, description='Instance', skip_none=True)
+    @api.marshal_with(models.response_model_instances_visibility, code=200, description='Instance', skip_none=True)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     def get(self):
         '''Retrieve instance information via API Key
@@ -21,4 +21,4 @@ class FindInstance(Resource):
         if not user:
             raise e.NotFound("API key not found. Please Claim an instance first and use the API key that is PM'd to you")
         instance = database.find_instance_by_user(user)
-        return instance.get_details(),200
+        return instance.get_details(show_visibilities=True),200
