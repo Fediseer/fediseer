@@ -9,7 +9,7 @@ class Guarantors(Resource):
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
-    decorators = [limiter.limit("30/minute"), limiter.limit("20/minute", key_func = get_request_path)]
+    decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)
@@ -36,7 +36,7 @@ class Guarantees(Resource):
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
-    decorators = [limiter.limit("30/minute"), limiter.limit("20/minute", key_func = get_request_path)]
+    decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='Instances', skip_none=True)

@@ -13,7 +13,7 @@ class CensuresGiven(Resource):
     get_parser.add_argument("min_censures", required=False, default=1, type=int, help="Limit to this amount of censures of more", location="args")
     get_parser.add_argument("reasons_csv", required=False, type=str, help="Only retrieve censures where their reasons include any of the text in this csv", location="args")
 
-    decorators = [limiter.limit("30/minute"), limiter.limit("20/minute", key_func = get_request_path)]
+    decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     @api.expect(get_parser)
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Censures_get, code=200, description='Instances', skip_none=True)
@@ -152,7 +152,7 @@ class Censures(Resource):
             return {"domains": [instance["domain"] for instance in instance_details]},200
         return {"instances": instance_details},200
 
-    decorators = [limiter.limit("30/minute"), limiter.limit("20/minute", key_func = get_request_path)]
+    decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
