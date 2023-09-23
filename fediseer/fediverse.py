@@ -69,7 +69,6 @@ def get_misskey_admins(domain,software):
                     if role.get("isAdministrator") is True:
                         admins_found.append(user_entry["username"])
             offset += 10
-            logger.debug(offset)
         if len(admins_found) == 0:
             raise Exception(f"No admin contact is specified for {domain}.")
         return admins_found
