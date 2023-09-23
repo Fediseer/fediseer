@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.16.2
+
+* Added way to retrieve misskey admins
+
 # 0.16.1
 
 * Fix bug not returning reasons when seeing which instances censured/endorsed/hesitatated against a specific instance

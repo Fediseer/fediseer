@@ -21,28 +21,61 @@ def get_mastodon_admins(domain,software):
         site = requests.get(f"https://{domain}/api/v2/instance")
         site_json = site.json()
         if "contact" not in site_json or "account" not in site_json["contact"] or "username" not in site_json["contact"]["account"]:
-            logger.error(f"No admin contact is specified for {domain}.")
             raise Exception(f"No admin contact is specified for {domain}.")
         return [site_json["contact"]["account"]["username"]]
     except Exception as err:
         if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}. Request text: {site.text()}")
+            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
+        else:
+            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
+        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
+
+def get_firefish_admins(domain,software):
+    site = None
+    try:
+        site = requests.get(f"https://{domain}/api/v1/instance")
+        site_json = site.json()
+        if "contact_account" not in site_json or "username" not in site_json["contact_account"]:
+            raise Exception(f"No admin contact is specified for {domain}.")
+        return [site_json["contact_account"]["username"]]
+    except Exception as err:
+        if site is not None:
+            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
         else:
             logger.error(f"Error retrieving {software} site info for {domain}: {err}")
         raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
 
 def get_misskey_admins(domain,software):
     site = None
+    site_json = None
+    offset = 0
+    admins_found = []
     try:
-        site = requests.get(f"https://{domain}/api/v1/instance")
-        site_json = site.json()
-        if "contact_account" not in site_json or "username" not in site_json["contact_account"]:
-            logger.error(f"No admin contact is specified for {domain}.")
+        while site_json is None or len(site_json) != 0 and offset < 500:
+            payload = {
+                "limit": 10,
+                "offset": offset,
+                "sort": "+createdAt",
+                "state": "alive",
+                "origin": "local",
+                "hostname": None
+                }
+            site = requests.post(f"https://{domain}/api/users", json=payload)
+            site_json = site.json()
+            for user_entry in site_json:
+                if user_entry.get("isAdmin") is True:
+                    admins_found.append(user_entry["username"])
+                for role in user_entry.get("roles",[]):
+                    if role.get("isAdministrator") is True:
+                        admins_found.append(user_entry["username"])
+            offset += 10
+            logger.debug(offset)
+        if len(admins_found) == 0:
             raise Exception(f"No admin contact is specified for {domain}.")
-        return [site_json["contact_account"]["username"]]
+        return admins_found
     except Exception as err:
         if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}. Request text: {site.text()}")
+            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
         else:
             logger.error(f"Error retrieving {software} site info for {domain}: {err}")
         raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
@@ -59,7 +92,7 @@ def get_pleroma_admins(domain,software):
         return [admin_username]
     except Exception as err:
         if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}. Request text: {site.text()}")
+            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
         else:
             logger.error(f"Error retrieving {software} site info for {domain}: {err}")
         raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
@@ -94,10 +127,10 @@ def get_admin_for_software(software: str, domain: str):
         "friendica": get_mastodon_admins,
         "pleroma": get_pleroma_admins,
         "akkoma": get_pleroma_admins,
-        "firefish": get_misskey_admins,
-        "iceshrimp": get_misskey_admins,
-        "mitra": get_misskey_admins,
         "misskey": get_misskey_admins,
+        "firefish": get_firefish_admins,
+        "iceshrimp": get_firefish_admins,
+        "mitra": get_firefish_admins,
         "unknown": get_unknown_admins,
         "wildcard": get_unknown_admins,
     }
