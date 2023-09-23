@@ -101,16 +101,16 @@ def discover_admins(domain,software):
     try:
         site = requests.get(f"https://{domain}/api/v1/instance")
         site_json = site.json()
-        # Pleroma/Akkoma style
-        if "email" in site_json:
-            admin_username = site_json["email"].split('@',1)[0]
-            return [admin_username]
         # Misskey/Firefish style
         if "contact_account" in site_json:
             return [site_json["contact_account"]["username"]]
         # Mastodon style
         if "contact" in site_json:
             return [site_json["contact"]["account"]["username"]]
+        # Pleroma/Akkoma style
+        if "email" in site_json:
+            admin_username = site_json["email"].split('@',1)[0]
+            return [admin_username]
         raise Exception(f"Site software '{software} does not match any of the known APIs")
     except Exception as err:
         logger.error(f"Error retrieving {software} site info for {domain}: {err}")
