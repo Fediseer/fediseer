@@ -95,7 +95,9 @@ class Instance(db.Model):
     oprhan_since = db.Column(db.DateTime, nullable=True)
     
     open_registrations = db.Column(db.Boolean, unique=False, nullable=False, index=True)
-    email_verify = db.Column(db.Boolean, unique=False, nullable=False, index=True)
+    email_verify = db.Column(db.Boolean, unique=False, nullable=True, index=True)
+    approval_required = db.Column(db.Boolean, unique=False, nullable=True, index=True)
+    has_captcha = db.Column(db.Boolean, unique=False, nullable=True, index=True)
     software = db.Column(db.String(50), unique=False, nullable=False, index=True)
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
@@ -123,13 +125,19 @@ class Instance(db.Model):
         db.session.commit()
 
     def get_details(self,show_visibilities=False):
+        email_verification = None
+        # We only know this info for lemmy currently
+        if self.software == "lemmy":
+            email_verification = self.email_verify
         ret_dict = {
             "id": self.id,
             "domain": self.domain,
             "software": self.software,
             "claimed": len(self.admins),
             "open_registrations": self.open_registrations,
-            "email_verify": self.email_verify,
+            "email_verify": email_verification,
+            "approval_required": self.approval_required,
+            "has_captcha": self.has_captcha,
             "endorsements": len(self.endorsements),
             "approvals": len(self.approvals),
             "guarantor": self.get_guarantor_domain(),
