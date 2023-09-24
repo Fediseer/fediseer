@@ -15,7 +15,7 @@ from mastodon import Mastodon
 from loguru import logger
 from fediseer.database import functions as database
 from fediseer.consts import SUPPORTED_SOFTWARE, FEDISEER_VERSION
-from fediseer.fediverse import get_admin_for_software
+from fediseer.fediverse import InstanceInfo
 from fediseer import enums
 
 class ActivityPubPM:    
@@ -187,13 +187,13 @@ class ActivityPubPM:
         admins = database.find_admins_by_instance(instance)
         if not admins:
             try:
-                admins = get_admin_for_software(software, domain)
+                admins = InstanceInfo(domain).admin_usernames
             except Exception as err:
                 if software not in SUPPORTED_SOFTWARE:
                     logger.warning(f"Failed to figure out admins from {software}: {domain}")
                 raise e.BadRequest(f"Failed to retrieve admin list: {err}")
         else:
-            admins = [a.username for a in admins]
+            admins = set([a.username for a in admins])
             proxy = instance.pm_proxy
         if not admins:
             raise e.BadRequest(f"Could not determine admins for {domain}")

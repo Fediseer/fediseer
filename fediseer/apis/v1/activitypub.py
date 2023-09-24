@@ -1,5 +1,4 @@
 from fediseer.apis.v1.base import *
-from fediseer.fediverse import get_nodeinfo
 
 class User(Resource):
     get_parser = reqparse.RequestParser()

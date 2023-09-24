@@ -10,7 +10,7 @@ from fediseer import exceptions as e
 from fediseer.utils import hash_api_key
 from fediseer.messaging import activitypub_pm
 from pythorhead import Lemmy
-from fediseer.fediverse import get_admin_for_software, get_nodeinfo, get_instance_info
+from fediseer.fediverse import InstanceInfo
 from fediseer.limiter import limiter
 
 api = Namespace('v1', 'API Version 1' )
@@ -60,54 +60,41 @@ class Suspicions(Resource):
         return {"instances": sus_instances},200
 
 def ensure_instance_registered(domain, allow_unreachable=False):        
-    if domain.endswith("test.dbzer0.com"):
-        # Fake instances for testing chain of trust
-        requested_lemmy = Lemmy(f"https://{domain}")
-        requested_lemmy._requestor.nodeinfo = {"software":{"name":"lemmy"}}
-        open_registrations = False
-        email_verify = True
-        has_captcha = True
-        software = "lemmy"
-        admin_usernames = ["db0"]
-        nodeinfo = get_nodeinfo("lemmy.dbzer0.com")
-        requested_lemmy = Lemmy(f"https://{domain}")
-    else:
-        software,open_registrations,approval_required,email_verify,has_captcha = get_instance_info(domain,allow_unreachable)
-        try:
-            admin_usernames = get_admin_for_software(software, domain)
-        except:
-            admin_usernames = []
+    instance_info = InstanceInfo(domain,allow_unreachable=allow_unreachable)
     instance = database.find_instance_by_domain(domain)
     if instance:
         if (
-            instance.software != software or
-            instance.open_registrations != open_registrations or
-            instance.approval_required != approval_required or
-            instance.email_verify != email_verify or
-            instance.has_captcha != has_captcha
+            instance.software != instance_info.software or
+            instance.open_registrations != instance_info.open_registrations or
+            instance.approval_required != instance_info.approval_required or
+            instance.email_verify != instance_info.email_verify or
+            instance.has_captcha != instance_info.has_captcha
         ):
-            logger.debug(["would change",software,open_registrations,approval_required,email_verify,has_captcha])        
-            # instance.software = software
-            # instance.open_registrations = open_registrations
-            # instance.approval_required = approval_required
-            # instance.email_verify = email_verify
-            # instance.has_captcha = has_captcha
-            # db.session.commit()
-        logger.debug([software,open_registrations,approval_required,email_verify,has_captcha])        
-        return instance, nodeinfo, admin_usernames
+            # logger.debug(["new",instance_info.software,instance_info.open_registrations,instance_info.approval_required,instance_info.email_verify,instance_info.has_captcha])        
+            # logger.debug(["old", instance.software,instance.open_registrations,instance.approval_required,instance.email_verify,instance.has_captcha])        
+            logger.debug(f"Updated instance info for {domain}")
+            instance.software = instance_info.software
+            instance.open_registrations = instance_info.open_registrations
+            instance.approval_required = instance_info.approval_required
+            instance.email_verify = instance_info.email_verify
+            instance.has_captcha = instance_info.has_captcha
+            db.session.commit()
+        
+        return instance, instance_info
     new_instance = Instance(
         domain=domain,
-        open_registrations=open_registrations,
-        email_verify=email_verify,
-        approval_required=approval_required,
-        has_captcha=has_captcha,
-        software=software,
+        open_registrations=instance_info.open_registrations,
+        email_verify=instance_info.email_verify,
+        approval_required=instance_info.approval_required,
+        has_captcha=instance_info.has_captcha,
+        software=instance_info.software,
     )
     new_instance.create()
-    return new_instance, nodeinfo, admin_usernames
+    return new_instance, instance_info
 
-from fediseer.flask import OVERSEER
-with OVERSEER.app_context():
-    logger.debug(ensure_instance_registered("lemmy.dbzer0.com"))
-    import sys
-    sys.exit()
+# Debug
+# from fediseer.flask import OVERSEER
+# with OVERSEER.app_context():
+#     logger.debug(ensure_instance_registered("lemmings.world"))
+#     import sys
+#     sys.exit()

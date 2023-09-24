@@ -5,55 +5,71 @@ from fediseer.consts import FEDISEER_VERSION
 import fediseer.exceptions as e
 
 class InstanceInfo():
-def get_lemmy_admins(domain,software):
-    requested_lemmy = Lemmy(f"https://{domain}")
-    try:
-        site = requested_lemmy.site.get()
-    except Exception as err:
-        logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise err
-    if not site:
-        logger.error(f"Error retrieving {software} site info for {domain}")
-        raise Exception(f"Error retrieving {software} site info for {domain}")
-    return [a["person"]["name"] for a in site["admins"]]
 
-def get_mastodon_admins(domain,software):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v2/instance")
-        site_json = site.json()
-        if "contact" not in site_json or "account" not in site_json["contact"] or "username" not in site_json["contact"]["account"]:
-            raise Exception(f"No admin contact is specified for {domain}.")
-        return [site_json["contact"]["account"]["username"]]
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
+    domain = None
+    node_info = None
+    instance_info = None
+    admin_usernames = set()
+    software = None
+    open_registrations = None
+    approval_required = None
+    email_verify = None
+    has_captcha = None
+    _allow_unreachable = False
+    _req_timeout = 5
+
+    def __init__(self, domain, allow_unreachable=False, req_timeout=5):
+        self.domain = domain
+        self._allow_unreachable = allow_unreachable
+        self._req_timeout = req_timeout
+        if domain.endswith("test.dbzer0.com"):
+            # Fake instances for testing chain of trust
+            self.open_registrations = False
+            self.approval_required = False
+            self.email_verify = True
+            self.has_captcha = True
+            self.software = "lemmy"
+            self.admin_usernames = {"db0"}
+            self.node_info = InstanceInfo.get_nodeinfo("lemmy.dbzer0.com")
+            self.instance_info = {}
+            return
+
+        self.node_info = InstanceInfo.get_nodeinfo(domain)
+        try:
+            self.parse_instance_info()
+        except Exception as err:
+            if self.node_info is not None:
+                sw = self.software
+            else:
+                sw = 'Unknown'
+            logger.error(f"Error retrieving {sw} site info for {self.domain}: {err}")
+            raise Exception(f"Error retrieving {sw} site info for {self.domain}: {err}")
+        try:
+            self.retrieve_admins()
+        except:
+            pass
+
+    def get_lemmy_admins(self):
+        self.admin_usernames = set([a["person"]["name"] for a in self.instance_info["admins"]])
+
+    def get_mastodon_admins(self):
+        if "contact_account" in self.instance_info: # New API
+            if "username" not in self.instance_info["contact_account"]:
+                raise Exception(f"No admin contact is specified for {self.domain}.")
+            self.admin_usernames = {self.instance_info["contact_account"]["username"]}
+        elif "contact" in self.instance_info: # Old API
+            if "account" not in self.instance_info["contact"]:
+                raise Exception(f"No admin contact is specified for {self.domain}.")
+            self.admin_usernames = {self.instance_info["contact"]["account"]["username"]}
         else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
+            raise Exception(f"Could not determine admin contacts for {self.domain}.")
 
-def get_firefish_admins(domain,software):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v1/instance")
-        site_json = site.json()
-        if "contact_account" not in site_json or "username" not in site_json["contact_account"]:
-            raise Exception(f"No admin contact is specified for {domain}.")
-        return [site_json["contact_account"]["username"]]
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-def get_misskey_admins(domain,software):
-    site = None
-    site_json = None
-    offset = 0
-    admins_found = []
-    try:
-        while site_json is None or len(site_json) != 0 and offset < 500:
+    def get_misskey_admins(self):
+        site_users = None
+        users_json = None
+        offset = 0
+        admins_found = set()
+        while users_json is None or len(users_json) != 0 and offset < 500:
             payload = {
                 "limit": 10,
                 "offset": offset,
@@ -62,237 +78,183 @@ def get_misskey_admins(domain,software):
                 "origin": "local",
                 "hostname": None
                 }
-            site = requests.post(f"https://{domain}/api/users", json=payload)
-            site_json = site.json()
-            for user_entry in site_json:
+            site_users = requests.post(f"https://{self.domain}/api/users", json=payload)
+            users_json = site_users.json()
+            for user_entry in users_json:
                 if user_entry.get("isAdmin") is True:
-                    admins_found.append(user_entry["username"])
+                    admins_found.add(user_entry["username"])
                 for role in user_entry.get("roles",[]):
                     if role.get("isAdministrator") is True:
-                        admins_found.append(user_entry["username"])
+                        admins_found.add(user_entry["username"])
             offset += 10
         if len(admins_found) == 0:
-            raise Exception(f"No admin contact is specified for {domain}.")
-        return admins_found
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
+            raise Exception(f"No admin contact is specified for {self.domain}.")
+        self.admin_usernames = admins_found
 
-def get_pleroma_admins(domain,software):
-    nodeinfo = None
-    try:
-        nodeinfo = get_nodeinfo(domain)
-        nodeinfo_json = nodeinfo.json()
-        if "staffAccounts" not in nodeinfo_json or len(nodeinfo_json["staffAccounts"]) == 0:
-            logger.error(f"No admin contact is specified for {domain}.")
-            raise Exception(f"No admin contact is specified for {domain}.")
-        admin_list = []
-        for staff in nodeinfo_json["staffAccounts"]:
-            admin_list.append(staff.split('/')[-1])
-        return admin_list
-    except Exception as err:
-        if nodeinfo is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
+    def get_pleroma_admins(self):
+        if "staffAccounts" not in self.node_info["metadata"] or len(self.node_info["metadata"]["staffAccounts"]) == 0:
+            raise Exception(f"No admin contact is specified for {self.domain}.")
+        for staff in self.node_info["metadata"]["staffAccounts"]:
+            self.admin_usernames.add(staff.split('/')[-1])
 
-def discover_admins(domain,software):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v1/instance")
-        site_json = site.json()
-        # Firefish style
-        if "contact_account" in site_json:
-            return [site_json["contact_account"]["username"]]
-        # Mastodon style
-        if "contact" in site_json:
-            return [site_json["contact"]["account"]["username"]]
-        # Pleroma/Akkoma style
-        if "email" in site_json:
-            admin_username = site_json["email"].split('@',1)[0]
-            return [admin_username]
-        raise Exception(f"Site software '{software} does not match any of the known APIs")
-    except Exception as err:
-        logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
+    def discover_admins(self):
+        try:
+            self.get_mastodon_admins()
+            return
+        except:
+            pass
+        try:
+            self.get_lemmy_admins()
+            return
+        except:
+            pass
+        try:
+            self.get_pleroma_admins()
+            return
+        except:
+            pass
+        try:
+            self.get_misskey_admins()
+            return
+        except:
+            pass
+        logger.warning(f"Site software '{self.software} does not match any of the known APIs")
+        raise Exception(f"Site software '{self.software} does not match any of the known APIs")
 
-def get_unknown_admins(domain,software):
-    return []
+    def get_unknown_admins(self):
+        return []
 
-def get_admin_for_software(software: str, domain: str):
-    software_map = {
-        "lemmy": get_lemmy_admins,
-        "mastodon": get_mastodon_admins,
-        "friendica": get_mastodon_admins,
-        "pleroma": get_pleroma_admins,
-        "akkoma": get_pleroma_admins,
-        "misskey": get_misskey_admins,
-        "firefish": get_firefish_admins,
-        "iceshrimp": get_firefish_admins,
-        "mitra": get_firefish_admins,
-        "unknown": get_unknown_admins,
-        "wildcard": get_unknown_admins,
-    }
-    if software not in software_map:
-        return discover_admins(domain,software)
-    return software_map[software](domain,software)
-
-def get_lemmy_info(domain,software,nodeinfo):
-    try:
-        requested_lemmy = Lemmy(f"https://{domain}")
-        site = requested_lemmy.site.get()
-        if not site:
-            raise Exception(f"Error encountered while polling lemmy domain. Please check it's running correctly")
-        open_registrations = site["site_view"]["local_site"]["registration_mode"] == "open"
-        email_verify = site["site_view"]["local_site"]["require_email_verification"]
-        approval_required = site["site_view"]["local_site"]["registration_mode"] == "RequireApplication"
-        has_captcha = site["site_view"]["local_site"]["captcha_enabled"]
-        return software,open_registrations,approval_required,email_verify,has_captcha 
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-def get_mastodon_info(domain,software,nodeinfo):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v1/instance",timeout=5)
-        site_json = site.json()
-        approval_required = site_json["approval_required"]
-        if nodeinfo is None:
-            raise Exception("Error retrieving nodeinfo")
-        open_registrations = nodeinfo["openRegistrations"]
-        email_verify = None
-        has_captcha = None
-        return software,open_registrations,approval_required,email_verify,has_captcha
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-def get_pleroma_info(domain,software,nodeinfo):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v1/instance",timeout=5)
-        site_json = site.json()
-        approval_required = site_json["approval_required"]
-        if nodeinfo is None:
-            raise Exception("Error retrieving nodeinfo")
-        open_registrations = nodeinfo["openRegistrations"]
-        email_verify = None
-        has_captcha = None
-        return software,open_registrations,approval_required,email_verify,has_captcha
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-def get_firefish_info(domain,software,nodeinfo):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v1/instance",timeout=5)
-        site_json = site.json()
-        approval_required = site_json["approval_required"]
-        if nodeinfo is None:
-            raise Exception("Error retrieving nodeinfo")
-        open_registrations = nodeinfo["openRegistrations"]
-        email_verify = nodeinfo["metadata"]["emailRequiredForSignup"]
-        has_captcha = nodeinfo["metadata"]["enableHcaptcha"] is True or nodeinfo["metadata"]["enableRecaptcha"] is True
-        return software,open_registrations,approval_required,email_verify,has_captcha
-    except Exception as err:
-        if site is not None:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}.")
-        else:
-            logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-def get_unknown_info(domain,software,nodeinfo):
-    try:
-        if nodeinfo is None:
-            return software,False,None,None,None
-        open_registrations = nodeinfo.get("openRegistrations", False)
-        return software,open_registrations,None,None,None
-    except Exception as err:
-        logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-def discover_info(domain,software,nodeinfo):
-    site = None
-    try:
-        site = requests.get(f"https://{domain}/api/v1/instance")
-        site_json = site.json()
-        approval_required = site_json.get("approval_required")
-        if nodeinfo is None:
-            raise Exception("Error retrieving nodeinfo")
-        open_registrations = nodeinfo.get("openRegistrations")
-        # Only firefish and lemmy report the next two
-        if "metadata" in nodeinfo:
-            email_verify = nodeinfo["metadata"].get("emailRequiredForSignup")
-            has_captcha = None
-            if nodeinfo["metadata"].get("enableHcaptcha") is True or nodeinfo.get("enableRecaptcha") is True:
-                has_captcha = True
-        return software,open_registrations,approval_required,email_verify,has_captcha
-    except Exception as err:
-        logger.error(f"Error retrieving {software} site info for {domain}: {err}")
-        raise Exception(f"Error retrieving {software} site info for {domain}: {err}")
-
-
-def get_instance_info(domain: str, allow_unreachable=False):
-    nodeinfo = get_nodeinfo(domain)
-    if not nodeinfo:
-        if not allow_unreachable:
-            raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
-        else:
-            software = "unknown"
-            if "*" in domain:
-                software = "wildcard"
-    else:
-        software = nodeinfo["software"]["name"]
-    software_map = {
-        "lemmy": get_lemmy_info,
-        "mastodon": get_mastodon_info,
-        "friendica": get_mastodon_info,
-        "pleroma": get_pleroma_info,
-        "akkoma": get_pleroma_info,
-        "firefish": get_firefish_info,
-        "iceshrimp": get_firefish_info,
-        "mitra": get_firefish_info,
-        "unknown": get_unknown_info,
-        "wildcard": get_unknown_info,
-    }
-    if software not in software_map:
-        return discover_info(domain,software,nodeinfo)
-    return software_map[software](domain,software,nodeinfo)
-
-
-def get_nodeinfo(domain):
-    try:
-        headers = {
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Sec-GPC": "1",
-            "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
+    def retrieve_admins(self):
+        software_map = {
+            "lemmy": self.get_lemmy_admins,
+            "mastodon": self.get_mastodon_admins,
+            "friendica": self.get_mastodon_admins,
+            "pleroma": self.get_pleroma_admins,
+            "akkoma": self.get_pleroma_admins,
+            "misskey": self.get_misskey_admins,
+            "firefish": self.get_mastodon_admins,
+            "iceshrimp": self.get_mastodon_admins,
+            "mitra": self.get_mastodon_admins,
+            "unknown": self.get_unknown_admins,
+            "wildcard": self.get_unknown_admins,
         }
-        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=3).json()
-        headers["Sec-Fetch-Site"] = "cross-site"
-        nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=3).json()
-        return nodeinfo
-    except Exception as err:
-        return None
+        if self.software not in software_map:
+            self.discover_admins()
+        else:
+            software_map[self.software]()
 
-# software,open_registrations,approval_required,email_verify,has_captcha    
-# logger.debug(get_instance_info("lemmy.dbzer0.com"))
+    def get_lemmy_info(self):
+        requested_lemmy = Lemmy(f"https://{self.domain}")
+        self.instance_info = requested_lemmy.site.get()
+        if not self.instance_info:
+            raise Exception(f"Error encountered while polling lemmy domain. Please check it's running correctly")
+        self.open_registrations = self.instance_info["site_view"]["local_site"]["registration_mode"] == "open"
+        self.email_verify = self.instance_info["site_view"]["local_site"]["require_email_verification"]
+        self.approval_required = self.instance_info["site_view"]["local_site"]["registration_mode"] == "RequireApplication"
+        self.has_captcha = self.instance_info["site_view"]["local_site"]["captcha_enabled"]
+
+    def get_mastodon_info(self):
+        site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
+        self.instance_info = site.json()
+        self.approval_required = self.instance_info["approval_required"]
+        if self.node_info is None:
+            raise Exception("Error retrieving nodeinfo")
+        self.open_registrations = self.node_info["openRegistrations"]
+        self.email_verify = None
+        self.has_captcha = None
+
+    def get_pleroma_info(self):
+        site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
+        self.instance_info = site.json()
+        self.approval_required = self.instance_info["approval_required"]
+        if self.node_info is None:
+            raise Exception("Error retrieving nodeinfo")
+        self.open_registrations = self.node_info["openRegistrations"]
+        self.email_verify = None
+        self.has_captcha = None
+
+    def get_firefish_info(self):
+        site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
+        self.instance_info = site.json()
+        self.approval_required = self.instance_info["approval_required"]
+        if self.node_info is None:
+            raise Exception("Error retrieving nodeinfo")
+        self.open_registrations = self.node_info["openRegistrations"]
+        self.email_verify = self.node_info["metadata"]["emailRequiredForSignup"]
+        self.has_captcha = self.node_info["metadata"]["enableHcaptcha"] is True or self.node_info["metadata"]["enableRecaptcha"] is True
+
+    def get_unknown_info(self):
+        if self.node_info is not None:
+            self.open_registrations = self.node_info.get("openRegistrations", False)
+
+    def discover_info(self):
+        site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
+        self.instance_info = site.json()
+        self.approval_required = self.instance_info.get("approval_required")
+        if self.node_info is None:
+            raise Exception("Error retrieving nodeinfo")
+        self.open_registrations = self.node_info.get("openRegistrations")
+        # Only firefish and lemmy report the next two
+        if "metadata" in self.node_info:
+            self.email_verify = self.node_info["metadata"].get("emailRequiredForSignup")
+            self.has_captcha = None
+            if self.node_info["metadata"].get("enableHcaptcha") is True or self.node_info.get("enableRecaptcha") is True:
+                self.has_captcha = True
+
+
+    def parse_instance_info(self):
+        if not self.node_info:
+            if not self._allow_unreachable:
+                raise e.BadRequest(f"Error encountered while polling domain {self.domain}. Please check it's running correctly")
+            else:
+                self.software = "unknown"
+                if "*" in self.domain:
+                    self.software = "wildcard"
+        else:
+            self.software = self.node_info["software"]["name"]
+        software_map = {
+            "lemmy": self.get_lemmy_info,
+            "mastodon": self.get_mastodon_info,
+            "friendica": self.get_mastodon_info,
+            "pleroma": self.get_pleroma_info,
+            "akkoma": self.get_pleroma_info,
+            "firefish": self.get_firefish_info,
+            "iceshrimp": self.get_firefish_info,
+            "mitra": self.get_firefish_info,
+            "unknown": self.get_unknown_info,
+            "wildcard": self.get_unknown_info,
+        }
+        if self.software not in software_map:
+            self.discover_info()
+        else:
+            software_map[self.software]()
+
+    @staticmethod
+    def get_nodeinfo(domain):
+        try:
+            headers = {
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+                "Sec-GPC": "1",
+                "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
+            }
+            wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=3).json()
+            headers["Sec-Fetch-Site"] = "cross-site"
+            nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=3).json()
+            return nodeinfo
+        except Exception as err:
+            return None
+
+# Debug
+# ii = InstanceInfo("lemmy.dbzer0.com")
+# logger.debug([
+#     ii.software,
+#     ii.open_registrations,
+#     ii.approval_required,
+#     ii.email_verify,
+#     ii.has_captcha,
+#     ii.admin_usernames])
 # import sys
 # sys.exit()

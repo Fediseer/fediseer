@@ -91,7 +91,7 @@ class Guarantees(Resource):
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
-        target_instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
+        target_instance, instance_info = ensure_instance_registered(domain)
         if not target_instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         if database.get_guarantee(target_instance.id,instance.id):
