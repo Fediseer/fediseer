@@ -4,6 +4,7 @@ from fediseer.classes.user import User, Claim
 from fediseer import enums
 from fediseer.classes.instance import Solicitation
 from fediseer.classes.reports import Report
+from fediseer.register import ensure_instance_registered
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -29,8 +30,6 @@ class Whitelist(Resource):
             return {"domains": [instance["domain"] for instance in instance_details]},200
         return {"instances": instance_details},200
 
-
-
 class WhitelistDomain(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -42,7 +41,13 @@ class WhitelistDomain(Resource):
         '''Display info about a specific instance
         '''
         self.args = self.get_parser.parse_args()
-        instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
+        try:
+            instance, instance_info = ensure_instance_registered(domain)
+        except Exception as err:
+            # If the domain had been previously registered, we return its cached info
+            instance = database.find_instance_by_domain(domain)
+            if not instance:
+                raise err
         if not instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         return instance.get_details(show_visibilities=True),200
@@ -66,14 +71,14 @@ class WhitelistDomain(Resource):
         self.args = self.put_parser.parse_args()
         if '@' in self.args.admin:
             raise e.BadRequest("Please send the username without any @ signs or domains")
-        instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
+        instance, instance_info = ensure_instance_registered(domain)
         guarantor_instance = None
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
             if not guarantor_instance:
                 raise e.BadRequest(f"Requested guarantor domain {self.args.guarantor} is not registered with the Fediseer yet!")
-        if self.args.admin not in admin_usernames:
-            if len(admin_usernames) == 0:
+        if self.args.admin not in instance_info.admin_usernames:
+            if len(instance_info.admin_usernames) == 0:
                 raise e.Unauthorized(f"We could not discover any admins for this instance software. Please Ensure your software exposes this info. If it's exposed in a novel manner, consider sending us a PR to be able to retrieve this infomation.")
             else:
                 raise e.Forbidden(f"Only admins of that {instance.software} are allowed to claim it.")

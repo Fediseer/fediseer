@@ -12,8 +12,9 @@ from fediseer.classes.instance import Instance, Endorsement, Guarantee, Rejectio
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
+from fediseer.consts import POLLS_PER_DAY
 
-def get_all_instances(min_endorsements = 0, min_guarantors = 1):
+def get_all_instances(min_endorsements = 0, min_guarantors = 1, include_decommissioned = True):
     query = db.session.query(
         Instance
     ).outerjoin(

@@ -21,3 +21,9 @@ class ListVisibility(enum.Enum):
     OPEN = 0
     ENDORSED = 1
     PRIVATE = 2
+
+class InstanceState(enum.Enum):
+    UP = 0
+    UNREACHABLE = 1
+    OFFLINE = 2
+    DECIMMISSIONED = 3

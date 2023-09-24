@@ -10,3 +10,4 @@ SUPPORTED_SOFTWARE = {
     "misskey",
     "mitra",
 }
+POLLS_PER_DAY=2

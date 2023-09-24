@@ -2,6 +2,7 @@ from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Guarantee, RejectionRecord, Solicitation
 from fediseer.classes.reports import Report
 from fediseer import enums
+from fediseer.register import ensure_instance_registered
 
 class Guarantors(Resource):
     get_parser = reqparse.RequestParser()
@@ -91,7 +92,7 @@ class Guarantees(Resource):
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
-        target_instance, nodeinfo, admin_usernames = ensure_instance_registered(domain)
+        target_instance, instance_info = ensure_instance_registered(domain)
         if not target_instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         if database.get_guarantee(target_instance.id,instance.id):

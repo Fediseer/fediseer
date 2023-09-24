@@ -10,7 +10,7 @@ from fediseer import exceptions as e
 from fediseer.utils import hash_api_key
 from fediseer.messaging import activitypub_pm
 from pythorhead import Lemmy
-from fediseer.fediverse import get_admin_for_software, get_nodeinfo
+from fediseer.fediverse import InstanceInfo
 from fediseer.limiter import limiter
 
 api = Namespace('v1', 'API Version 1' )
@@ -59,60 +59,9 @@ class Suspicions(Resource):
             return {"domains": [instance["domain"] for instance in sus_instances]},200
         return {"instances": sus_instances},200
 
-
-
-def ensure_instance_registered(domain, allow_unreachable=False):        
-    if domain.endswith("test.dbzer0.com"):
-        # Fake instances for testing chain of trust
-        requested_lemmy = Lemmy(f"https://{domain}")
-        requested_lemmy._requestor.nodeinfo = {"software":{"name":"lemmy"}}
-        open_registrations = False
-        email_verify = True
-        software = "lemmy"
-        admin_usernames = ["db0"]
-        nodeinfo = get_nodeinfo("lemmy.dbzer0.com")
-        requested_lemmy = Lemmy(f"https://{domain}")
-        site = requested_lemmy.site.get()
-    else:
-        nodeinfo = get_nodeinfo(domain)
-        if not nodeinfo:
-            if not allow_unreachable:
-                raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
-            else:
-                software = "unknown"
-                if "*" in domain:
-                    software = "wildcard"
-                nodeinfo = {
-                    "openRegistrations": False,
-                    "software": {
-                        "name": software
-                    }
-                }
-        software = nodeinfo["software"]["name"]
-        if software == "lemmy":
-            requested_lemmy = Lemmy(f"https://{domain}")
-            site = requested_lemmy.site.get()
-            if not site:
-                raise e.BadRequest(f"Error encountered while polling lemmy domain {domain}. Please check it's running correctly")
-            open_registrations = site["site_view"]["local_site"]["registration_mode"] == "open"
-            email_verify = site["site_view"]["local_site"]["require_email_verification"]
-            software = software
-            admin_usernames = [a["person"]["name"] for a in site["admins"]]
-        else:
-            open_registrations = nodeinfo["openRegistrations"]
-            email_verify = False
-            try:
-                admin_usernames = get_admin_for_software(software, domain)
-            except:
-                admin_usernames = []
-    instance = database.find_instance_by_domain(domain)
-    if instance:
-        return instance, nodeinfo, admin_usernames
-    new_instance = Instance(
-        domain=domain,
-        open_registrations=open_registrations,
-        email_verify=email_verify,
-        software=software,
-    )
-    new_instance.create()
-    return new_instance, nodeinfo, admin_usernames
+# Debug
+# from fediseer.flask import OVERSEER
+# with OVERSEER.app_context():
+#     logger.debug(ensure_instance_registered("lemmings.world"))
+#     import sys
+#     sys.exit()
