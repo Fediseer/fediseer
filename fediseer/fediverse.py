@@ -34,16 +34,18 @@ class InstanceInfo():
             self.instance_info = {}
             return
 
-        self.node_info = InstanceInfo.get_nodeinfo(domain)
+        self.node_info = InstanceInfo.get_nodeinfo(domain,req_timeout=self._req_timeout)
         try:
             self.parse_instance_info()
         except Exception as err:
-            if self.node_info is not None:
+            # This is just to report for the error message
+            if self.software is not None:
                 sw = self.software
             else:
-                sw = 'Unknown'
-            logger.error(f"Error retrieving {sw} site info for {self.domain}: {err}")
-            raise Exception(f"Error retrieving {sw} site info for {self.domain}: {err}")
+                sw = 'unknown'
+            if not self._allow_unreachable:
+                logger.error(f"Error retrieving {sw} site info for {self.domain}: {err}")
+                raise Exception(f"Error retrieving {sw} site info for {self.domain}: {err}")
         try:
             self.retrieve_admins()
         except:
@@ -188,7 +190,9 @@ class InstanceInfo():
             self.open_registrations = self.node_info.get("openRegistrations", False)
 
     def discover_info(self):
-        site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
+        site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout,allow_redirects=False)
+        if site.status_code != 200:
+            raise Exception(f"Unexpected status code retrieved when discovering nodeinfo: {site.status_code}")
         self.instance_info = site.json()
         self.approval_required = self.instance_info.get("approval_required")
         if self.node_info is None:
@@ -204,9 +208,7 @@ class InstanceInfo():
 
     def parse_instance_info(self):
         if not self.node_info:
-            if not self._allow_unreachable:
-                raise e.BadRequest(f"Error encountered while polling domain {self.domain}. Please check it's running correctly")
-            else:
+            if self._allow_unreachable:
                 self.software = "unknown"
                 if "*" in self.domain:
                     self.software = "wildcard"
@@ -230,7 +232,7 @@ class InstanceInfo():
             software_map[self.software]()
 
     @staticmethod
-    def get_nodeinfo(domain):
+    def get_nodeinfo(domain, req_timeout=3):
         try:
             headers = {
                 "Sec-Fetch-Dest": "document",
@@ -240,12 +242,22 @@ class InstanceInfo():
                 "Sec-GPC": "1",
                 "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
             }
-            wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=3).json()
+            wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=req_timeout).json()
             headers["Sec-Fetch-Site"] = "cross-site"
-            nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=3).json()
+            nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=req_timeout).json()
             return nodeinfo
         except Exception as err:
             return None
+
+    @staticmethod
+    def is_reachable(domain, req_timeout=5):
+        # Attempts to check if we can even reach the frontpage of the domain
+        # so that we know if it's an issue reaching the nodeinfo, or a problem of reaching the domain
+        logger.debug(domain)
+        req = requests.get(f"https://{domain}", timeout=req_timeout, allow_redirects=False)
+        logger.debug(req.status_code)
+        if req.status_code not in [200,401,403]:
+            raise Exception(f"Status code unexpected for instance frontpage: {req.status_code}")
 
 # Debug
 # ii = InstanceInfo("lemmy.dbzer0.com")

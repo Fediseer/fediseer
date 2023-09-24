@@ -1,3 +1,4 @@
 ALTER TABLE instances ADD COLUMN approval_required BOOLEAN;
 ALTER TABLE instances ADD COLUMN has_captcha BOOLEAN;
+ALTER TABLE instances ADD COLUMN poll_failures INTEGER default 0;
 ALTER TABLE instances ALTER COLUMN email_verify DROP NOT NULL;

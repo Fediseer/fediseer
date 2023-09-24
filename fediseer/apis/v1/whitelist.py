@@ -30,8 +30,6 @@ class Whitelist(Resource):
             return {"domains": [instance["domain"] for instance in instance_details]},200
         return {"instances": instance_details},200
 
-
-
 class WhitelistDomain(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
@@ -43,7 +41,13 @@ class WhitelistDomain(Resource):
         '''Display info about a specific instance
         '''
         self.args = self.get_parser.parse_args()
-        instance, instance_info = ensure_instance_registered(domain)
+        try:
+            instance, instance_info = ensure_instance_registered(domain)
+        except Exception as err:
+            # If the domain had been previously registered, we return its cached info
+            instance = database.find_instance_by_domain(domain)
+            if not instance:
+                raise err
         if not instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
         return instance.get_details(show_visibilities=True),200

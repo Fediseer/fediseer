@@ -1,7 +1,3 @@
-import uuid
-import os
-
-import dateutil.relativedelta
 from datetime import datetime
 from sqlalchemy import Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from loguru import logger
 from fediseer.flask import db, SQLITE_MODE
 from fediseer import enums
+from fediseer.consts import POLLS_PER_DAY
 
 uuid_column_type = lambda: UUID(as_uuid=True) if not SQLITE_MODE else db.String(36)
 
@@ -102,6 +99,7 @@ class Instance(db.Model):
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
     pm_proxy = db.Column(Enum(enums.PMProxy), default=enums.PMProxy.NONE, nullable=False)
+    poll_failures = db.Column(db.Integer, default=0, nullable=True)
     visibility_endorsements = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)
     visibility_censures = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)
     visibility_hesitations = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)
@@ -143,6 +141,7 @@ class Instance(db.Model):
             "guarantor": self.get_guarantor_domain(),
             "sysadmins": self.sysadmins,
             "moderators": self.moderators,
+            "state": self.get_state().name,
         }
         if show_visibilities:
             ret_dict["visibility_endorsements"] = self.visibility_endorsements.name
@@ -189,3 +188,13 @@ class Instance(db.Model):
 
     def is_hesitating(self,instance):
         return instance in self.hesitations_given
+
+    def get_state(self):
+        if self.poll_failures == 0:
+            return enums.InstanceState.UP
+        if self.poll_failures <= POLLS_PER_DAY:
+            return enums.InstanceState.UNREACHABLE
+        if self.poll_failures <= 30*POLLS_PER_DAY:
+            return enums.InstanceState.OFFLINE
+        return enums.InstanceState.DECIMMISSIONED
+        

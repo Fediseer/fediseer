@@ -40,6 +40,7 @@ class Models:
             'censure_reasons': fields.List(fields.String(description="The reasons instances have given for censuring this instance")),
             'sysadmins': fields.Integer(required=False, default=None, description="The count of system administrators in this instance as reported by its admins."),
             'moderators': fields.Integer(required=False, default=None, description="The count of community moderators in this instance as reported by its admins."),
+            'state': fields.String(required=True, enum=[e.name for e in enums.InstanceState], description="The state of the instance as seen from the fediseer."),
         })
         self.response_model_instances_visibility = api.inherit('InstanceVisibilityDetails', self.response_model_instances, {
             'visibility_endorsements': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's endorsements. When set to ENDORSED, only endorsed instances can see their endorsements. If set to PRIVATE allow this instance's own admins can see their endorsements."),
