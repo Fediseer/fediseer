@@ -4,6 +4,7 @@ from pythorhead import Lemmy
 from fediseer.consts import FEDISEER_VERSION
 import fediseer.exceptions as e
 
+class InstanceInfo():
 def get_lemmy_admins(domain,software):
     requested_lemmy = Lemmy(f"https://{domain}")
     try:
@@ -292,6 +293,6 @@ def get_nodeinfo(domain):
         return None
 
 # software,open_registrations,approval_required,email_verify,has_captcha    
-logger.debug(get_instance_info("lemmy.dbzer0.com"))
-import sys
-sys.exit()
+# logger.debug(get_instance_info("lemmy.dbzer0.com"))
+# import sys
+# sys.exit()

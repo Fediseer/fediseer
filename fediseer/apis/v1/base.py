@@ -10,7 +10,7 @@ from fediseer import exceptions as e
 from fediseer.utils import hash_api_key
 from fediseer.messaging import activitypub_pm
 from pythorhead import Lemmy
-from fediseer.fediverse import get_admin_for_software, get_nodeinfo, discover_info
+from fediseer.fediverse import get_admin_for_software, get_nodeinfo, get_instance_info
 from fediseer.limiter import limiter
 
 api = Namespace('v1', 'API Version 1' )
@@ -71,15 +71,29 @@ def ensure_instance_registered(domain, allow_unreachable=False):
         admin_usernames = ["db0"]
         nodeinfo = get_nodeinfo("lemmy.dbzer0.com")
         requested_lemmy = Lemmy(f"https://{domain}")
-        site = requested_lemmy.site.get()
     else:
-        software,open_registrations,approval_required,email_verify,has_captcha = discover_info(domain,software)
+        software,open_registrations,approval_required,email_verify,has_captcha = get_instance_info(domain,allow_unreachable)
         try:
             admin_usernames = get_admin_for_software(software, domain)
         except:
             admin_usernames = []
     instance = database.find_instance_by_domain(domain)
     if instance:
+        if (
+            instance.software != software or
+            instance.open_registrations != open_registrations or
+            instance.approval_required != approval_required or
+            instance.email_verify != email_verify or
+            instance.has_captcha != has_captcha
+        ):
+            logger.debug(["would change",software,open_registrations,approval_required,email_verify,has_captcha])        
+            # instance.software = software
+            # instance.open_registrations = open_registrations
+            # instance.approval_required = approval_required
+            # instance.email_verify = email_verify
+            # instance.has_captcha = has_captcha
+            # db.session.commit()
+        logger.debug([software,open_registrations,approval_required,email_verify,has_captcha])        
         return instance, nodeinfo, admin_usernames
     new_instance = Instance(
         domain=domain,
@@ -91,3 +105,9 @@ def ensure_instance_registered(domain, allow_unreachable=False):
     )
     new_instance.create()
     return new_instance, nodeinfo, admin_usernames
+
+from fediseer.flask import OVERSEER
+with OVERSEER.app_context():
+    logger.debug(ensure_instance_registered("lemmy.dbzer0.com"))
+    import sys
+    sys.exit()
