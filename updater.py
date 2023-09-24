@@ -29,8 +29,8 @@ def refresh_info(domain):
 if __name__ == "__main__":
     # Only setting this for the WSGI logs
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s', level=logging.WARNING)
-
     logger.init("Updater", status="Starting")
+    logger.info(f"Skipping instances with poll fails > {int(os.getenv('FEDISEER_IGNORE_POLL_FAILS', 0))}")
     # try: # Debug
     #     with OVERSEER.app_context():
     #         ensure_instance_registered(
@@ -42,10 +42,13 @@ if __name__ == "__main__":
     # except Exception as err:
     #     logger.error(err)
     futures = []
-    with ThreadPoolExecutor(max_workers=25) as executor:
+    with ThreadPoolExecutor(max_workers=int(os.getenv('FEDISEER_UPDATE_THREADS', 25))) as executor:
         with OVERSEER.app_context():
             for instance in database.get_all_instances(0,0):
                 if instance.software == 'wildcard':
+                    continue
+                if instance.poll_failures >= int(os.getenv('FEDISEER_IGNORE_POLL_FAILS', 0)):
+                    logger.debug(f"Skipped {instance.domain} due to too many poll fails.")
                     continue
                 futures.append(executor.submit(refresh_info, instance.domain))
                 if len(futures) >= 500:
