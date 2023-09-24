@@ -3,6 +3,7 @@ from fediseer.classes.instance import Censure
 from fediseer.utils import sanitize_string
 from fediseer.classes.reports import Report
 from fediseer import enums
+from fediseer.register import ensure_instance_registered
 
 class CensuresGiven(Resource):
     get_parser = reqparse.RequestParser()

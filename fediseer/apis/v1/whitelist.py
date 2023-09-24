@@ -4,6 +4,7 @@ from fediseer.classes.user import User, Claim
 from fediseer import enums
 from fediseer.classes.instance import Solicitation
 from fediseer.classes.reports import Report
+from fediseer.register import ensure_instance_registered
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()

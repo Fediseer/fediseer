@@ -3,6 +3,7 @@ from fediseer.classes.instance import Endorsement,Censure
 from fediseer.classes.reports import Report
 from fediseer import enums
 from fediseer.utils import sanitize_string
+from fediseer.register import ensure_instance_registered
 
 class Approvals(Resource):
     get_parser = reqparse.RequestParser()

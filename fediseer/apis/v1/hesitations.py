@@ -3,6 +3,7 @@ from fediseer.classes.instance import Hesitation
 from fediseer.utils import sanitize_string
 from fediseer.classes.reports import Report
 from fediseer import enums
+from fediseer.register import ensure_instance_registered
 
 class HesitationsGiven(Resource):
     get_parser = reqparse.RequestParser()

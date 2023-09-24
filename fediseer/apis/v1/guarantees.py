@@ -2,6 +2,7 @@ from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Guarantee, RejectionRecord, Solicitation
 from fediseer.classes.reports import Report
 from fediseer import enums
+from fediseer.register import ensure_instance_registered
 
 class Guarantors(Resource):
     get_parser = reqparse.RequestParser()
