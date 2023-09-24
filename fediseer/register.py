@@ -16,6 +16,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
             # This means that a misconfigured instance will also be considered as 'down'
             nodeinfo = InstanceInfo.get_nodeinfo(domain,req_timeout=allowed_timeout)
             if nodeinfo is None:
+                logger.warning(f"Recorded {domain} as unreachable.")
                 instance.updated = datetime.utcnow()
                 instance.poll_failures += 1
                 db.session.commit()
