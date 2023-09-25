@@ -158,7 +158,8 @@ class WhitelistDomain(Resource):
     @api.expect(patch_parser,models.input_instance_modify, validate=True)
     @api.marshal_with(models.response_model_api_key_reset, code=200, description='Instances', skip_none=True)
     @api.response(401, 'Invalid API Key', models.response_model_error)
-    @api.response(403, 'Instance Not Registered', models.response_model_error)
+    @api.response(403, 'Access Denied', models.response_model_error)
+    @api.response(403, 'Instance not claimed', models.response_model_error)
     def patch(self, domain):
         '''Regenerate API key for instance
         '''
