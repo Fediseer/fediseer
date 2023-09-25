@@ -198,15 +198,16 @@ class Endorsements(Resource):
         db.session.commit()
         # if not database.has_recent_endorsement(target_instance.id):
         try:
-            message = f"Your instance has just been [endorsed](https://fediseer.com/faq#what-is-an-endorsement) by {instance.domain}."
-            if reason is not None:
-                message = f"Your instance has just been [endorsed](https://fediseer.com/faq#what-is-an-endorsement) by {instance.domain} with reason: {reason}"
-            activitypub_pm.pm_admins(
-                message=message,
-                domain=target_instance.domain,
-                software=target_instance.software,
-                instance=target_instance,
-            )
+            if instance.visibility_endorsements != enums.ListVisibility.PRIVATE:
+                message = f"Your instance has just been [endorsed](https://fediseer.com/faq#what-is-an-endorsement) by {instance.domain}."
+                if reason is not None:
+                    message = f"Your instance has just been [endorsed](https://fediseer.com/faq#what-is-an-endorsement) by {instance.domain} with reason: {reason}"
+                activitypub_pm.pm_admins(
+                    message=message,
+                    domain=target_instance.domain,
+                    software=target_instance.software,
+                    instance=target_instance,
+                )
         except:
             pass
         logger.info(f"{instance.domain} Endorsed {domain}")
@@ -306,12 +307,13 @@ class Endorsements(Resource):
         db.session.add(new_report)
         db.session.commit()
         try:
-            activitypub_pm.pm_admins(
-                message=f"Oh no. {instance.domain} has just withdrawn the endorsement of your instance",
-                domain=target_instance.domain,
-                software=target_instance.software,
-                instance=target_instance,
-            )
+            if instance.visibility_endorsements != enums.ListVisibility.PRIVATE:
+                activitypub_pm.pm_admins(
+                    message=f"Oh no. {instance.domain} has just withdrawn the endorsement of your instance",
+                    domain=target_instance.domain,
+                    software=target_instance.software,
+                    instance=target_instance,
+                )
         except:
             pass
         logger.info(f"{instance.domain} Withdrew endorsement from {domain}")
