@@ -1,5 +1,18 @@
 # Changelog
 
+# 0.17.1
+
+* Prevent endorsement PMs being sent when visibility is private
+* Prevent lemmy switching to mastodon proxy
+* Fediseer can now change the PM proxy
+
+# 0.17.0
+
+* Added instance state
+* Added has_captcha
+* Added approval_required
+* Added update.py
+
 # 0.16.2
 
 * Added way to retrieve misskey admins

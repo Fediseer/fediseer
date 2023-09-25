@@ -173,6 +173,8 @@ class WhitelistDomain(Resource):
         instance_to_reset = database.find_instance_by_domain(domain)
         changed = False
         new_key = None
+        if requestor_instance != instance_to_reset and user.username != "fediseer":
+            raise e.Forbidden("Only an instance admin can modify the instance")
         if self.args.sysadmins is not None and instance.sysadmins != self.args.sysadmins:
             instance.sysadmins = self.args.sysadmins
             changed = True
