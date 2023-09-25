@@ -220,6 +220,10 @@ def find_instance_by_account(user_account):
     ).first()
     return instance
 
+def find_instance_by_domain(domain):
+    instance = Instance.query.filter_by(domain=domain).first()
+    return instance
+
 def find_admins_by_instance(instance):
     users = User.query.join(
         Claim

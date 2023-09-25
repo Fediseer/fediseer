@@ -170,6 +170,7 @@ class WhitelistDomain(Resource):
             raise e.Forbidden("You have not yet claimed an instance. Use the POST method to do so.")
         instance = database.find_instance_by_user(user)
         requestor_instance = instance
+        instance_to_reset = database.find_instance_by_domain(domain)
         changed = False
         new_key = None
         if self.args.sysadmins is not None and instance.sysadmins != self.args.sysadmins:
@@ -180,9 +181,11 @@ class WhitelistDomain(Resource):
             changed = True
         if self.args.pm_proxy is not None:
             proxy = enums.PMProxy[self.args.pm_proxy]
-            if instance.pm_proxy != proxy:
-                activitypub_pm.pm_new_proxy_switch(proxy,instance.pm_proxy,instance,user.username)
-                instance.pm_proxy = proxy
+            if instance_to_reset.software == "lemmy" and proxy == enums.PMProxy.MASTODON:
+                raise e.BadRequest("I'm sorry Dave, I can't let you do that. Lemmy is not capable of receiving mastodon PMs.")
+            if instance_to_reset.pm_proxy != proxy:
+                activitypub_pm.pm_new_proxy_switch(proxy,instance_to_reset.pm_proxy,instance_to_reset,user.username)
+                instance_to_reset.pm_proxy = proxy
                 changed = True
         if self.args.visibility_endorsements is not None:
             visibility = enums.ListVisibility[self.args.visibility_endorsements]
@@ -205,7 +208,7 @@ class WhitelistDomain(Resource):
                 requestor = user.username
                 instance_to_reset = database.find_instance_by_account(f"@{self.args.admin_username}@{domain}")
                 if instance_to_reset is None:
-                    raise e.NotFound(f"No Instance found matching provided domain. Have you remembered to register it?")
+                    raise e.NotFound(f"No admin '{self.args.admin_username}' found in instance {domain}. Have you remembered to claim it as that admin?")
                 if instance != instance_to_reset and user.username != "fediseer":
                     raise e.BadRequest("Only other admins of the same instance or the fediseer can request API key reset for others.")
                 
