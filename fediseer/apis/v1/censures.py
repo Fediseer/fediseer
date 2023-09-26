@@ -136,7 +136,7 @@ class Censures(Resource):
             if p_instance.visibility_censures == enums.ListVisibility.PRIVATE:
                 if get_instance is None:
                     continue
-                if not p_instance != get_instance:
+                if p_instance != get_instance:
                     continue
             instances.append(p_instance)
         for c_instance in instances:
