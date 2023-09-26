@@ -1,4 +1,5 @@
 import requests
+import socket
 from loguru import logger
 from pythorhead import Lemmy
 from fediseer.consts import FEDISEER_VERSION
@@ -17,6 +18,8 @@ class InstanceInfo():
     has_captcha = None
     _allow_unreachable = False
     _req_timeout = 5
+    _nodeinfo_err: Exception = None
+    _siteinfo_err: Exception = None
 
     def __init__(self, domain, allow_unreachable=False, req_timeout=5):
         self.domain = domain
@@ -34,12 +37,16 @@ class InstanceInfo():
             self.instance_info = {}
             return
 
-        self.node_info = InstanceInfo.get_nodeinfo(domain,req_timeout=self._req_timeout)
+        try:
+            self.node_info = InstanceInfo.get_nodeinfo(domain,req_timeout=self._req_timeout)
+        except Exception as err:
+            self._nodeinfo_err = err
 
     def get_instance_info(self):
         try:
             self.parse_instance_info()
         except Exception as err:
+            self._siteinfo_err = err
             # This is just to report for the error message
             if self.software is not None:
                 sw = self.software
@@ -238,21 +245,18 @@ class InstanceInfo():
 
     @staticmethod
     def get_nodeinfo(domain, req_timeout=3):
-        try:
-            headers = {
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "none",
-                "Sec-Fetch-User": "?1",
-                "Sec-GPC": "1",
-                "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
-            }
-            wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=req_timeout).json()
-            headers["Sec-Fetch-Site"] = "cross-site"
-            nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=req_timeout).json()
-            return nodeinfo
-        except Exception as err:
-            return None
+        headers = {
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Sec-GPC": "1",
+            "User-Agent": f"Fediseer/{FEDISEER_VERSION}",
+        }
+        wellknown = requests.get(f"https://{domain}/.well-known/nodeinfo", headers=headers, timeout=req_timeout).json()
+        headers["Sec-Fetch-Site"] = "cross-site"
+        nodeinfo = requests.get(wellknown['links'][-1]['href'], headers=headers, timeout=req_timeout).json()
+        return nodeinfo
 
     @staticmethod
     def is_reachable(domain, req_timeout=5):
@@ -264,15 +268,27 @@ class InstanceInfo():
         if req.status_code not in [200,401,403]:
             raise Exception(f"Status code unexpected for instance frontpage: {req.status_code}")
 
-# Debug
-# ii = InstanceInfo("makai.chaotic.ninja")
-# ii.get_instance_info()
-# logger.debug([
-#     ii.software,
-#     ii.open_registrations,
-#     ii.approval_required,
-#     ii.email_verify,
-#     ii.has_captcha,
-#     ii.admin_usernames])
+    def domain_exists(self):
+        try:
+            socket.gethostbyname(self.domain)
+            return True
+        except:
+            return False
+
+
+# # Debug
+# ii = InstanceInfo("outpoa.st")
+# if ii.domain_exists():
+#     ii.get_instance_info()
+#     logger.info([
+#         ii.software,
+#         ii.open_registrations,
+#         ii.approval_required,
+#         ii.email_verify,
+#         ii.has_captcha,
+#         ii.admin_usernames,
+#         ])
+# else:
+#     logger.error("Domain does not exist")
 # import sys
 # sys.exit()

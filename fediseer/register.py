@@ -18,7 +18,10 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
             if instance_info.node_info is None:
                 logger.warning(f"Recorded {domain} as unreachable.")
                 instance.updated = datetime.utcnow()
-                instance.poll_failures += 1
+                if instance_info.domain_exists():
+                    instance.poll_failures += 1
+                else:
+                    instance.poll_failures += 60
                 db.session.commit()
         if not allow_unreachable:
             raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
@@ -43,6 +46,10 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
             instance.poll_failures = 0
             db.session.commit()
         return instance, instance_info
+    poll_failures = 0
+    if not instance_info.domain_exists():
+        # If the domain is gone, we assume straight decommission
+        poll_failures = 100
     new_instance = Instance(
         domain=domain,
         open_registrations=instance_info.open_registrations,
@@ -50,6 +57,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
         approval_required=instance_info.approval_required,
         has_captcha=instance_info.has_captcha,
         software=instance_info.software,
+        poll_failures=poll_failures,
     )
     new_instance.create()
     return new_instance, instance_info
