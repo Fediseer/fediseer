@@ -126,3 +126,7 @@ class Models:
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
         })
+        self.input_flag_modify = api.model('FlagModify', {
+            'flag': fields.String(required=True, enum=[e.name for e in enums.InstanceFlags], description="The type of flag to apply"),
+            'comment': fields.String(required=False, description="A comment explaining this flag", example="admin"),
+        })
