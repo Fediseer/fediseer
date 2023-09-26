@@ -87,13 +87,13 @@ You can either use the rest API we have provided, providing your instance domain
 
 You will then receive an API key in PMs, which you can afterwards use to represent your instance on the fediseer.
 
-# What can I write in my reasons for endorsements, hesitations and censures?
+## What can I write in my reasons for endorsements, hesitations and censures?
 
 This is an optional free-form field for up to 255 characters. If will be handled as a comma-separated list, so we suggest using commas to split your reasons. As the reasons are meant to be used for filtering by others, we suggest you limit each entry to 2-5 words.
 
 You are not allowed to use hate speech in your reasons.
 
-# What can I write in my evidence for censures and hesitations?
+## What can I write in my evidence for censures and hesitations?
 
 This is an optionalfree-form field you can use to provide receipts for this judgement or explain your reasoning in depth. If you want to provide screenshots, we suggest linking to them, for example by [opening a thread in fediblock](https://lemmy.dbzer0.com/c/fediblock).
 
