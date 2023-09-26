@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 if instance.software == 'wildcard':
                     continue
                 # -1 doesn't skip anything
-                if os.getenv('FEDISEER_IGNORE_POLL_FAILS', -1) >= 0 and instance.poll_failures > int(os.getenv('FEDISEER_IGNORE_POLL_FAILS', 0)):
+                if int(os.getenv('FEDISEER_IGNORE_POLL_FAILS', -1)) >= 0 and instance.poll_failures > int(os.getenv('FEDISEER_IGNORE_POLL_FAILS', 0)):
                     logger.debug(f"Skipped {instance.domain} due to too many poll fails.")
                     continue
                 futures.append(executor.submit(refresh_info, instance.domain))
