@@ -101,7 +101,7 @@ class Instance(db.Model):
     updated = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     oprhan_since = db.Column(db.DateTime, nullable=True)
     
-    open_registrations = db.Column(db.Boolean, unique=False, nullable=False, index=True)
+    open_registrations = db.Column(db.Boolean, unique=False, nullable=True, index=True)
     email_verify = db.Column(db.Boolean, unique=False, nullable=True, index=True)
     approval_required = db.Column(db.Boolean, unique=False, nullable=True, index=True)
     has_captcha = db.Column(db.Boolean, unique=False, nullable=True, index=True)

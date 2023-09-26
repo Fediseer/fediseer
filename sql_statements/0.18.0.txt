@@ -1,1 +1,2 @@
 ALTER TYPE reporttype ADD VALUE 'FLAG';
+ALTER TABLE instances ALTER COLUMN open_registrations DROP NOT NULL;
