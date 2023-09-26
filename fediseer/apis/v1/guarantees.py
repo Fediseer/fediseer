@@ -113,7 +113,7 @@ class Guarantees(Resource):
                 flag=enums.InstanceFlags.MUTED,
                 comment=f"Inherited from guarantor {target_instance.domain}",
             )
-        db.session.add(muted_flag)
+            db.session.add(muted_flag)
         database.delete_all_solicitation_by_source(target_instance.id)
         new_report = Report(
             source_domain=instance.domain,
