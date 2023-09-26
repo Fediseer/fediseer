@@ -144,7 +144,7 @@ class Endorsements(Resource):
     @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
-    @api.response(403, 'Not Guaranteed', models.response_model_error)
+    @api.response(403, 'Access Denied', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def put(self, domain):
         '''Endorse an instance
@@ -158,6 +158,8 @@ class Endorsements(Resource):
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if len(instance.guarantors) == 0:
             raise e.Forbidden("Only guaranteed instances can endorse others.")
+        if database.instance_has_flag(instance.id,enums.InstanceFlags.RESTRICTED):
+            raise e.Forbidden("You cannot take this action as your instance is restricted")
         if instance.domain == domain:
             raise e.BadRequest("Nice try, but you can't endorse yourself.")
         if database.has_too_many_actions_per_min(instance.domain):

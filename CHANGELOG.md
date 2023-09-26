@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.18.0
+
+* Added instance flags
+
 # 0.17.1
 
 * Prevent endorsement PMs being sent when visibility is private

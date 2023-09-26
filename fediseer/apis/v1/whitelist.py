@@ -159,7 +159,7 @@ class WhitelistDomain(Resource):
     @api.marshal_with(models.response_model_api_key_reset, code=200, description='Instances', skip_none=True)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(403, 'Access Denied', models.response_model_error)
-    @api.response(403, 'Instance not claimed', models.response_model_error)
+    @api.response(404, 'Instance not claimed', models.response_model_error)
     def patch(self, domain):
         '''Regenerate API key for instance
         '''
@@ -174,7 +174,7 @@ class WhitelistDomain(Resource):
         instance_to_reset = database.find_instance_by_domain(domain)
         changed = False
         new_key = None
-        if requestor_instance != instance_to_reset and user.username != "fediseer":
+        if requestor_instance != instance_to_reset and user.account != "@fediseer@fediseer.com":
             raise e.Forbidden("Only an instance admin can modify the instance")
         if self.args.sysadmins is not None and instance.sysadmins != self.args.sysadmins:
             instance.sysadmins = self.args.sysadmins
@@ -183,6 +183,8 @@ class WhitelistDomain(Resource):
             instance.moderators = self.args.moderators
             changed = True
         if self.args.pm_proxy is not None:
+            if instance_to_reset is None:
+                raise e.NotFound(f"Instance {domain} has not been registered yet.")
             proxy = enums.PMProxy[self.args.pm_proxy]
             if instance_to_reset.software == "lemmy" and proxy == enums.PMProxy.MASTODON:
                 raise e.BadRequest("I'm sorry Dave, I can't let you do that. Lemmy is not capable of receiving mastodon PMs.")
@@ -193,26 +195,32 @@ class WhitelistDomain(Resource):
         if self.args.visibility_endorsements is not None:
             visibility = enums.ListVisibility[self.args.visibility_endorsements]
             if instance.visibility_endorsements != visibility:
+                if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+                    raise e.Forbidden("Muted instances cannot change their visibility away from private!")
                 instance.visibility_endorsements = visibility
                 changed = True
         if self.args.visibility_censures is not None:
             visibility = enums.ListVisibility[self.args.visibility_censures]
             if instance.visibility_censures != visibility:
+                if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+                    raise e.Forbidden("Muted instances cannot change their visibility away from private!")
                 instance.visibility_censures = visibility
                 changed = True
         if self.args.visibility_hesitations is not None:
             visibility = enums.ListVisibility[self.args.visibility_hesitations]
             if instance.visibility_hesitations != visibility:
+                if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+                    raise e.Forbidden("Muted instances cannot change their visibility away from private!")
                 instance.visibility_hesitations = visibility
                 changed = True
         if self.args.admin_username:
             requestor = None
-            if self.args.admin_username != user.username or user.username == "fediseer":
+            if self.args.admin_username != user.username or user.account == "@fediseer@fediseer.com":
                 requestor = user.username
                 instance_to_reset = database.find_instance_by_account(f"@{self.args.admin_username}@{domain}")
                 if instance_to_reset is None:
                     raise e.NotFound(f"No admin '{self.args.admin_username}' found in instance {domain}. Have you remembered to claim it as that admin?")
-                if instance != instance_to_reset and user.username != "fediseer":
+                if instance != instance_to_reset and user.account != "@fediseer@fediseer.com":
                     raise e.BadRequest("Only other admins of the same instance or the fediseer can request API key reset for others.")
                 
                 instance = instance_to_reset

@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload
 from fediseer.flask import db, SQLITE_MODE
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
@@ -460,3 +460,17 @@ def has_too_many_actions_per_min(source_domain):
         Report.created > datetime.utcnow() - timedelta(minutes=1),
     )
     return query.count() > 20
+
+def get_instance_flag(instance_id, flag_enum):
+    query = InstanceFlag.query.filter(
+        InstanceFlag.instance_id == instance_id,
+        InstanceFlag.flag == flag_enum,
+    )
+    return query.first()
+
+def instance_has_flag(instance_id, flag_enum):
+    query = InstanceFlag.query.filter(
+        InstanceFlag.instance_id == instance_id,
+        InstanceFlag.flag == flag_enum,
+    )
+    return query.count() == 1

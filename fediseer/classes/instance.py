@@ -82,6 +82,16 @@ class Solicitation(db.Model):
     target_instance = db.relationship("Instance", back_populates="solicitations_received", foreign_keys=[target_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
+class InstanceFlag(db.Model):
+    __tablename__ = "instance_flags"
+    __table_args__ = (UniqueConstraint('instance_id', 'flag', name='instance_flags_instance_id_flag'),)
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.String(255), unique=False, nullable=True, index=False)
+    flag = db.Column(Enum(enums.InstanceFlags), nullable=False, index=True)
+    instance_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
+    instance = db.relationship("Instance", back_populates="flags")
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
 class Instance(db.Model):
     __tablename__ = "instances"
 
@@ -117,6 +127,7 @@ class Instance(db.Model):
     rejections = db.relationship("RejectionRecord", back_populates="rejector_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejector_id])
     rejectors = db.relationship("RejectionRecord", back_populates="rejected_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejected_id])
     admins = db.relationship("Claim", back_populates="instance", cascade="all, delete-orphan")
+    flags = db.relationship("InstanceFlag", back_populates="instance", cascade="all, delete-orphan")
 
     def create(self):
         db.session.add(self)
@@ -147,6 +158,12 @@ class Instance(db.Model):
             ret_dict["visibility_endorsements"] = self.visibility_endorsements.name
             ret_dict["visibility_censures"] = self.visibility_censures.name
             ret_dict["visibility_hesitations"] = self.visibility_hesitations.name
+            ret_dict["flags"] = []
+            for flag in self.flags:
+                ret_dict["flags"].append({
+                    "flag": flag.flag.name,
+                    "comment": flag.comment
+                })
         return ret_dict
 
 
@@ -198,3 +215,8 @@ class Instance(db.Model):
             return enums.InstanceState.OFFLINE
         return enums.InstanceState.DECIMMISSIONED
         
+    def has_flag(self, flag_enum):
+        for flag in self.flags:
+            if flag.flag == flag_enum:
+                return True
+        return False

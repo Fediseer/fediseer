@@ -7,6 +7,7 @@ class ReportType(enum.Enum):
     HESITATION = 3
     CLAIM = 4
     SOLICITATION = 5
+    FLAG = 6
 
 class ReportActivity(enum.Enum):
     ADDED = 0
@@ -27,3 +28,7 @@ class InstanceState(enum.Enum):
     UNREACHABLE = 1
     OFFLINE = 2
     DECIMMISSIONED = 3
+
+class InstanceFlags(enum.Enum):
+    RESTRICTED = 0
+    MUTED = 1
