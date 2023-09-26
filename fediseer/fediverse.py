@@ -35,6 +35,8 @@ class InstanceInfo():
             return
 
         self.node_info = InstanceInfo.get_nodeinfo(domain,req_timeout=self._req_timeout)
+
+    def get_instance_info(self):
         try:
             self.parse_instance_info()
         except Exception as err:
@@ -190,9 +192,10 @@ class InstanceInfo():
             self.open_registrations = self.node_info.get("openRegistrations", False)
 
     def discover_info(self):
+        # Mastodon API
         site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout,allow_redirects=False)
         if site.status_code != 200:
-            raise Exception(f"Unexpected status code retrieved when discovering nodeinfo: {site.status_code}")
+            raise Exception(f"Unexpected status code retrieved when discovering instance info: {site.status_code}")
         self.instance_info = site.json()
         self.approval_required = self.instance_info.get("approval_required")
         if self.node_info is None:
@@ -225,6 +228,8 @@ class InstanceInfo():
             "mitra": self.get_firefish_info,
             "unknown": self.get_unknown_info,
             "wildcard": self.get_unknown_info,
+            # Instance info not supported for misskey yet
+            "misskey": self.get_unknown_info,
         }
         if self.software not in software_map:
             self.discover_info()
@@ -260,7 +265,8 @@ class InstanceInfo():
             raise Exception(f"Status code unexpected for instance frontpage: {req.status_code}")
 
 # Debug
-# ii = InstanceInfo("lemmy.dbzer0.com")
+# ii = InstanceInfo("makai.chaotic.ninja")
+# ii.get_instance_info()
 # logger.debug([
 #     ii.software,
 #     ii.open_registrations,

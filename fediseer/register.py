@@ -10,12 +10,12 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
     instance = database.find_instance_by_domain(domain)
     try:
         instance_info = InstanceInfo(domain,allow_unreachable=allow_unreachable, req_timeout=allowed_timeout)
+        instance_info.get_instance_info()
     except Exception as err:
         if record_unreachable and instance and instance.software != "wildcard":
             # We only consider an instance unreachable if we can't reach its nodeinfo
             # This means that a misconfigured instance will also be considered as 'down'
-            nodeinfo = InstanceInfo.get_nodeinfo(domain,req_timeout=allowed_timeout)
-            if nodeinfo is None:
+            if instance_info.node_info is None:
                 logger.warning(f"Recorded {domain} as unreachable.")
                 instance.updated = datetime.utcnow()
                 instance.poll_failures += 1

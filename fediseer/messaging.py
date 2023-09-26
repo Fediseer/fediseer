@@ -187,7 +187,9 @@ class ActivityPubPM:
         admins = database.find_admins_by_instance(instance)
         if not admins:
             try:
-                admins = InstanceInfo(domain).admin_usernames
+                ii = InstanceInfo(domain)
+                ii.get_instance_info()
+                admins = ii.admin_usernames
             except Exception as err:
                 if software not in SUPPORTED_SOFTWARE:
                     logger.warning(f"Failed to figure out admins from {software}: {domain}")
