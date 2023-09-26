@@ -4,6 +4,8 @@ This document will attempt to provide some definitions and answers to common que
 
 [TOC]
 
+# Terminology
+
 ## What is the Fediseer?
 
 The fediseer is a service for the fediverse which attempts to provide a crowdsourced human-curated spam/ham classification of fediverse instances as well as provide a public space to specify approval/disapproval of other instances.
@@ -30,7 +32,6 @@ This allows the fediseer to quickly deal with spam instances that sneaked into t
 
 [Chain of Trust Devlog](https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/)
 
-
 ## What is an endorsement?
 
 An endorsement is a completely subjective positive judgement from one instance to another. Effectively signifying that instance A "approves" of instance B. The reason for this can be anything and do not have to be stated.
@@ -47,6 +48,13 @@ An instance can be censure any number of instances and be censured by any number
 
 One can export the list of instances censured by a subset of instances.
 
+## What is a hesitation?
+
+An hesitation is a mulder version of a censure, it signifies some sort of mistrust of one instance towards another. The reason for this can be anything and do not have to be stated.
+
+An instance can be hesitate against number of instances and be doubted by number of instances.
+
+One can export the list of instances hesitate by a subset of instances.
 
 ## What is an instance claim
 
@@ -54,11 +62,44 @@ A claimed instance is an instance whose admin has requisted an API key with whic
 
 Fediseer has no users. Instead it's driven by instance admins only. Instance admins likewise only act as their instances.
 
+## What are instance visibilities
+
+An instance can set the visibility of its endorsements, censures, and/or hesitations to one of the following:
+
+* `OPEN`: Anyone can see and retrieve that list
+* `ENDORSED`: Only instances endorsed by the source instance, can see that list
+* `PRIVATE`: Only the source instance can see that list.
+
+Note that guarantees are always public as this is necessary for the good functioning of the chain of trust.
+
+## What is an instance flag
+
+An instance flag represents some marking from the fediverse admins toward an instance. There's currently the following flags
+
+* `RESTRICTED`: The instance cannot guarantee, endorse, censure or hesitate other instances anymore. This flag is only used against egregious trolling or malicious behaviour.
+* `MUTED`: The instance's visibilities are forcefully set to `PRIVATE` and cannot be changed. This flag is meant to used against trolling or harassing behaviour.
+
+# Functionality
+
 ## How can I claim my instance?
 
 You can either use the rest API we have provided, providing your instance domain and admin username on it. Alternativey you can use one of our frontends.
 
 You will then receive an API key in PMs, which you can afterwards use to represent your instance on the fediseer.
+
+# What can I write in my reasons for endorsements, hesitations and censures?
+
+This is an optional free-form field for up to 255 characters. If will be handled as a comma-separated list, so we suggest using commas to split your reasons. As the reasons are meant to be used for filtering by others, we suggest you limit each entry to 2-5 words.
+
+You are not allowed to use hate speech in your reasons.
+
+# What can I write in my evidence for censures and hesitations?
+
+This is an optionalfree-form field you can use to provide receipts for this judgement or explain your reasoning in depth. If you want to provide screenshots, we suggest linking to them, for example by [opening a thread in fediblock](https://lemmy.dbzer0.com/c/fediblock).
+
+You are not allowed to use hate speech in your evidence.
+
+# Philosophy
 
 ## Doesn't this all cause fediverse centralization?
 
