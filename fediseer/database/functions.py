@@ -467,3 +467,10 @@ def get_instance_flag(instance_id, flag_enum):
         InstanceFlag.flag == flag_enum,
     )
     return query.first()
+
+def instance_has_flag(instance_id, flag_enum):
+    query = InstanceFlag.query.filter(
+        InstanceFlag.instance_id == instance_id,
+        InstanceFlag.flag == flag_enum,
+    )
+    return query.count() == 1

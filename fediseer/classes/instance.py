@@ -86,7 +86,7 @@ class InstanceFlag(db.Model):
     __tablename__ = "instance_flags"
     __table_args__ = (UniqueConstraint('instance_id', 'flag', name='instance_flags_instance_id_flag'),)
     id = db.Column(db.Integer, primary_key=True)
-    comment = db.Column(db.Text, unique=False, nullable=True, index=False)
+    comment = db.Column(db.String(255), unique=False, nullable=True, index=False)
     flag = db.Column(Enum(enums.InstanceFlags), nullable=False, index=True)
     instance_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
     instance = db.relationship("Instance", back_populates="flags")
@@ -158,6 +158,12 @@ class Instance(db.Model):
             ret_dict["visibility_endorsements"] = self.visibility_endorsements.name
             ret_dict["visibility_censures"] = self.visibility_censures.name
             ret_dict["visibility_hesitations"] = self.visibility_hesitations.name
+            ret_dict["flags"] = []
+            for flag in self.flags:
+                ret_dict["flags"].append({
+                    "flag": flag.flag.name,
+                    "comment": flag.comment
+                })
         return ret_dict
 
 

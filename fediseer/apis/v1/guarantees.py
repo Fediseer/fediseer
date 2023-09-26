@@ -1,5 +1,5 @@
 from fediseer.apis.v1.base import *
-from fediseer.classes.instance import Guarantee, RejectionRecord, Solicitation
+from fediseer.classes.instance import Guarantee, RejectionRecord, Solicitation, InstanceFlag
 from fediseer.classes.reports import Report
 from fediseer import enums
 from fediseer.register import ensure_instance_registered
@@ -69,7 +69,7 @@ class Guarantees(Resource):
     @api.marshal_with(models.response_model_simple_response, code=200, description='Endorse Instance')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
-    @api.response(403, 'Instance Not Guaranteed or Tartget instance Guaranteed by others', models.response_model_error)
+    @api.response(403, 'Access Denied', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
     def put(self, domain):
         '''Guarantee an instance
@@ -87,6 +87,8 @@ class Guarantees(Resource):
             raise e.Forbidden("Only guaranteed instances can guarantee others.")
         if len(instance.guarantees) >= 20 and instance.id != 0:
             raise e.Forbidden("You cannot guarantee for more than 20 instances")
+        if database.instance_has_flag(instance.id,enums.InstanceFlags.RESTRICTED):
+            raise e.Forbidden("You cannot take this action as your instance is restricted")
         if database.has_too_many_actions_per_min(instance.domain):
             raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
@@ -105,6 +107,13 @@ class Guarantees(Resource):
             guarantor_id=instance.id,
         )
         db.session.add(new_guarantee)
+        if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+            muted_flag = InstanceFlag(
+                instance_id=target_instance.id,
+                flag=enums.InstanceFlags.MUTED,
+                comment=f"Inherited from guarantor {target_instance.domain}",
+            )
+        db.session.add(muted_flag)
         database.delete_all_solicitation_by_source(target_instance.id)
         new_report = Report(
             source_domain=instance.domain,

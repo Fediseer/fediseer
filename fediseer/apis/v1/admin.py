@@ -34,7 +34,7 @@ class Flag(Resource):
         admin_instance = database.find_instance_by_user(user)
         target_instance, instance_info = ensure_instance_registered(domain)
         flag = enums.InstanceFlags[self.args.flag]
-        if target_instance.has_flag(flag):
+        if database.instance_has_flag(target_instance.id,flag):
             return {"message": "OK"},200
         new_flag = InstanceFlag(
             instance_id = target_instance.id,
@@ -42,6 +42,18 @@ class Flag(Resource):
             comment = self.args.comment,
         )
         db.session.add(new_flag)
+        if flag == enums.InstanceFlags.RESTRICTED and not database.instance_has_flag(target_instance.id,enums.InstanceFlags.MUTED):
+            muted_flag = InstanceFlag(
+                instance_id = target_instance.id,
+                flag = enums.InstanceFlags.MUTED,
+                comment = "Restricted with reason: " + self.args.comment,
+            )
+            db.session.add(muted_flag)
+        # Sactioned instances get no visibility
+        if flag in [enums.InstanceFlags.MUTED,enums.InstanceFlags.RESTRICTED]:
+            target_instance.visibility_censures = enums.ListVisibility.PRIVATE
+            target_instance.visibility_endorsements = enums.ListVisibility.PRIVATE
+            target_instance.visibility_hesitations = enums.ListVisibility.PRIVATE
         new_report = Report(
             source_domain=admin_instance.domain,
             target_domain=target_instance.domain,

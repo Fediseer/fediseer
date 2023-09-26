@@ -42,10 +42,15 @@ class Models:
             'moderators': fields.Integer(required=False, default=None, description="The count of community moderators in this instance as reported by its admins."),
             'state': fields.String(required=True, enum=[e.name for e in enums.InstanceState], description="The state of the instance as seen from the fediseer."),
         })
+        self.response_model_flag_details = api.model('FlagDetails', {
+            'flag': fields.String(required=True, enum=[e.name for e in enums.InstanceFlags], description="The type of flag"),
+            'comment': fields.String(required=False, description="A comment explaining this flag", example="admin"),
+        })
         self.response_model_instances_visibility = api.inherit('InstanceVisibilityDetails', self.response_model_instances, {
             'visibility_endorsements': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's endorsements. When set to ENDORSED, only endorsed instances can see their endorsements. If set to PRIVATE allow this instance's own admins can see their endorsements."),
             'visibility_censures': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's censures. When set to ENDORSED, only endorsed instances can see their censures. If set to PRIVATE allow this instance's own admins can see their censures."),
             'visibility_hesitations': fields.String(required=True, enum=[e.name for e in enums.ListVisibility], description="If OPEN, this instance allows anyone to read this instance's hesitations. When set to ENDORSED, only endorsed instances can see their hesitations. If set to PRIVATE allow this instance's own admins can see their hesitations."),
+            'flags': fields.List(fields.Nested(self.response_model_flag_details)),
         })
         self.response_model_model_Whitelist_get = api.model('WhitelistedInstances', {
             'instances': fields.List(fields.Nested(self.response_model_instances_visibility)),
@@ -128,5 +133,5 @@ class Models:
         })
         self.input_flag_modify = api.model('FlagModify', {
             'flag': fields.String(required=True, enum=[e.name for e in enums.InstanceFlags], description="The type of flag to apply"),
-            'comment': fields.String(required=False, description="A comment explaining this flag", example="admin"),
+            'comment': fields.String(max_length=255, required=False, description="A comment explaining this flag", example="reasons"),
         })

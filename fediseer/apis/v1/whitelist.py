@@ -195,16 +195,22 @@ class WhitelistDomain(Resource):
         if self.args.visibility_endorsements is not None:
             visibility = enums.ListVisibility[self.args.visibility_endorsements]
             if instance.visibility_endorsements != visibility:
+                if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+                    raise e.Forbidden("Muted instances cannot change their visibility away from private!")
                 instance.visibility_endorsements = visibility
                 changed = True
         if self.args.visibility_censures is not None:
             visibility = enums.ListVisibility[self.args.visibility_censures]
             if instance.visibility_censures != visibility:
+                if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+                    raise e.Forbidden("Muted instances cannot change their visibility away from private!")
                 instance.visibility_censures = visibility
                 changed = True
         if self.args.visibility_hesitations is not None:
             visibility = enums.ListVisibility[self.args.visibility_hesitations]
             if instance.visibility_hesitations != visibility:
+                if database.instance_has_flag(instance.id,enums.InstanceFlags.MUTED):
+                    raise e.Forbidden("Muted instances cannot change their visibility away from private!")
                 instance.visibility_hesitations = visibility
                 changed = True
         if self.args.admin_username:
