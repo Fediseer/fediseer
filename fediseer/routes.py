@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, request
 from markdown import markdown
 from loguru import logger
 from fediseer.flask import OVERSEER
+from fediseer.faq import FEDISEER_FAQ
 import fediseer.exceptions as e
 
 @logger.catch(reraise=True)
@@ -57,6 +58,15 @@ def faq():
     {style}
     </head>
     """
+    faq_dict = {}
+    for entry in FEDISEER_FAQ:
+        if entry["category"] not in faq_dict:
+            faq_dict[entry["category"]] = []
+        faq_dict[entry["category"]].append(entry)
+    for category in faq_dict:
+        md += f"#{category.capitalize()}\n\n"
+        for entry in faq_dict[category]:
+            md += f"## {entry['question']}\n\n{entry['document']}"
     return(head + markdown(md, extensions=['toc']
 ))
 

@@ -8,6 +8,7 @@
 * Instances will now display their tags, unless muted.
 * Can now retrieve instances in the whitelist filtered by tags
 * Fix hesitations received appearing when visibility was limited.
+* FAQ retrievable by API
 
 # 0.18.0
 

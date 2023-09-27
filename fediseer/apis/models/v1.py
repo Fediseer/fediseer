@@ -140,3 +140,10 @@ class Models:
         self.input_tags = api.model('Tags', {
             'tags_csv': fields.String(min_length=2, required=True, description="A comma-separated list of tags"),
         })
+        self.response_model_faq_entry = api.model('FAQEntry', {
+            'category': fields.String(description="The overarching category for this entry", example="terminology"),
+            'added': fields.DateTime(description="The date this entry was added"),
+            'question': fields.String(description="The entry in question form", example="What is an FAQ?"),
+            'stub': fields.String(description="The entry in a short form", example="faq"),
+            'document': fields.String(description="The answer provided by this FAQ entry", example="An FAQ stands for Frequently Asked Questions."),
+        })

@@ -1,7 +1,7 @@
 from fediseer.apis.v1.base import *
 from fediseer import enums
-from fediseer.classes.reports import Report
 from fediseer.classes.instance import InstanceTag
+from fediseer.consts import MAX_TAGS
 
 class Tags(Resource):
 
@@ -32,8 +32,8 @@ class Tags(Resource):
         tags = [t.strip() for t in self.args.tags_csv.split(',')]
         if database.instance_has_flag(instance.id,enums.InstanceFlags.RESTRICTED):
             raise e.Forbidden("You cannot take this action as your instance is restricted")
-        if database.count_instance_tags(instance.id) + len(tags) >= 100:
-            raise e.BadRequest("You can't have more than 100 tags")
+        if database.count_instance_tags(instance.id) + len(tags) >= MAX_TAGS:
+            raise e.BadRequest(f"You can't have more than {MAX_TAGS} tags")
         if len(tags) != len(set([t.lower() for t in tags])):
             raise e.BadRequest("You cannot specify the same tag with different case.")
         for tag in tags:
