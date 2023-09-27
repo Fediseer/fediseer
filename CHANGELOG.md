@@ -7,6 +7,7 @@
 * Added paging and limit to whitelist get
 * Instances will now display their tags, unless muted.
 * Can now retrieve instances in the whitelist filtered by tags
+* Fix hesitations received appearing when visibility was limited.
 
 # 0.18.0
 
