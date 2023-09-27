@@ -30,6 +30,8 @@ class Tags(Resource):
         instance = database.find_instance_by_user(user)
         changed = False
         tags = [t.strip() for t in self.args.tags_csv.split(',')]
+        if database.instance_has_flag(instance.id,enums.InstanceFlags.RESTRICTED):
+            raise e.Forbidden("You cannot take this action as your instance is restricted")
         if database.count_instance_tags(instance.id) + len(tags) >= 100:
             raise e.BadRequest("You can't have more than 100 tags")
         if len(tags) != len(set([t.lower() for t in tags])):
