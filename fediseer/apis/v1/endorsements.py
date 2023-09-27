@@ -13,6 +13,8 @@ class Approvals(Resource):
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
     get_parser.add_argument("min_endorsements", required=False, default=1, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("reasons_csv", required=False, type=str, help="Only retrieve endorsements where their reasons include any of the text in this csv", location="args")
+    get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve", location="args")
+    get_parser.add_argument("limit", required=False, type=int, default=10, help="Which page of results to retrieve", location="args")
 
     decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     @api.expect(get_parser)

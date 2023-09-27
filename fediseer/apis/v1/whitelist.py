@@ -11,6 +11,9 @@ class Whitelist(Resource):
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
+    get_parser.add_argument("tags_csv", required=False, type=str, help="A list of tags to filter.", location="args")
+    get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve", location="args")
+    get_parser.add_argument("limit", required=False, type=int, default=1000, help="Which page of results to retrieve", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
@@ -21,8 +24,21 @@ class Whitelist(Resource):
         '''A List with the details of all instances and their endorsements
         '''
         self.args = self.get_parser.parse_args()
+        # if self.args.limit > 100: # Once limit is in effect
+        #     raise e.BadRequest("limit cannot be more than 100")
+        if self.args.limit < 10:
+            raise e.BadRequest("Limit cannot be less than 10")
+        tags = None
+        if self.args.tags_csv is not None:
+            tags = [t.strip() for t in self.args.tags_csv.split(',')]
         instance_details = []
-        for instance in database.get_all_instances(self.args.endorsements,self.args.guarantors):
+        for instance in database.get_all_instances(
+            min_endorsements=self.args.endorsements,
+            min_guarantors=self.args.guarantors,
+            tags=tags,
+            page=self.args.page,
+            limit=self.args.limit,
+        ):
             instance_details.append(instance.get_details(show_visibilities=True))
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200

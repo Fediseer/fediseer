@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import func, Index
 
 from loguru import logger
 from fediseer.flask import db, SQLITE_MODE
@@ -92,6 +93,18 @@ class InstanceFlag(db.Model):
     instance = db.relationship("Instance", back_populates="flags")
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
+class InstanceTag(db.Model):
+    __tablename__ = "instance_tags"
+    __table_args__ = (
+        UniqueConstraint('instance_id', 'tag', name='instance_tags_instance_id_tag'),
+        Index("ix_tags_lower", func.lower('tag')),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    tag = db.Column(db.String(100), unique=False, nullable=False)
+    instance_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
+    instance = db.relationship("Instance", back_populates="tags")
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
 class Instance(db.Model):
     __tablename__ = "instances"
 
@@ -127,7 +140,8 @@ class Instance(db.Model):
     rejections = db.relationship("RejectionRecord", back_populates="rejector_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejector_id])
     rejectors = db.relationship("RejectionRecord", back_populates="rejected_instance", cascade="all, delete-orphan", foreign_keys=[RejectionRecord.rejected_id])
     admins = db.relationship("Claim", back_populates="instance", cascade="all, delete-orphan")
-    flags = db.relationship("InstanceFlag", back_populates="instance", cascade="all, delete-orphan")
+    flags = db.relationship("InstanceFlag", back_populates="instance", cascade="all, delete-orphan", lazy='joined')
+    tags = db.relationship("InstanceTag", back_populates="instance", cascade="all, delete-orphan", lazy='joined')
 
     def create(self):
         db.session.add(self)
@@ -153,6 +167,7 @@ class Instance(db.Model):
             "sysadmins": self.sysadmins,
             "moderators": self.moderators,
             "state": self.get_state().name,
+            "tags": [t.tag for t in self.tags] if not self.has_flag(enums.InstanceFlags.MUTED) else [],
         }
         if show_visibilities:
             ret_dict["visibility_endorsements"] = self.visibility_endorsements.name

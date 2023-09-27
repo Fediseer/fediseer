@@ -1,5 +1,4 @@
 from fediseer.apis.v1.base import *
-from fediseer.messaging import activitypub_pm
 from fediseer import enums
 from fediseer.classes.reports import Report
 from fediseer.register import ensure_instance_registered

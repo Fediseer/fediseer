@@ -113,12 +113,12 @@ class Hesitations(Resource):
         precheck_instances = database.get_all_hesitant_instances_by_dubious_id(instance.id)
         instances = []
         for p_instance in precheck_instances:
-            if p_instance.visibility_endorsements == enums.ListVisibility.ENDORSED:
+            if p_instance.visibility_hesitations == enums.ListVisibility.ENDORSED:
                 if get_instance is None:
                     continue
                 if not p_instance.is_endorsing(get_instance):
                     continue
-            if p_instance.visibility_endorsements == enums.ListVisibility.PRIVATE:
+            if p_instance.visibility_hesitations == enums.ListVisibility.PRIVATE:
                 if get_instance is None:
                     continue
                 if p_instance != get_instance:

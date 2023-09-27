@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.19.0
+
+* Added instance Tags. Instance owners can add and remove them
+* Limited retrieval of whitelist to 10 instances by default
+* Added paging and limit to whitelist get
+* Instances will now display their tags, unless muted.
+* Can now retrieve instances in the whitelist filtered by tags
+* Fix hesitations received appearing when visibility was limited.
+
 # 0.18.0
 
 * Added instance flags

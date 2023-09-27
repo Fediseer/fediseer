@@ -41,6 +41,8 @@ class Models:
             'sysadmins': fields.Integer(required=False, default=None, description="The count of system administrators in this instance as reported by its admins."),
             'moderators': fields.Integer(required=False, default=None, description="The count of community moderators in this instance as reported by its admins."),
             'state': fields.String(required=True, enum=[e.name for e in enums.InstanceState], description="The state of the instance as seen from the fediseer."),
+            'tags': fields.List(fields.String(min_length=2, required=False, description="Domain tags (if any)")),
+
         })
         self.response_model_flag_details = api.model('FlagDetails', {
             'flag': fields.String(required=True, enum=[e.name for e in enums.InstanceFlags], description="The type of flag"),
@@ -134,4 +136,7 @@ class Models:
         self.input_flag_modify = api.model('FlagModify', {
             'flag': fields.String(required=True, enum=[e.name for e in enums.InstanceFlags], description="The type of flag to apply"),
             'comment': fields.String(max_length=255, required=False, description="A comment explaining this flag", example="reasons"),
+        })
+        self.input_tags = api.model('Tags', {
+            'tags_csv': fields.String(min_length=2, required=True, description="A comma-separated list of tags"),
         })
