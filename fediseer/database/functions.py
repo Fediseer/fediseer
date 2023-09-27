@@ -8,7 +8,7 @@ from sqlalchemy.orm import noload
 from fediseer.flask import db, SQLITE_MODE
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag, InstanceTag
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
@@ -472,5 +472,19 @@ def instance_has_flag(instance_id, flag_enum):
     query = InstanceFlag.query.filter(
         InstanceFlag.instance_id == instance_id,
         InstanceFlag.flag == flag_enum,
+    )
+    return query.count() == 1
+
+def get_instance_tag(instance_id, tag: str):
+    query = InstanceTag.query.filter(
+        InstanceTag.instance_id == instance_id,
+        InstanceTag.flag == tag,
+    )
+    return query.first()
+
+def instance_has_tag(instance_id, tag: str):
+    query = InstanceTag.query.filter(
+        InstanceTag.instance_id == instance_id,
+        InstanceTag.flag == tag.lower(),
     )
     return query.count() == 1
