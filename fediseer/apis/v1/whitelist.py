@@ -88,6 +88,8 @@ class WhitelistDomain(Resource):
         if self.args.pm_proxy is not None:
             proxy = enums.PMProxy[self.args.pm_proxy]
             if instance.pm_proxy != proxy:
+                if proxy == enums.PMProxy.MASTODON and instance.software == "lemmy":
+                    raise e.BadRequest("I'm sorry Dave, I can't let you do that. Lemmy is not capable of receiving mastodon PMs.")
                 instance.pm_proxy = proxy
         api_key = activitypub_pm.pm_new_api_key(
             domain=domain, 
