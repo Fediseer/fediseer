@@ -1,20 +1,22 @@
-import time
-import uuid
-import json
 from loguru import logger
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_, and_, not_, Boolean
-from sqlalchemy.orm import noload
-from fediseer.flask import db, SQLITE_MODE
+from fediseer.flask import db
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
 from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag, InstanceTag
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
-from fediseer.consts import POLLS_PER_DAY
 
-def get_all_instances(min_endorsements = 0, min_guarantors = 1, include_decommissioned = True):
+def get_all_instances(
+        min_endorsements = 0, 
+        min_guarantors = 1, 
+        tags = None,
+        include_decommissioned = True,
+        page=1,
+        limit=10,
+    ):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -35,8 +37,14 @@ def get_all_instances(min_endorsements = 0, min_guarantors = 1, include_decommis
     ).having(
         db.func.count(Instance.guarantors) >= min_guarantors,
     )
-    return query.all()
-
+    if tags:
+        # Convert tags to lowercase and filter instances that have any of the tags
+        lower_tags = [tag.lower() for tag in tags]
+        query = query.filter(Instance.tags.any(func.lower(InstanceTag.tag).in_(lower_tags)))
+    page -= 1
+    if page < 0:
+        page = 0
+    return query.order_by(Instance.created.desc()).offset(limit * page).limit(limit).all()
 
 def get_all_endorsed_instances_by_approving_id(approving_ids):
     query = db.session.query(
@@ -485,6 +493,12 @@ def get_instance_tag(instance_id, tag: str):
 def instance_has_tag(instance_id, tag: str):
     query = InstanceTag.query.filter(
         InstanceTag.instance_id == instance_id,
-        InstanceTag.flag == tag.lower(),
+        InstanceTag.tag == tag.lower(),
     )
     return query.count() == 1
+
+def count_instance_tags(instance_id):
+    query = InstanceTag.query.filter(
+        InstanceTag.instance_id == instance_id,
+    )
+    return query.count()

@@ -10,6 +10,7 @@ import fediseer.apis.v1.badges as badges
 import fediseer.apis.v1.find as find
 import fediseer.apis.v1.report as report
 import fediseer.apis.v1.admin as admin
+import fediseer.apis.v1.tags as tags
 from fediseer.apis.v1.base import api
 
 api.add_resource(base.Suspicions, "/instances")
@@ -30,4 +31,5 @@ api.add_resource(guarantees.Guarantees, "/guarantees/<string:domain>")
 api.add_resource(badges.GuaranteeBadge, "/badges/guarantees/<string:domain>.svg")
 api.add_resource(badges.EndorsementBadge, "/badges/endorsements/<string:domain>.svg")
 api.add_resource(admin.Flag, "/admin/flags/<string:domain>")
+api.add_resource(tags.Tags, "/admin/tags")
 api.add_resource(report.Report, "/reports")
