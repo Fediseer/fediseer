@@ -13,7 +13,7 @@ class Whitelist(Resource):
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("tags_csv", required=False, type=str, help="A list of tags to filter.", location="args")
     get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve", location="args")
-    get_parser.add_argument("limit", required=False, type=int, default=10, help="Which page of results to retrieve", location="args")
+    get_parser.add_argument("limit", required=False, type=int, default=1000, help="Which page of results to retrieve", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
@@ -24,8 +24,8 @@ class Whitelist(Resource):
         '''A List with the details of all instances and their endorsements
         '''
         self.args = self.get_parser.parse_args()
-        if self.args.limit > 100:
-            raise e.BadRequest("limit cannot be more than 100")
+        # if self.args.limit > 100: # Once limit is in effect
+        #     raise e.BadRequest("limit cannot be more than 100")
         if self.args.limit < 10:
             raise e.BadRequest("Limit cannot be less than 10")
         tags = None
