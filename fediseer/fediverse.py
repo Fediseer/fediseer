@@ -37,7 +37,6 @@ class InstanceInfo():
             self.instance_info = {}
             return
         if domain == "fediseer.com":
-            # Fake instances for testing chain of trust
             self.open_registrations = False
             self.approval_required = False
             self.email_verify = False

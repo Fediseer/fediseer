@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request
 from markdown import markdown
 from loguru import logger
 from fediseer.flask import OVERSEER
-from fediseer.faq import FEDISEER_FAQ
+from fediseer.faq import FAQ_LANGUAGES
 import fediseer.exceptions as e
 
 @logger.catch(reraise=True)
@@ -59,7 +59,7 @@ def faq():
     </head>
     """
     faq_dict = {}
-    for entry in FEDISEER_FAQ:
+    for entry in FAQ_LANGUAGES["eng"]:
         if entry["category"] not in faq_dict:
             faq_dict[entry["category"]] = []
         faq_dict[entry["category"]].append(entry)

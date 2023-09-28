@@ -142,6 +142,7 @@ class Models:
         })
         self.response_model_faq_entry = api.model('FAQEntry', {
             'category': fields.String(description="The overarching category for this entry", example="terminology"),
+            'category_translated': fields.String(description="The overarching category for this entry, translated to the target language.", example="terminology"),
             'added': fields.DateTime(description="The date this entry was added"),
             'question': fields.String(description="The entry in question form", example="What is an FAQ?"),
             'stub': fields.String(description="The entry in a short form", example="faq"),
