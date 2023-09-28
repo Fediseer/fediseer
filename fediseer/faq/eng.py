@@ -1,9 +1,20 @@
 from fediseer.consts import MAX_TAGS
 
+ENG_HEADER = """#Fediseer FAQ
+
+This document will attempt to provide some definitions and answers to common questions around the fediseer.
+
+[TOC]
+"""
+
+ENG_TRANSLATION_MESSAGE = "**Attention**: This translation is not completed yet."
+
+
 ENG_FAQ = [
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is the Fediseer?",
         "stub": "fediseer",
@@ -20,6 +31,7 @@ The fediseer provides a machine readable API to consume the data contained withi
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is a guarantee?",
         "stub": "guarantee",
@@ -34,6 +46,7 @@ Guarantees are community driven. While the fediseer can guarantee at the top lev
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is the chain of trust?",
         "stub": "chain of trust",
@@ -48,6 +61,7 @@ This allows the fediseer to quickly deal with spam instances that sneaked into t
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is an endorsement?",
         "stub": "endorsement",
@@ -62,6 +76,7 @@ When looking at the instance whitelist, one can also filter by amount of endorse
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is a censure?",
         "stub": "censure",
@@ -76,6 +91,7 @@ One can export the list of instances censured by a subset of instances.
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is a hesitation?",
         "stub": "hesitation",
@@ -90,6 +106,7 @@ One can export the list of instances hesitate by a subset of instances.
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is an instance claim?",
         "stub": "claim",
@@ -102,6 +119,7 @@ Fediseer has no users. Instead it's driven by instance admins only. Instance adm
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What are instance visibilities?",
         "stub": "visibilities",
@@ -118,6 +136,7 @@ Note that guarantees are always public as this is necessary for the good functio
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What is an instance flag?",
         "stub": "flag",
@@ -131,6 +150,7 @@ Note that guarantees are always public as this is necessary for the good functio
     {
         "category": "terminology",
         "category_translated": "terminology",
+        "translated": True,
         "added": "2023-09-27",
         "question": "What is an instance tag?",
         "stub": "tag",
@@ -147,6 +167,7 @@ Like always, no hate speech is allowed.
     {
         "category": "functionality",
         "category_translated": "functionality",
+        "translated": True,
         "added": "2023-09-25",
         "question": "How can I claim my instance?",
         "stub": "instance claim",
@@ -159,6 +180,7 @@ You will then receive an API key in PMs, which you can afterwards use to represe
     {
         "category": "functionality",
         "category_translated": "functionality",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What can I write in my reasons for endorsements, hesitations and censures?",
         "stub": "reasons",
@@ -171,6 +193,7 @@ You are not allowed to use hate speech in your reasons.
     {
         "category": "functionality",
         "category_translated": "functionality",
+        "translated": True,
         "added": "2023-09-25",
         "question": "What can I write in my evidence for censures and hesitations?",
         "stub": "evidence",
@@ -183,6 +206,7 @@ You are not allowed to use hate speech in your evidence.
     {
         "category": "philosophy",
         "category_translated": "philosophy",
+        "translated": True,
         "added": "2023-09-25",
         "question": "Doesn't this all cause fediverse centralization?",
         "stub": "centralization",
@@ -195,6 +219,7 @@ Not only that, but the fediseer is free and open source software, allowing anyon
     {
         "category": "philosophy",
         "category_translated": "philosophy",
+        "translated": True,
         "added": "2023-09-25",
         "question": "Doesn't this make the fediseer an authority on the fediverse?",
         "stub": "authority",

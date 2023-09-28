@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, request
 from markdown import markdown
 from loguru import logger
 from fediseer.flask import OVERSEER
-from fediseer.faq import FAQ_LANGUAGES
+from fediseer.faq import FAQ_LANGUAGES, HEADER_LANGUAGES, TRANSLATION_MESSAGE_LANGUAGES, LANGUAGE_NAMES
 import fediseer.exceptions as e
 
 @logger.catch(reraise=True)
@@ -34,12 +34,12 @@ def index():
     return(head + markdown(findex))
 
 @logger.catch(reraise=True)
-@OVERSEER.route('/faq')
+@OVERSEER.route('/faq/<lang>')
 # @cache.cached(timeout=300)
-def faq():
-    with open(f'fediseer/templates/faq.md') as md_file:
-        md = md_file.read()
-
+def faq(lang):
+    if lang not in FAQ_LANGUAGES:
+        return redirect(url_for('faq_default'))
+    md = HEADER_LANGUAGES[lang]
     style = """<style>
         body {
             max-width: 120ex;
@@ -59,16 +59,48 @@ def faq():
     </head>
     """
     faq_dict = {}
-    for entry in FAQ_LANGUAGES["eng"]:
-        if entry["category"] not in faq_dict:
-            faq_dict[entry["category"]] = []
-        faq_dict[entry["category"]].append(entry)
+    for entry in FAQ_LANGUAGES[lang]:
+        if entry["category_translated"] not in faq_dict:
+            faq_dict[entry["category_translated"]] = []
+        faq_dict[entry["category_translated"]].append(entry)
     for category in faq_dict:
         md += f"#{category.capitalize()}\n\n"
         for entry in faq_dict[category]:
-            md += f"## {entry['question']}\n\n{entry['document']}"
-    return(head + markdown(md, extensions=['toc']
-))
+            md += f"## {entry['question']}\n"
+            if entry["translated"] is False:
+                md += f"{TRANSLATION_MESSAGE_LANGUAGES[lang]}\n\n"
+            md += f"{entry['document']}"
+    return(head + markdown(md, extensions=['toc']))
+
+@logger.catch(reraise=True)
+@OVERSEER.route('/faq')
+@OVERSEER.route('/faq/')
+def faq_default():
+    style = """<style>
+        body {
+            max-width: 120ex;
+            margin: 0 auto;
+            color: #333333;
+            line-height: 1.4;
+            font-family: sans-serif;
+            padding: 1em;
+        }
+        </style>
+    """
+
+    head = f"""<head>
+    <title>Fediseer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {style}
+    </head>
+    """
+    md = "#Fediseer FAQ\n\n" +\
+        "We provide the fediseer FAQ in multiple languages. Please select one of the options below.\n\n"
+
+    for lang in LANGUAGE_NAMES:
+        md += f"   * [{LANGUAGE_NAMES[lang]}](/faq/{lang})\n"
+    md += "\nPlease [help us add more language support](https://github.com/Fediseer/fediseer/blob/main/TRANSLATIONS.md)"
+    return(head + markdown(md))
 
 @logger.catch(reraise=True)
 @OVERSEER.route('/.well-known/webfinger')
