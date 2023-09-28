@@ -7,6 +7,8 @@ from datetime import datetime
 from loguru import logger
 
 def ensure_instance_registered(domain, allow_unreachable=False, record_unreachable = False, allowed_timeout=5):
+    if domain == "localhost":
+        raise e.BadRequest("Cannot seek for localhost")
     instance = database.find_instance_by_domain(domain)
     try:
         instance_info = InstanceInfo(domain,allow_unreachable=allow_unreachable, req_timeout=allowed_timeout)

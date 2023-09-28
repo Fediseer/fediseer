@@ -36,6 +36,17 @@ class InstanceInfo():
             self.node_info = InstanceInfo.get_nodeinfo("lemmy.dbzer0.com")
             self.instance_info = {}
             return
+        if domain == "fediseer.com":
+            # Fake instances for testing chain of trust
+            self.open_registrations = False
+            self.approval_required = False
+            self.email_verify = False
+            self.has_captcha = False
+            self.software = "fediseer"
+            self.admin_usernames = {"fediseer"}
+            self.node_info = {}
+            self.instance_info = {}
+            return
 
         try:
             self.node_info = InstanceInfo.get_nodeinfo(domain,req_timeout=self._req_timeout)
@@ -217,6 +228,8 @@ class InstanceInfo():
 
 
     def parse_instance_info(self):
+        if self.domain == "fediseer.com":
+            return
         if not self.node_info:
             if self._allow_unreachable:
                 self.software = "unknown"
