@@ -13,7 +13,7 @@ DEU_TRANSLATION_MESSAGE = "**Achtung**: Diese Übersetzung ist noch nicht abgesc
 DEU_FAQ = [
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist Fediseer?",
@@ -30,7 +30,7 @@ Der Fediseer bietet eine maschinenlesbare API, um die darin enthaltenen Daten zu
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist eine Bürgschaft?",
@@ -45,7 +45,7 @@ Bürgschaften sind von der Gemeinschaft abhängig. Während der Fediseer auch au
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist die Vertrauenskette?",
@@ -60,7 +60,7 @@ Das hilft Fediseer, schnell mit unvertrauenswürdigen Instanzen fertig zu werden
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist eine Empfehlung?",
@@ -75,7 +75,7 @@ Wenn man sich die Whitelist der Instanzen ansieht, kann man auch nach der Anzahl
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist ein Tadel?",
@@ -90,7 +90,7 @@ Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen zensiert
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist ein Tadel?",
@@ -105,7 +105,7 @@ Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen getadelt
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was bedeutet es eine Instanz zu beanspruchen?",
@@ -118,7 +118,7 @@ Fediseer hat keine Benutzerkonten. Stattdessen wird es nur von Instanzadministra
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was sind Sichtbarkeiten von Instanzen?",
@@ -134,7 +134,7 @@ Beachten Sie, dass Garantien immer öffentlich sind, da dies für das gute Funkt
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was ist ein Instanzkennzeichen?",
@@ -148,7 +148,7 @@ Beachten Sie, dass Garantien immer öffentlich sind, da dies für das gute Funkt
     },
     {
         "category": "terminology",
-        "category_translated": "terminology",
+        "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-27",
         "question": "Was ist ein Instanz-Tag?",
@@ -165,7 +165,7 @@ Wie immer ist keine Hassrede erlaubt.
     },
     {
         "category": "functionality",
-        "category_translated": "functionality",
+        "category_translated": "Funktionalität",
         "translated": True,
         "added": "2023-09-25",
         "question": "Wie kann ich meine Instanz beanspruchen?",
@@ -178,7 +178,7 @@ Sie erhalten dann einen API-Schlüssel als PN, den Sie anschließend verwenden k
     },
     {
         "category": "functionality",
-        "category_translated": "functionality",
+        "category_translated": "Funktionalität",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was kann ich in meine Begründungen für Befürwortungen, Bedenken und Tadel schreiben?",
@@ -191,7 +191,7 @@ Sie dürfen in Ihren Begründungen keine Hassreden verwenden.
     },
     {
         "category": "functionality",
-        "category_translated": "functionality",
+        "category_translated": "Funktionalität",
         "translated": True,
         "added": "2023-09-25",
         "question": "Was kann ich als Begründung für meine Zweifel schreiben?",
@@ -204,7 +204,7 @@ Sie dürfen in Ihren Belegen keine Hassrede verwenden.
     },
     {
         "category": "philosophy",
-        "category_translated": "philosophy",
+        "category_translated": "Philosophie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Führt das alles nicht zu einer Zentralisierung der Föderation?",
@@ -218,7 +218,7 @@ Nicht nur das, der Fediseer ist eine freie und quelloffene Software, die es jede
     },
     {
         "category": "philosophy",
-        "category_translated": "philosophy",
+        "category_translated": "Philosophie",
         "translated": True,
         "added": "2023-09-25",
         "question": "Macht dies den Fediseer nicht zu einer Autorität im Fediversum?",
