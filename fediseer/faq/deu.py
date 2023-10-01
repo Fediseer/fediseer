@@ -2,12 +2,12 @@ from fediseer.consts import MAX_TAGS
 
 DEU_HEADER = """#Fediseer FAQ
 
-This document will attempt to provide some definitions and answers to common questions around the fediseer.
+In diesem Dokument wird versucht, einige Definitionen und Antworten auf allgemeine Fragen rund um den Fediseer zu geben.
 
 [TOC]
 """
 
-DEU_TRANSLATION_MESSAGE = "**Attention**: This translation is not completed yet."
+DEU_TRANSLATION_MESSAGE = "**Achtung**: Diese Übersetzung ist noch nicht abgeschlossen."
 
 
 DEU_FAQ = [
@@ -16,16 +16,16 @@ DEU_FAQ = [
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is the Fediseer?",
+        "question": "Was ist Fediseer?",
         "stub": "fediseer",
         "document":
-"""The fediseer is a service for the fediverse which attempts to provide a crowdsourced human-curated spam/ham classification of fediverse instances as well as provide a public space to specify approval/disapproval of other instances.
+"""Fediseer ist ein Dienst für das Fediverse, der versucht, eine von Menschenhand kuratierte Vertrauens-Klassifizierung von Fediverse-Instanzen bereitzustellen sowie einen öffentlichen Raum zu bieten, um die Zustimmung/Ablehnung anderer Instanzen anzugeben.
 
-In simple terms, using the fediseer, we attempt to figure out if an instance is spam or not through a human-driven system called the "chain of trust".
+Vereinfacht ausgedrückt, versuchen wir mit dem Fediseer herauszufinden, ob eine Instanz Vertrauenswürdig ist oder nicht, und zwar mit Hilfe eines menschengesteuerten Systems, der sogenannten "Vertrauenskette".
 
-The three main concepts used in Fediseer are guarantees, endorsements and censures.
+Die drei Hauptfunktionen sind dabei: Empfehlungen, Bürgschaften und Tadel.
 
-The fediseer provides a machine readable API to consume the data contained within.
+Der Fediseer bietet eine maschinenlesbare API, um die darin enthaltenen Daten zu nutzen.
 """
     },
     {
@@ -33,14 +33,14 @@ The fediseer provides a machine readable API to consume the data contained withi
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is a guarantee?",
+        "question": "Was ist eine Bürgschaft?",
         "stub": "guarantee",
         "document":
-"""Basically, any guaranteed instance is known as definitelly "not spam" (AKA "ham"). That doesn't mean any non-guaranteed instance is spam. Rather it is considered "unknown". The only reasoning to guarantee an instance is whether they are spam or not. The objective here being to prevent malicious actors from spawning an infinite amount of new instances on the fediverse to send spam.
+""" Jede Instanz mit einer Bürgschaft kann als vertrauenswürdig angesehen werden. Das bedeutet nicht, dass eine Instanz ohne Bürgschaft nicht Vertrauenswürdig ist. Es bedeutet vielmehr, dass der Status "unbekannt" ist. Der Zweck der Bürgschaft für eine Instanz besteht darin, andere wissen zu lassen, ob es sich um eine vertrauenswürdige Instanz handelt. Damit soll verhindert werden, dass böswillige Akteure eine unendliche Anzahl neuer Instanzen im Fediverse erzeugen, um Spam zu versenden.
 
-Each instance can only be guaranteed by one instance and guarantee another instance. This is called the "chain of trust"
+Jede Instanz kann durch eine andere Instanz eine Bürgschaft erhalten und kann dann für 20 andere Instanzen bürgen. Dies wird als "Vertrauenskette" bezeichnet.
 
-Guarantees are community driven. While the fediseer can guarantee at the top level as well, we hope that instance admins will guarantee the instances they know of and help ensure the health of the network.
+Bürgschaften sind von der Gemeinschaft abhängig. Während der Fediseer auch auf der obersten Ebene Bürgschaften vergeben kann, hoffen wir, dass die Instanz-Admins für die Instanzen bürgen, von denen sie wissen, dass sie vertrauenswürdig sind.
 """
     },
     {
@@ -48,14 +48,14 @@ Guarantees are community driven. While the fediseer can guarantee at the top lev
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is the chain of trust?",
+        "question": "Was ist die Vertrauenskette?",
         "stub": "chain of trust",
         "document":
-"""Because each instance on the fediseer can guarantee and be guaranteed by a single instance, this causes a chain to form starting from the fediseer itself. Any instance guaranteed by such an unbroken chain is considered as ham. If the guarantee for any instance in this chain is revoked, the chain of trust is broken and any instances below are considered not-guaranteed.
+""" Da jede Instanz auf dem Fediseer für andere Instanzen bürgt und eine Bürgschaft erhalten kann, bildet sich eine Kette, die vom Fediseer selbst ausgeht. Jede Instanz, die von einer solchen ununterbrochenen Kette eine Bürgschaft besitzt, gilt als vertrauenswürdig. Wenn die Bürgschaft für eine Instanz aufgehoben wird, wird die Vertrauenskette unterbrochen und alle darunterliegenden Instanzen werden als bürgschaftslos betrachtet.
 
-This allows the fediseer to quickly deal with spam instances that sneaked into the fediseer and then guaranteed a bunch more of the spammy friends. As the chain can be revoked higher up, even a whole spam network can be countered by revoking the guarantee from the first spammer guaranteed.
+Das hilft Fediseer, schnell mit unvertrauenswürdigen Instanzen fertig zu werden, die sich in Fediseer eingeschlichen haben und dann für weitere unvertrauenswürdige Instanzen bürgen. So kann z.B. ein ganzes Spam-Netzwerk bekämpft werden, indem die Bürgschaft des ersten Spammers widerrufen wird.
 
-[Chain of Trust Devlog](https://dbzer0.com/blog/overseer-a-fediverse-chain-of-trust/)
+[Chain of Trust Devlog](https://dbzer0.com/blog/overseer-a-Fediverse-chain-of-trust/)
 """
     },
     {
@@ -63,14 +63,14 @@ This allows the fediseer to quickly deal with spam instances that sneaked into t
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is an endorsement?",
+        "question": "Was ist eine Empfehlung?",
         "stub": "endorsement",
         "document":
-"""An endorsement is a completely subjective positive judgement from one instance to another. Effectively signifying that instance A "approves" of instance B. The reason for this can be anything and do not have to be stated.
+""" Eine Empfehlung ist ein völlig subjektives positives Urteil von einer Instanz gegenüber einer anderen. Es bedeutet, dass Instanz A Instanz B vertraut. Dafür kann es vielerlei Gründe geben, welche auch angegeben werden können.
 
-An instance can be approve of any number of instances and be endorsed by any number of instances. One can even get an autogenerated badge with the amount of endorsements they've received to display.
+Eine Instanz kann beliebig viele Instanzen Empfehlungen aussprechen und beliebig viele Empfehlungen erhalten. Es gibt ein Abzeichen, das die Anzahl der Empfehlungen anzeigt. Sie können das Abzeichen im linken Menü unter Ihrem Instanznamen sehen.
 
-When looking at the instance whitelist, one can also filter by amount of endorsements. Likewise one can also export the list of instances endorsed by a subset of instances.
+Wenn man sich die Whitelist der Instanzen ansieht, kann man auch nach der Anzahl der Empfehlungen filtern. Ebenso kann man die Liste der Instanzen, die von einer Teilmenge von Instanzen empfohlen werden, exportieren.
 """
     },
     {
@@ -78,14 +78,14 @@ When looking at the instance whitelist, one can also filter by amount of endorse
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is a censure?",
+        "question": "Was ist ein Tadel?",
         "stub": "censure",
         "document":
-"""An censure is a completely subjective negative judgement from one instance to another. Effectively signifying that instance A "disapproves" of instance B. The reason for this can be anything and do not have to be stated.
+"""Ein Tadel ist ein völlig subjektives negatives Urteil von einer Instanz zur anderen. Es bedeutet, dass die Instanz A die Instanz B "missbilligt". Der Grund dafür kann alles sein und muss nicht angegeben werden.
 
-An instance can be censure any number of instances and be censured by any number of instances.
+Eine Instanz kann von einer beliebigen Anzahl von Instanzen getadelt werden und von einer beliebigen Anzahl von Instanzen getadelt werden.
 
-One can export the list of instances censured by a subset of instances.
+Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen zensiert werden, exportieren.
 """
     },
     {
@@ -93,14 +93,14 @@ One can export the list of instances censured by a subset of instances.
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is a hesitation?",
+        "question": "Was ist ein Tadel?",
         "stub": "hesitation",
         "document":
-"""An hesitation is a mulder version of a censure, it signifies some sort of mistrust of one instance towards another. The reason for this can be anything and do not have to be stated.
+""" Ein Tadel ist ein völlig subjektives negatives Urteil von einer Instanz gegenüber einer anderen. Es bedeutet, dass Instanz A die Instanz B als unvertrauenswürdig betrachtet.Dafür kann es vielerlei Gründe geben, welche auch angegeben werden können.
 
-An instance can be hesitate against number of instances and be doubted by number of instances.
+Eine Instanz kann eine beliebige Anzahl von Instanzen tadeln und von einer beliebigen Anzahl von Instanzen getadelt werden.
 
-One can export the list of instances hesitate by a subset of instances.
+Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen getadelt werden, exportieren.
 """
     },
     {
@@ -108,12 +108,12 @@ One can export the list of instances hesitate by a subset of instances.
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is an instance claim?",
+        "question": "Was bedeutet es eine Instanz zu beanspruchen?",
         "stub": "claim",
         "document":
-"""A claimed instance is an instance whose admin has requisted an API key with which to use the fediseer as their instance.
+""" Eine beanspruchte Instanz ist eine Instanz, deren Administrator einen API-Schlüssel von Fediseer angefordert hat.
 
-Fediseer has no users. Instead it's driven by instance admins only. Instance admins likewise only act as their instances.
+Fediseer hat keine Benutzerkonten. Stattdessen wird es nur von Instanzadministratoren betrieben welche ausschließlich als ihre Instanz agieren.
 """
     },
     {
@@ -121,16 +121,15 @@ Fediseer has no users. Instead it's driven by instance admins only. Instance adm
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What are instance visibilities?",
+        "question": "Was sind Sichtbarkeiten von Instanzen?",
         "stub": "visibilities",
         "document":
-"""An instance can set the visibility of its endorsements, censures, and/or hesitations to one of the following:
+"""Eine Instanz kann die Sichtbarkeit ihrer Vermerke, Rügen und/oder Vorbehalte auf eine der folgenden Möglichkeiten einstellen:
+* `OPEN`: Jeder kann diese Liste sehen und abrufen
+* `ENDORSED`: Nur Instanzen, die von der Quellinstanz gebilligt wurden, können diese Liste sehen
+* `PRIVATE`: Nur die Quellinstanz kann diese Liste sehen.
 
-* `OPEN`: Anyone can see and retrieve that list
-* `ENDORSED`: Only instances endorsed by the source instance, can see that list
-* `PRIVATE`: Only the source instance can see that list.
-
-Note that guarantees are always public as this is necessary for the good functioning of the chain of trust.
+Beachten Sie, dass Garantien immer öffentlich sind, da dies für das gute Funktionieren der Vertrauenskette notwendig ist.
 """
     },
     {
@@ -138,13 +137,13 @@ Note that guarantees are always public as this is necessary for the good functio
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What is an instance flag?",
+        "question": "Was ist ein Instanzkennzeichen?",
         "stub": "flag",
         "document":
-"""An instance flag represents some marking from the fediverse admins toward an instance. There's currently the following flags
+"""Eine Instanzkennzeichnung stellt eine Markierung der Fediverse-Administratoren für eine Instanz dar. Derzeit gibt es die folgenden Flaggen
 
-* `RESTRICTED`: The instance cannot guarantee, endorse, censure or hesitate other instances anymore. This flag is only used against egregious trolling or malicious behaviour.
-* `MUTED`: The instance's visibilities are forcefully set to `PRIVATE` and cannot be changed. This flag is meant to used against trolling or harassing behaviour.
+* `EINGESCHRÄNKT`: Die Instanz kann nicht mehr für andere Instanzen garantieren, sie unterstützen, tadeln oder zögern. Diese Flagge wird nur gegen ungeheuerliches Trolling oder bösartiges Verhalten verwendet.
+* `Stummgeschaltet`: Die Sichtbarkeit der Instanz wird zwangsweise auf `PRIVATE` gesetzt und kann nicht geändert werden. Dieses Flag ist gegen Trolling oder schikanöses Verhalten gedacht.
 """
     },
     {
@@ -152,16 +151,16 @@ Note that guarantees are always public as this is necessary for the good functio
         "category_translated": "terminology",
         "translated": True,
         "added": "2023-09-27",
-        "question": "What is an instance tag?",
+        "question": "Was ist ein Instanz-Tag?",
         "stub": "tag",
         "document":
-f"""An instance tag is up to {MAX_TAGS} voluntary classifications by the instance admins for their own instance.
-These tags can be anything that the owner wishes to use to describe their instance in a few words.
+f"""Ein Instanz-Tag besteht aus bis zu {MAX_TAGS} freiwilligen Klassifizierungen durch die Instanzadministratoren für ihre eigene Instanz.
+Diese Tags können alles sein, was der Eigentümer verwenden möchte, um seine Instanz in wenigen Worten zu beschreiben.
 
-The tags can then be used by integrators to filter instances for their block or allow lists,
-or to help people discover instances relevant to their interests.
+Die Tags können dann von Betreibern verwendet werden, um Instanzen für ihre Sperr- oder Erlaubnislisten zu filtern,
+oder um Menschen zu helfen, Instanzen zu finden, die ihren Interessen entsprechen.
 
-Like always, no hate speech is allowed.
+Wie immer ist keine Hassrede erlaubt.
 """
     },
     {
@@ -169,12 +168,12 @@ Like always, no hate speech is allowed.
         "category_translated": "functionality",
         "translated": True,
         "added": "2023-09-25",
-        "question": "How can I claim my instance?",
+        "question": "Wie kann ich meine Instanz beanspruchen?",
         "stub": "instance claim",
         "document":
-"""You can either use the rest API we have provided, providing your instance domain and admin username on it. Alternativey you can use one of our frontends.
+"""Sie können entweder die von uns bereitgestellte Rest-API verwenden, indem Sie Ihre Instanzdomäne und Ihren Administrator-Benutzernamen angeben. Alternativ können Sie auch unseren [Frontend](https://gui.fediseer.com/) verwenden.
 
-You will then receive an API key in PMs, which you can afterwards use to represent your instance on the fediseer.
+Sie erhalten dann einen API-Schlüssel als PN, den Sie anschließend verwenden können, um Ihre Instanz auf dem Fediseer zu repräsentieren.
 """
     },
     {
@@ -182,12 +181,12 @@ You will then receive an API key in PMs, which you can afterwards use to represe
         "category_translated": "functionality",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What can I write in my reasons for endorsements, hesitations and censures?",
+        "question": "Was kann ich in meine Begründungen für Befürwortungen, Bedenken und Tadel schreiben?",
         "stub": "reasons",
         "document":
-"""This is an optional free-form field for up to 255 characters. If will be handled as a comma-separated list, so we suggest using commas to split your reasons. As the reasons are meant to be used for filtering by others, we suggest you limit each entry to 2-5 words.
+"""Dies ist ein optionales Textfeld das bis zu 255 Zeichen erlaubt. Es wird als kommagetrennte Liste behandelt, daher empfehlen wir Ihnen, Ihre Gründe durch Kommas zu trennen. Da die Gründe dazu dienen sollen, von anderen gefiltert zu werden, empfehlen wir Ihnen, jeden Eintrag auf 2-5 Wörter zu beschränken.
 
-You are not allowed to use hate speech in your reasons.
+Sie dürfen in Ihren Begründungen keine Hassreden verwenden.
 """
     },
     {
@@ -195,12 +194,12 @@ You are not allowed to use hate speech in your reasons.
         "category_translated": "functionality",
         "translated": True,
         "added": "2023-09-25",
-        "question": "What can I write in my evidence for censures and hesitations?",
+        "question": "Was kann ich als Begründung für meine Zweifel schreiben?",
         "stub": "evidence",
         "document":
-"""This is an optional free-form field you can use to provide receipts for this judgement or explain your reasoning in depth. If you want to provide screenshots, we suggest linking to them, for example by [opening a thread in fediblock](https://lemmy.dbzer0.com/c/fediblock).
+"""Dies ist ein optionales Textfeld, das Sie nutzen können, um Belege für dieses Aktion zu liefern oder Ihre Argumentation ausführlich zu erläutern. Wenn Sie Screenshots zur Verfügung stellen möchten, empfehlen wir Ihnen, diese zu verlinken, z. B. durch [Eröffnung eines Threads im Fediblock] (https://lemmy.dbzer0.com/c/fediblock).
 
-You are not allowed to use hate speech in your evidence.
+Sie dürfen in Ihren Belegen keine Hassrede verwenden.
 """
     },
     {
@@ -208,12 +207,13 @@ You are not allowed to use hate speech in your evidence.
         "category_translated": "philosophy",
         "translated": True,
         "added": "2023-09-25",
-        "question": "Doesn't this all cause fediverse centralization?",
+        "question": "Führt das alles nicht zu einer Zentralisierung der Föderation?",
         "stub": "centralization",
         "document":
-"""No. The fediseer has no official integration with fediverse software. The fediseer simply provides the information within in a machine-readable REST API. How this information is utilized is up to the various instance admins. One is perfectly free to not utilize the fediseer whatsoever.
+"""Nein. Der fediseer hat keine offizielle Integration mit Fediverse Software. Der fediseer stellt lediglich die darin enthaltenen Informationen in einer maschinenlesbaren REST API zur Verfügung. Wie diese Informationen genutzt werden, bleibt den verschiedenen Instanzadministratoren überlassen. Es steht ihnen völlig frei, den fediseer überhaupt nicht zu nutzen.
 
-Not only that, but the fediseer is free and open source software, allowing anyone to re-host it and run it according to their own principles. If you do not trust this fediseer instance, you can rehost yourself and people can switch instances by changing a domain name.
+
+Nicht nur das, der Fediseer ist eine freie und quelloffene Software, die es jedem erlaubt, sie neu zu hosten und nach seinen eigenen Prinzipien zu betreiben. Wenn Sie dieser fediseer-Instanz nicht trauen, können Sie sich selbst neu hosten und die Leute können die Instanz wechseln, indem sie einen Domainnamen ändern.
 """
     },
     {
@@ -221,10 +221,10 @@ Not only that, but the fediseer is free and open source software, allowing anyon
         "category_translated": "philosophy",
         "translated": True,
         "added": "2023-09-25",
-        "question": "Doesn't this make the fediseer an authority on the fediverse?",
+        "question": "Macht dies den Fediseer nicht zu einer Autorität im Fediversum?",
         "stub": "authority",
         "document":
-"""The fediseer is designed to be completely crowd-sourced as pertains to the chain of trust. The admin of the fediseer does not control what people guarantee, endorse or censure. The various instance admins are driving the chain of trust.
+"""Der Fediseer ist so konzipiert, dass die Vertrauenskette vollständig von der Masse getragen wird. Der Administrator des Fediseers hat keine Kontrolle darüber, was die Leute garantieren, gutheißen oder zensieren. Die verschiedenen Instanzadministratoren steuern die Vertrauenskette.
 """
     },
 ]
