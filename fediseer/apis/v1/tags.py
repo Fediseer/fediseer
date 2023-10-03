@@ -64,7 +64,7 @@ class Tags(Resource):
     def delete(self):
         '''Delete an instance's tag
         '''
-        self.args = self.patch_parser.parse_args()
+        self.args = self.delete_parser.parse_args()
         if not self.args.apikey:
             raise e.Unauthorized("You must provide the API key that was PM'd to the admin account")
         user = database.find_user_by_api_key(self.args.apikey)
@@ -75,9 +75,9 @@ class Tags(Resource):
         tags = [t.strip() for t in self.args.tags_csv.split(',')]
         for tag in tags:
             existing_tag = database.get_instance_tag(instance.id,tag)
-            if not existing_tag:
-                existing_tag
-            db.session.delete(existing_tag)
+            if existing_tag:
+                db.session.delete(existing_tag)
+                changed = True
         if changed:
             db.session.commit()
             return {"message": "Changed"},200
