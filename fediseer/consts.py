@@ -1,4 +1,4 @@
-FEDISEER_VERSION = "0.19.0"
+FEDISEER_VERSION = "0.19.1"
 SUPPORTED_SOFTWARE = {
     "lemmy",
     "mastodon",

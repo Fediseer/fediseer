@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.19.1
+
+* Fixed Deleting tags
+
 # 0.19.0
 
 * Added instance Tags. Instance owners can add and remove them

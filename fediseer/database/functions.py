@@ -486,7 +486,7 @@ def instance_has_flag(instance_id, flag_enum):
 def get_instance_tag(instance_id, tag: str):
     query = InstanceTag.query.filter(
         InstanceTag.instance_id == instance_id,
-        InstanceTag.flag == tag,
+        InstanceTag.tag == tag,
     )
     return query.first()
 

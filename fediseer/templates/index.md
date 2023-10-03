@@ -33,5 +33,6 @@ However using the endorsement system, you can create a further customized whitel
 These are the people who made this software possible.
 
 * [Db0](https://dbzer0.com) - Development and Maintenance.
+* [Rikudou](https://lemmings.world/u/rikudou) - GUI Development.
 
 <a rel="me" href="https://botsin.space/@fediseer"></a>
