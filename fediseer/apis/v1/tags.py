@@ -64,7 +64,7 @@ class Tags(Resource):
     def delete(self):
         '''Delete an instance's tag
         '''
-        self.args = self.patch_parser.parse_args()
+        self.args = self.delete_parser.parse_args()
         if not self.args.apikey:
             raise e.Unauthorized("You must provide the API key that was PM'd to the admin account")
         user = database.find_user_by_api_key(self.args.apikey)
