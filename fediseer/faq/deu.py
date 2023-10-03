@@ -93,14 +93,14 @@ Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen zensiert
         "category_translated": "Terminologie",
         "translated": True,
         "added": "2023-09-25",
-        "question": "Was ist ein Tadel?",
+        "question": "Was ist ein Zweifel?",
         "stub": "hesitation",
         "document":
-""" Ein Tadel ist ein völlig subjektives negatives Urteil von einer Instanz gegenüber einer anderen. Es bedeutet, dass Instanz A die Instanz B als unvertrauenswürdig betrachtet.Dafür kann es vielerlei Gründe geben, welche auch angegeben werden können.
+"""  Ein Zweifel gleicht einem Tadel, nur nicht so streng. Man könnte es als missfallen und nicht als unvertrauenswürdig einstufen.
 
-Eine Instanz kann eine beliebige Anzahl von Instanzen tadeln und von einer beliebigen Anzahl von Instanzen getadelt werden.
+Eine Instanz kann beliebig viele Instanzen tadeln sowie von beliebig vielen getadelt werden. Auch hierfür kann es vielerlei Gründe geben, welche ebenfalls angegeben werden können.
 
-Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen getadelt werden, exportieren.
+Man kann die Liste der Instanzen, die von einer Teilmenge von Instanzen angezweifelt werden, exportieren.
 """
     },
     {
