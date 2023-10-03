@@ -75,9 +75,9 @@ class Tags(Resource):
         tags = [t.strip() for t in self.args.tags_csv.split(',')]
         for tag in tags:
             existing_tag = database.get_instance_tag(instance.id,tag)
-            if not existing_tag:
-                existing_tag
-            db.session.delete(existing_tag)
+            if existing_tag:
+                db.session.delete(existing_tag)
+                changed = True
         if changed:
             db.session.commit()
             return {"message": "Changed"},200
