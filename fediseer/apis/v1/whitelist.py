@@ -24,8 +24,8 @@ class Whitelist(Resource):
         '''A List with the details of all instances and their endorsements
         '''
         self.args = self.get_parser.parse_args()
-        # if self.args.limit > 100: # Once limit is in effect
-        #     raise e.BadRequest("limit cannot be more than 100")
+        if self.args.limit > 100: # Once limit is in effect
+            raise e.BadRequest("limit cannot be more than 100")
         if self.args.limit < 10:
             raise e.BadRequest("Limit cannot be less than 10")
         tags = None

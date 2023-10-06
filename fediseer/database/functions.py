@@ -46,7 +46,7 @@ def get_all_instances(
         page = 0
     return query.order_by(Instance.created.desc()).offset(limit * page).limit(limit).all()
 
-def get_all_endorsed_instances_by_approving_id(approving_ids):
+def get_all_endorsed_instances_by_approving_id(approving_ids,page=1,limit=100):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -58,7 +58,13 @@ def get_all_endorsed_instances_by_approving_id(approving_ids):
     ).group_by(
         Instance.id
     )
-    return query.all()
+    if limit is not None:
+        page -= 1
+        if page < 0:
+            page = 0
+        return query.offset(limit * page).limit(limit).all()
+    else:
+        return query.all()
 
 def get_all_approving_instances_by_endorsed_id(endorsed_id):
     query = db.session.query(
@@ -86,7 +92,7 @@ def get_all_endorsement_reasons_for_endorsed_id(endorsed_id, approving_ids):
     return query.all()
 
 
-def get_all_censured_instances_by_censuring_id(censuring_ids):
+def get_all_censured_instances_by_censuring_id(censuring_ids,page=1,limit=100):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -98,7 +104,13 @@ def get_all_censured_instances_by_censuring_id(censuring_ids):
     ).group_by(
         Instance.id
     )
-    return query.all()
+    if limit is not None:
+        page -= 1
+        if page < 0:
+            page = 0
+        return query.offset(limit * page).limit(limit).all()
+    else:
+        return query.all()
 
 def get_all_censuring_instances_by_censured_id(censured_id):
     query = db.session.query(
@@ -127,7 +139,7 @@ def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
     return query.all()
 
 
-def get_all_dubious_instances_by_hesitant_id(hesitant_ids):
+def get_all_dubious_instances_by_hesitant_id(hesitant_ids,page=1,limit=100):
     query = db.session.query(
         Instance
     ).outerjoin(
@@ -139,7 +151,13 @@ def get_all_dubious_instances_by_hesitant_id(hesitant_ids):
     ).group_by(
         Instance.id
     )
-    return query.all()
+    if limit is not None:
+        page -= 1
+        if page < 0:
+            page = 0
+        return query.offset(limit * page).limit(limit).all()
+    else:
+        return query.all()
 
 def get_all_hesitant_instances_by_dubious_id(dubious_id):
     query = db.session.query(

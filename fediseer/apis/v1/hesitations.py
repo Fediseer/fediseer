@@ -13,6 +13,8 @@ class HesitationsGiven(Resource):
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
     get_parser.add_argument("min_hesitations", required=False, default=1, type=int, help="Limit to this amount of hesitations of more", location="args")
     get_parser.add_argument("reasons_csv", required=False, type=str, help="Only retrieve hesitations where their reasons include any of the text in this csv", location="args")
+    get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve. Only unfiltered results will be paginated.", location="args")
+    get_parser.add_argument("limit", required=False, type=int, default=1000, help="Which amount of results to retrieve. Only unfiltered results will be limited.", location="args")
 
     decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     @api.expect(get_parser)
@@ -27,6 +29,10 @@ class HesitationsGiven(Resource):
         and the results will be a set of all their hesitations together.
         '''
         self.args = self.get_parser.parse_args()
+        # if self.args.limit > 100: # Once limit is in effect
+        #     raise e.BadRequest("limit cannot be more than 100")
+        if self.args.limit < 10:
+            raise e.BadRequest("Limit cannot be less than 10")
         get_instance = None
         if self.args.apikey:
             get_instance = database.find_instance_by_api_key(self.args.apikey)
@@ -54,7 +60,16 @@ class HesitationsGiven(Resource):
         if self.args.min_hesitations > len(instances):
             raise e.BadRequest(f"You cannot request more hesitations than the amount of reference domains")
         instance_details = []
-        for c_instance in database.get_all_dubious_instances_by_hesitant_id([instance.id for instance in instances]):
+        limit = self.args.limit
+        if self.args.reasons_csv:
+            limit = None
+        if self.args.min_hesitations and self.args.min_hesitations != 1:
+            limit = None
+        for c_instance in database.get_all_dubious_instances_by_hesitant_id(
+            hesitant_ids=[instance.id for instance in instances],
+            page=self.args.page,
+            limit=limit,
+        ):
             hesitations = database.get_all_hesitation_reasons_for_dubious_id(c_instance.id, [instance.id for instance in instances])
             hesitation_count = len(hesitations)
             hesitations = [c for c in hesitations if c.reason is not None]

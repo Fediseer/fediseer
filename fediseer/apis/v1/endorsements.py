@@ -13,8 +13,8 @@ class Approvals(Resource):
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
     get_parser.add_argument("min_endorsements", required=False, default=1, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("reasons_csv", required=False, type=str, help="Only retrieve endorsements where their reasons include any of the text in this csv", location="args")
-    get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve", location="args")
-    get_parser.add_argument("limit", required=False, type=int, default=10, help="Which page of results to retrieve", location="args")
+    get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve.", location="args")
+    get_parser.add_argument("limit", required=False, type=int, default=1000, help="Which amount of results to retrieve.", location="args")
 
     decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     @api.expect(get_parser)
@@ -28,13 +28,17 @@ class Approvals(Resource):
         You can pass a comma-separated list of domain names and the results will be a set of all their
         endorsements together.
         '''
-        domains_list = domains_csv.split(',')
         self.args = self.get_parser.parse_args()
+        # if self.args.limit > 100: # Once limit is in effect
+        #     raise e.BadRequest("limit cannot be more than 100")
+        if self.args.limit < 10:
+            raise e.BadRequest("Limit cannot be less than 10")
         get_instance = None
         if self.args.apikey:
             get_instance = database.find_instance_by_api_key(self.args.apikey)
             if not get_instance:
                 raise e.Unauthorized(f"No Instance found matching provided API key. Please ensure you've typed it correctly")
+        domains_list = domains_csv.split(',')
         precheck_instances = database.find_multiple_instance_by_domains(domains_list)
         if not precheck_instances:
             raise e.NotFound(f"No Instances found matching any of the provided domains. Have you remembered to register them?")
@@ -53,8 +57,14 @@ class Approvals(Resource):
             instances.append(p_instance)
         if len(instances) == 0:
             raise e.Forbidden(f"You do not have access to see these endorsements")
+        if self.args.min_endorsements > len(instances):
+            raise e.BadRequest(f"You cannot request more censures than the amount of reference domains")
         instance_details = []
-        for e_instance in database.get_all_endorsed_instances_by_approving_id([instance.id for instance in instances]):
+        for e_instance in database.get_all_endorsed_instances_by_approving_id(
+            approving_ids=[instance.id for instance in instances],
+            page=self.args.page,
+            limit=self.args.limit,
+        ):
             endorsements = database.get_all_endorsement_reasons_for_endorsed_id(e_instance.id, [instance.id for instance in instances])
             endorsement_count = len(endorsements)
             endorsements = [e for e in endorsements if e.reason is not None]
