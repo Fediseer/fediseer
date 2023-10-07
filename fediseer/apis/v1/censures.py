@@ -206,13 +206,12 @@ class Censures(Resource):
         target_instance, instance_info = ensure_instance_registered(domain, allow_unreachable=True)
         if not target_instance:
             raise e.NotFound(f"Something went wrong trying to register this instance.")
-        if not target_instance:
-            raise e.BadRequest("Instance to censure not found")
         if database.get_endorsement(target_instance.id,instance.id):
             raise e.BadRequest("You can't censure an instance you've endorsed! Please withdraw the endorsement first.")
         if database.get_censure(target_instance.id,instance.id):
             return {"message":'OK'}, 200
-    
+        if database.count_all_censured_instances_by_censuring_id(instance.id) >= instance.max_list_size:
+            raise e.Forbidden("You're reached the maximum amount of instances you can add to your censures. Please contact the admins of fediseer to increase this limit is needed.")
         reason = self.args.reason
         if reason is not None:
             reason = sanitize_string(reason)
@@ -340,4 +339,126 @@ class Censures(Resource):
         db.session.add(new_report)
         db.session.commit()
         logger.info(f"{instance.domain} Withdrew censure from {domain}")
+        return {"message":'Changed'}, 200
+
+
+class BatchCensures(Resource):
+
+    decorators = [limiter.limit("2/minute", key_func = get_request_path)]
+    post_parser = reqparse.RequestParser()
+    post_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
+    post_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    post_parser.add_argument("delete", required=False, default=False, type=bool, help="Set to true, to delete all censures which are not in the censures list", location="json")
+    post_parser.add_argument("overwrite", required=False, default=False, type=bool, help="Set to true, to modify all existing entries with new data", location="json")
+    post_parser.add_argument("censures", default=None, type=list, required=True, location="json")
+
+
+    @api.expect(post_parser,models.input_batch_censures, validate=True)
+    @api.marshal_with(models.response_model_simple_response, code=200, description='Batch Censure Instances')
+    @api.response(400, 'Bad Request', models.response_model_error)
+    @api.response(401, 'Invalid API Key', models.response_model_error)
+    @api.response(403, 'Access Denied', models.response_model_error)
+    @api.response(404, 'Instance not registered', models.response_model_error)
+    def post(self):
+        '''Batch Censure instances
+        '''
+        self.args = self.post_parser.parse_args()
+        if not self.args.apikey:
+            raise e.Unauthorized("You must provide the API key that was PM'd to your admin account")
+        instance = database.find_instance_by_api_key(self.args.apikey)
+        if not instance:
+            raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
+        if len(instance.guarantors) == 0:
+            raise e.Forbidden("Only guaranteed instances can censure others.")
+        if database.instance_has_flag(instance.id,enums.InstanceFlags.RESTRICTED):
+            raise e.Forbidden("You cannot take this action as your instance is restricted")
+        if database.has_too_many_actions_per_min(instance.domain):
+            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
+        unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
+        if not unbroken_chain:
+            raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
+        if self.args.delete is True:
+            if len(self.args.censures) >= instance.max_list_size:
+                raise e.Forbidden("You're specified more than maximum amount of instances you can add to your censures. Please contact the admins of fediseer to increase this limit is needed.")
+        else:
+            if database.count_all_censured_instances_by_censuring_id([instance.id]) + len(self.args.censures) >= instance.max_list_size:
+                raise e.Forbidden("You're reached the maximum amount of instances you can add to your censures. Please contact the admins of fediseer to increase this limit is needed.")
+            if len(self.args.censures) == 0:
+                raise e.BadRequest("You have not provided any entries to append to your censures.")
+        added_entries = 0
+        deleted_entries = 0
+        modified_entries = 0
+        seen_domains = set()
+        if self.args.delete:
+            existing_censures = database.get_all_censured_instances_by_censuring_id([instance.id], limit=None)
+            new_censures = set([c["domain"] for c in self.args.censures])
+            for target_instance in existing_censures:
+                if target_instance.domain not in new_censures:
+                    old_censure = database.get_censure(target_instance.id,instance.id)
+                    db.session.delete(old_censure)
+                    deleted_entries += 1
+        for entry in self.args.censures:
+            if entry["domain"] in seen_domains:
+                logger.info(f"Batch censure operation by {instance.domain} had duplicate entries for {entry['domain']}")
+                continue
+            seen_domains.add(entry["domain"])
+            if instance.domain == entry["domain"]:
+                continue
+            target_instance, instance_info = ensure_instance_registered(entry["domain"], allow_unreachable=True)
+            reason = entry.get("reason")
+            if reason is not None:
+                reason = sanitize_string(reason)
+            evidence = entry.get("evidence")
+            if evidence is not None:
+                evidence = sanitize_string(evidence)
+            if not target_instance:
+                continue
+            if database.get_endorsement(target_instance.id,instance.id):
+                continue
+            censure = database.get_censure(target_instance.id,instance.id)            
+            if censure:
+                if self.args.overwrite is False:
+                    continue
+                if censure.reason == reason and censure.evidence == evidence:  
+                    continue
+                censure.reason = reason
+                censure.evidence = evidence
+                modified_entries += 1
+            else:             
+                new_censure = Censure(
+                    censuring_id=instance.id,
+                    censured_id=target_instance.id,
+                    reason=reason,
+                    evidence=evidence,
+                )
+                db.session.add(new_censure)
+                added_entries += 1
+        if added_entries + deleted_entries + modified_entries == 0:
+            return {"message":'OK'}, 200
+        if added_entries > 0:
+            new_report = Report(
+                source_domain=instance.domain,
+                target_domain='[MULTIPLE]',
+                report_type=enums.ReportType.CENSURE,
+                report_activity=enums.ReportActivity.ADDED,
+            )
+            db.session.add(new_report)
+        if modified_entries > 0:
+            new_report = Report(
+                source_domain=instance.domain,
+                target_domain='[MULTIPLE]',
+                report_type=enums.ReportType.CENSURE,
+                report_activity=enums.ReportActivity.MODIFIED,
+            )
+            db.session.add(new_report)
+        if deleted_entries > 0:
+            new_report = Report(
+                source_domain=instance.domain,
+                target_domain='[MULTIPLE]',
+                report_type=enums.ReportType.CENSURE,
+                report_activity=enums.ReportActivity.DELETED,
+            )
+            db.session.add(new_report)
+        db.session.commit()
+        logger.info(f"{instance.domain} Batched Censures for {added_entries + modified_entries + deleted_entries} domains.")
         return {"message":'Changed'}, 200

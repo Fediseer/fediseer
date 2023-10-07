@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.20.0
+
+* Added batching for adding/removing/modifying censures
+* Added soft limit for censures/endorsements/hesitations to 2000 entries
+
 # 0.19.1
 
 * Fixed Deleting tags

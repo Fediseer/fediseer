@@ -121,6 +121,7 @@ class Instance(db.Model):
     software = db.Column(db.String(50), unique=False, nullable=False, index=True)
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
+    max_list_size = db.Column(db.Integer, unique=False, nullable=False, default=2000)
     pm_proxy = db.Column(Enum(enums.PMProxy), default=enums.PMProxy.NONE, nullable=False)
     poll_failures = db.Column(db.Integer, default=0, nullable=True)
     visibility_endorsements = db.Column(Enum(enums.ListVisibility), default=enums.ListVisibility.OPEN, nullable=False)

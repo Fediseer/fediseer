@@ -1,0 +1,1 @@
+ALTER TABLE instances ADD COLUMN max_list_size INTEGER default 2000;
