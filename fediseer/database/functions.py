@@ -92,8 +92,8 @@ def get_all_endorsement_reasons_for_endorsed_id(endorsed_id, approving_ids):
     return query.all()
 
 
-def get_all_censured_instances_by_censuring_id(censuring_ids,page=1,limit=100):
-    query = db.session.query(
+def query_all_censured_instances_by_censuring_id(censuring_ids):
+    return db.session.query(
         Instance
     ).outerjoin(
         Instance.censures_received,
@@ -104,6 +104,13 @@ def get_all_censured_instances_by_censuring_id(censuring_ids,page=1,limit=100):
     ).group_by(
         Instance.id
     )
+
+def count_all_censured_instances_by_censuring_id(censuring_ids):
+    query = query_all_censured_instances_by_censuring_id(censuring_ids)
+    return query.count()
+
+def get_all_censured_instances_by_censuring_id(censuring_ids,page=1,limit=100):
+    query = query_all_censured_instances_by_censuring_id(censuring_ids)
     if limit is not None:
         page -= 1
         if page < 0:
