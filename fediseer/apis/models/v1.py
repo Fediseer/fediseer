@@ -157,3 +157,16 @@ class Models:
             'overwrite': fields.Boolean(required=False, default=False, description="Set to true, to modify all existing entries with new data."),
             'censures': fields.List(fields.Nested(self.input_batch_entry)),
         })
+        self.input_batch_endorsements_entry = api.inherit('BatchEndorsementEntry', self.input_endorsements_modify, {
+            'domain': fields.String(required=True, description="The domain for which this entry applies to", example="lemmy.example.com"),
+        })
+        self.input_batch_endorsements = api.model('BatchEndorsements', {
+            'delete': fields.Boolean(required=False, default=False, description="Set to true, to delete all endorsements which are not in the endorsements list."),
+            'overwrite': fields.Boolean(required=False, default=False, description="Set to true, to modify all existing entries with new data."),
+            'endorsements': fields.List(fields.Nested(self.input_batch_endorsements_entry)),
+        })
+        self.input_batch_hesitations = api.model('BatchHesitations', {
+            'delete': fields.Boolean(required=False, default=False, description="Set to true, to delete all hesitations which are not in the hesitations list."),
+            'overwrite': fields.Boolean(required=False, default=False, description="Set to true, to modify all existing entries with new data."),
+            'hesitations': fields.List(fields.Nested(self.input_batch_entry)),
+        })

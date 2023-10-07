@@ -345,24 +345,24 @@ class Censures(Resource):
 class BatchCensures(Resource):
 
     decorators = [limiter.limit("2/minute", key_func = get_request_path)]
-    put_parser = reqparse.RequestParser()
-    put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
-    put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
-    put_parser.add_argument("delete", required=False, default=False, type=bool, help="Set to true, to delete all censures which are not in the censures list", location="json")
-    put_parser.add_argument("overwrite", required=False, default=False, type=bool, help="Set to true, to modify all existing entries with new data", location="json")
-    put_parser.add_argument("censures", default=None, type=list, required=True, location="json")
+    post_parser = reqparse.RequestParser()
+    post_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
+    post_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    post_parser.add_argument("delete", required=False, default=False, type=bool, help="Set to true, to delete all censures which are not in the censures list", location="json")
+    post_parser.add_argument("overwrite", required=False, default=False, type=bool, help="Set to true, to modify all existing entries with new data", location="json")
+    post_parser.add_argument("censures", default=None, type=list, required=True, location="json")
 
 
-    @api.expect(put_parser,models.input_batch_censures, validate=True)
+    @api.expect(post_parser,models.input_batch_censures, validate=True)
     @api.marshal_with(models.response_model_simple_response, code=200, description='Batch Censure Instances')
     @api.response(400, 'Bad Request', models.response_model_error)
     @api.response(401, 'Invalid API Key', models.response_model_error)
     @api.response(403, 'Access Denied', models.response_model_error)
     @api.response(404, 'Instance not registered', models.response_model_error)
-    def put(self):
+    def post(self):
         '''Batch Censure instances
         '''
-        self.args = self.put_parser.parse_args()
+        self.args = self.post_parser.parse_args()
         if not self.args.apikey:
             raise e.Unauthorized("You must provide the API key that was PM'd to your admin account")
         instance = database.find_instance_by_api_key(self.args.apikey)
@@ -392,9 +392,10 @@ class BatchCensures(Resource):
         if self.args.delete:
             existing_censures = database.get_all_censured_instances_by_censuring_id([instance.id], limit=None)
             new_censures = set([c["domain"] for c in self.args.censures])
-            for censure in existing_censures:
-                if censure.domain not in new_censures:
-                    db.session.delete(censure)
+            for target_instance in existing_censures:
+                if target_instance.domain not in new_censures:
+                    old_censure = database.get_censure(target_instance.id,instance.id)
+                    db.session.delete(old_censure)
                     deleted_entries += 1
         for entry in self.args.censures:
             if entry["domain"] in seen_domains:

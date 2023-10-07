@@ -46,8 +46,8 @@ def get_all_instances(
         page = 0
     return query.order_by(Instance.created.desc()).offset(limit * page).limit(limit).all()
 
-def get_all_endorsed_instances_by_approving_id(approving_ids,page=1,limit=100):
-    query = db.session.query(
+def query_all_endorsed_instances_by_approving_id(approving_ids):
+    return db.session.query(
         Instance
     ).outerjoin(
         Instance.endorsements,
@@ -58,6 +58,13 @@ def get_all_endorsed_instances_by_approving_id(approving_ids,page=1,limit=100):
     ).group_by(
         Instance.id
     )
+
+def count_all_endorsed_instances_by_approving_id(approving_ids):
+    query = query_all_endorsed_instances_by_approving_id(approving_ids)
+    return query.count()
+
+def get_all_endorsed_instances_by_approving_id(approving_ids,page=1,limit=100):
+    query = query_all_endorsed_instances_by_approving_id(approving_ids)
     if limit is not None:
         page -= 1
         if page < 0:
@@ -146,8 +153,8 @@ def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
     return query.all()
 
 
-def get_all_dubious_instances_by_hesitant_id(hesitant_ids,page=1,limit=100):
-    query = db.session.query(
+def query_all_dubious_instances_by_hesitant_id(hesitant_ids):
+    return db.session.query(
         Instance
     ).outerjoin(
         Instance.hesitations_received,
@@ -158,6 +165,13 @@ def get_all_dubious_instances_by_hesitant_id(hesitant_ids,page=1,limit=100):
     ).group_by(
         Instance.id
     )
+
+def count_all_dubious_instances_by_hesitant_id(hesitant_ids):
+    query = query_all_dubious_instances_by_hesitant_id(hesitant_ids)
+    return query.count()
+
+def get_all_dubious_instances_by_hesitant_id(hesitant_ids,page=1,limit=100):
+    query = query_all_dubious_instances_by_hesitant_id(hesitant_ids)
     if limit is not None:
         page -= 1
         if page < 0:
