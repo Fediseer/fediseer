@@ -198,7 +198,8 @@ class Hesitations(Resource):
             raise e.BadRequest("You can't hesitate against an instance you've endorsed! Please withdraw the endorsement first.")
         if database.get_hesitation(target_instance.id,instance.id):
             return {"message":'OK'}, 200
-    
+        if database.count_all_dubious_instances_by_hesitant_id([instance.id]) >= instance.max_list_size:
+            raise e.Forbidden("You're reached the maximum amount of instances you can add to your hesitations. Please contact the admins of fediseer to increase this limit is needed.")
         reason = self.args.reason
         if reason is not None:
             reason = sanitize_string(reason)

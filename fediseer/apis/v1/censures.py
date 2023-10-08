@@ -210,7 +210,7 @@ class Censures(Resource):
             raise e.BadRequest("You can't censure an instance you've endorsed! Please withdraw the endorsement first.")
         if database.get_censure(target_instance.id,instance.id):
             return {"message":'OK'}, 200
-        if database.count_all_censured_instances_by_censuring_id(instance.id) >= instance.max_list_size:
+        if database.count_all_censured_instances_by_censuring_id([instance.id]) >= instance.max_list_size:
             raise e.Forbidden("You're reached the maximum amount of instances you can add to your censures. Please contact the admins of fediseer to increase this limit is needed.")
         reason = self.args.reason
         if reason is not None:
