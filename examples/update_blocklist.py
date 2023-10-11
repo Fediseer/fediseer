@@ -17,25 +17,30 @@ ACTIVITY_SUSPICION = 20
 # If there's this many registered users per active monthly user, this site will be considered suspicious
 MONTHLY_ACTIVITY_SUSPICION = 500
 # Extra domains you can block. You can just delete the contents if you want to only block suspicious domains
-blacklist = [
+blocklist = [
     "truthsocial.com",
     "threads.net",
 ]
 # Add instances in here which want to ensure are not added in your blocklist
 # 
-whitelist = [
+safelist = [
 ]
 # If you (don't) want to combine your own censures, with the ones from other trusted instances, adjust the list below.
 # The censures will be the combined list from your own domain and any domains specified below.
 trusted_instances = [
-    "lemmings.world",
+    "lemmy.world"
 ]
 # If you want to only block based on specific filters as specified by the admins who have censured them
 # You can provide them in a list below. Any instance marked with that filter from your trusted instances
 # Will be added. Others will be ignored
 # Sample has been provided below
-# reason_filters = ["loli","csam","bigotry"]
-reason_filters = []
+filtered_instances = [
+    "lemmings.world",
+]
+reason_filters = [
+    "__all_pedos__",
+    "__all_bigots__",
+]
 # If you want to only censure instances which have been marked by more than 1 trusted instance, then increase the number below
 min_censures = 1
 # Change this to the number of changes over which this script will ask for manual confirmation
@@ -53,16 +58,27 @@ sus = fediseer.suspicions.get(
     active_suspicion=MONTHLY_ACTIVITY_SUSPICION,
     format=FormatType.LIST
 )
-print("Fetching censures")
+print("Fetching trusted censures")
 trusted_instances.append(LEMMY_DOMAIN)
-
-censures = fediseer.censure.get_given(
+trusted_censures = fediseer.censure.get_given(
     domain_set = set(trusted_instances), 
+    min_censures = min_censures, 
+    format = FormatType.LIST,
+)
+print("Fetching filtered censures")
+filtered_censures = fediseer.censure.get_given(
+    domain_set = set(filtered_instances), 
     reasons = reason_filters, 
     min_censures = min_censures, 
     format = FormatType.LIST,
 )
-defed = (set(blacklist) | set(censures["domains"]) | set(sus["domains"])) - set(whitelist)
+print("Fetching endorsements")
+trusted_instances.append(LEMMY_DOMAIN)
+endorsements = fediseer.endorsement.get_given(
+    domain_set = set(trusted_instances), 
+    format = FormatType.LIST,
+)
+defed = (set(blocklist) | set(trusted_censures["domains"]) | set(filtered_censures["domains"]) | set(sus["domains"])) - set(safelist) - set(endorsements["domains"])
 try:
     with open("previous_defed.json", 'r') as file:
         prev_defed = set(json.loads(file.read()))
