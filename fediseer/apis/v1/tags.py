@@ -5,6 +5,24 @@ from fediseer.consts import MAX_TAGS
 
 class Tags(Resource):
 
+    get_parser = reqparse.RequestParser()
+    get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+
+    @api.expect(get_parser)
+    @api.marshal_with(models.response_model_tag_info, code=200, description='Tag counts', as_list=True)
+    @api.response(400, 'Bad Request', models.response_model_error)
+    @api.response(401, 'Invalid API Key', models.response_model_error)
+    @api.response(403, 'Access Denied', models.response_model_error)
+
+    def get(self):
+        '''Display all known tags (converted to lowercase)
+        And count how many times they've been used
+        '''
+        self.args = self.get_parser.parse_args()
+        rows_dict = database.get_tag_counts()
+        tags = [{"tag":tag, "count": rows_dict[tag]} for tag in rows_dict]
+        return tags,200
+        
     put_parser = reqparse.RequestParser()
     put_parser.add_argument("apikey", type=str, required=True, help="The sending instance's API key.", location='headers')
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")

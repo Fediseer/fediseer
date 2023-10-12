@@ -541,3 +541,14 @@ def count_instance_tags(instance_id):
         InstanceTag.instance_id == instance_id,
     )
     return query.count()
+
+def get_tag_counts():
+    query = db.session.query(
+        func.lower(InstanceTag.tag).label('tag'),
+        func.count().label('tag_count')
+    ).group_by(InstanceTag.tag)
+
+    result = query.all()
+
+    tag_counts = {row.tag: row.tag_count for row in result}
+    return tag_counts

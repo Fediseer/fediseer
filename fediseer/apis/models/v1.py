@@ -170,3 +170,7 @@ class Models:
             'overwrite': fields.Boolean(required=False, default=False, description="Set to true, to modify all existing entries with new data."),
             'hesitations': fields.List(fields.Nested(self.input_batch_entry)),
         })
+        self.response_model_tag_info = api.model('TagsInfo', {
+            'tag': fields.String(description="The tag name (lowercased)", example="anarchism"),
+            'count': fields.Integer(description="The amount of instances tagged with this tag", example="5"),
+        })
