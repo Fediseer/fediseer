@@ -147,6 +147,7 @@ def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
         Censure.censured_id == censured_id,
         Censure.censuring_id.in_(censuring_ids),
     ).with_entities(
+        Censure.censuring_id,
         Censure.reason,
         Censure.evidence,
     )
@@ -199,6 +200,7 @@ def get_all_hesitation_reasons_for_dubious_id(dubious_id, hesitant_ids):
         Hesitation.dubious_id == dubious_id,
         Hesitation.hesitant_id.in_(hesitant_ids),
     ).with_entities(
+        Hesitation.hesitant_id,
         Hesitation.reason,
         Hesitation.evidence,
     )

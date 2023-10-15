@@ -140,10 +140,10 @@ class Hesitations(Resource):
                     continue
             instances.append(p_instance)
         instance_details = []
+        hesitations = database.get_all_hesitation_reasons_for_dubious_id(instance.id, [c.id for c in instances])
         rebuttals = database.get_all_rebuttals_from_source_instance_id(instance.id,[c.id for c in instances])
         for c_instance in instances:
-            hesitations = database.get_all_hesitation_reasons_for_dubious_id(instance.id, [c_instance.id])
-            hesitations = [c for c in hesitations if c.reason is not None]
+            hesitations = [c for c in hesitations if c.reason is not None and c.hesitant_id == c_instance.id]
             c_instance_details = c_instance.get_details()
             if len(hesitations) > 0:
                 c_instance_details["hesitation_reasons"] = [hesitation.reason for hesitation in hesitations]
