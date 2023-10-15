@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.20.1
+
+* Allow filtering by software
+
 # 0.20.0
 
 * Added batching for adding/removing/modifying censures

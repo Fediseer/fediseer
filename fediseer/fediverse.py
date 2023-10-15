@@ -235,7 +235,7 @@ class InstanceInfo():
                 if "*" in self.domain:
                     self.software = "wildcard"
         else:
-            self.software = self.node_info["software"]["name"]
+            self.software = self.node_info["software"]["name"].lower()
         software_map = {
             "lemmy": self.get_lemmy_info,
             "mastodon": self.get_mastodon_info,

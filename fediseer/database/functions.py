@@ -13,6 +13,7 @@ def get_all_instances(
         min_endorsements = 0, 
         min_guarantors = 1, 
         tags = None,
+        software = None,
         include_decommissioned = True,
         page=1,
         limit=10,
@@ -41,6 +42,9 @@ def get_all_instances(
         # Convert tags to lowercase and filter instances that have any of the tags
         lower_tags = [tag.lower() for tag in tags]
         query = query.filter(Instance.tags.any(func.lower(InstanceTag.tag).in_(lower_tags)))
+    if software:
+        lower_sw = [sw.lower() for sw in software]
+        query = query.filter(Instance.software.in_(lower_sw))
     page -= 1
     if page < 0:
         page = 0

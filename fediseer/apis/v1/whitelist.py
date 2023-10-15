@@ -12,6 +12,7 @@ class Whitelist(Resource):
     get_parser.add_argument("endorsements", required=False, default=0, type=int, help="Limit to this amount of endorsements of more", location="args")
     get_parser.add_argument("guarantors", required=False, default=1, type=int, help="Limit to this amount of guarantors of more", location="args")
     get_parser.add_argument("tags_csv", required=False, type=str, help="A list of tags to filter.", location="args")
+    get_parser.add_argument("software_csv", required=False, type=str, help="show only instances running one of this software", location="args")
     get_parser.add_argument("page", required=False, type=int, default=1, help="Which page of results to retrieve", location="args")
     get_parser.add_argument("limit", required=False, type=int, default=100, help="Which page of results to retrieve", location="args")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
@@ -31,11 +32,15 @@ class Whitelist(Resource):
         tags = None
         if self.args.tags_csv is not None:
             tags = [t.strip() for t in self.args.tags_csv.split(',')]
+        software = None
+        if self.args.software_csv is not None:
+            software = [s.strip() for s in self.args.software_csv.split(',')]
         instance_details = []
         for instance in database.get_all_instances(
             min_endorsements=self.args.endorsements,
             min_guarantors=self.args.guarantors,
             tags=tags,
+            software=software,
             page=self.args.page,
             limit=self.args.limit,
         ):
