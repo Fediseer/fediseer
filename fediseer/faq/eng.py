@@ -36,7 +36,7 @@ The fediseer provides a machine readable API to consume the data contained withi
         "question": "What is a guarantee?",
         "stub": "guarantee",
         "document": 
-"""Basically, any guaranteed instance is known as definitelly "not spam" (AKA "ham"). That doesn't mean any non-guaranteed instance is spam. Rather it is considered "unknown". The only reasoning to guarantee an instance is whether they are spam or not. The objective here being to prevent malicious actors from spawning an infinite amount of new instances on the fediverse to send spam.
+"""Basically, any guaranteed instance is known as definitely "not spam" (AKA "ham"). That doesn't mean any non-guaranteed instance is spam. Rather it is considered "unknown". The only reasoning to guarantee an instance is whether they are spam or not. The objective here being to prevent malicious actors from spawning an infinite amount of new instances on the fediverse to send spam.
 
 Each instance can only be guaranteed by one instance and guarantee another instance. This is called the "chain of trust"
 
