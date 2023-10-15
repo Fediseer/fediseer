@@ -162,7 +162,9 @@ class Censures(Resource):
             if len(censures) > 0:
                 c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
                 c_instance_details["censure_evidence"] = [censure.evidence for censure in censures if censure.evidence is not None]
-                c_instance_details["rebuttal"] = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
+                rebuttals = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
+                if len(rebuttals) > 0 and not database.instance_has_flag(c_instance.id,enums.InstanceFlags.MUTED):
+                    c_instance_details["rebuttal"] = rebuttals
             instance_details.append(c_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
