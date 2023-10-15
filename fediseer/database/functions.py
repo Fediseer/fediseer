@@ -26,6 +26,9 @@ def get_all_instances(
     ).options(
         joinedload(Instance.guarantors),
         joinedload(Instance.endorsements),
+        joinedload(Instance.admins),
+        joinedload(Instance.guarantors),
+        joinedload(Instance.tags)
     ).group_by(
         Instance.id
     ).filter(
@@ -84,6 +87,9 @@ def get_all_approving_instances_by_endorsed_id(endorsed_id):
         Instance.approvals,
     ).options(
         joinedload(Instance.approvals),
+        joinedload(Instance.endorsements),
+        joinedload(Instance.admins),
+        joinedload(Instance.guarantors)
     ).filter(
         Endorsement.endorsed_id == endorsed_id
     ).group_by(
@@ -100,6 +106,13 @@ def get_all_endorsement_reasons_for_endorsed_id(endorsed_id, approving_ids):
     )
     return query.all()
 
+def get_all_endorsements_from_approving_id(approving_ids):
+    query = Endorsement.query.filter(
+        Endorsement.approving_ids.in_(approving_ids)
+    )
+    return query.all()
+
+
 
 def query_all_censured_instances_by_censuring_id(censuring_ids):
     return db.session.query(
@@ -108,6 +121,10 @@ def query_all_censured_instances_by_censuring_id(censuring_ids):
         Instance.censures_received,
     ).options(
         joinedload(Instance.censures_received),
+        joinedload(Instance.endorsements),
+        joinedload(Instance.approvals),
+        joinedload(Instance.admins),
+        joinedload(Instance.guarantors)
     ).filter(
         Censure.censuring_id.in_(censuring_ids)
     ).group_by(
@@ -153,6 +170,12 @@ def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
     )
     return query.all()
 
+def get_all_censures_from_censuring_id(censuring_ids):
+    query = Censure.query.filter(
+        Censure.censuring_id.in_(censuring_ids)
+    )
+    return query.all()
+
 
 def query_all_dubious_instances_by_hesitant_id(hesitant_ids):
     return db.session.query(
@@ -161,6 +184,10 @@ def query_all_dubious_instances_by_hesitant_id(hesitant_ids):
         Instance.hesitations_received,
     ).options(
         joinedload(Instance.hesitations_received),
+        joinedload(Instance.endorsements),
+        joinedload(Instance.approvals),
+        joinedload(Instance.admins),
+        joinedload(Instance.guarantors)
     ).filter(
         Hesitation.hesitant_id.in_(hesitant_ids)
     ).group_by(
@@ -203,6 +230,12 @@ def get_all_hesitation_reasons_for_dubious_id(dubious_id, hesitant_ids):
         Hesitation.hesitant_id,
         Hesitation.reason,
         Hesitation.evidence,
+    )
+    return query.all()
+
+def get_all_hesitations_from_hesitant_id(hesitant_ids):
+    query = Hesitation.query.filter(
+        Hesitation.hesitant_id.in_(hesitant_ids)
     )
     return query.all()
 

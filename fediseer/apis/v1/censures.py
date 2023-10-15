@@ -65,37 +65,42 @@ class CensuresGiven(Resource):
             limit = None
         if self.args.min_censures and self.args.min_censures != 1:
             limit = None
+        censures = database.get_all_censures_from_censuring_id([instance.id for instance in instances])
+        if self.args.reasons_csv:
+            reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
+            reasons_filter = set(reasons_filter)
+            if "__all_pedos__" in reasons_filter:
+                reasons_filter.add("csam")
+                reasons_filter.add("loli")
+                reasons_filter.add("shota")
+                reasons_filter.add("pedophil")
+            if "__all_bigots__" in reasons_filter:
+                reasons_filter.add("racism")
+                reasons_filter.add("sexism")
+                reasons_filter.add("transphobia")
+                reasons_filter.add("homophobia")
+                reasons_filter.add("islamophobia")
+                reasons_filter.add("nazi")
+                reasons_filter.add("fascist")
+                reasons_filter.add("hate speech")
+                reasons_filter.add("bigotry")
         for c_instance in database.get_all_censured_instances_by_censuring_id(
             censuring_ids = [instance.id for instance in instances],
             page=self.args.page,
             limit=limit,
         ):
-            censures = database.get_all_censure_reasons_for_censured_id(c_instance.id, [instance.id for instance in instances])
-            censure_count = len(censures)
-            censures = [c for c in censures if c.reason is not None]
-            c_instance_details = c_instance.get_details()
+            c_censures = [c for c in censures if c.censured_id == c_instance.id]
+            censure_count = len(c_censures)
+            r_censures = [c for c in c_censures if c.reason is not None]
+            if self.args.csv or self.args.domains:
+                c_instance_details = {"domain": c_instance.domain}
+            else:
+                c_instance_details = c_instance.get_details()
             skip_instance = True
             if self.args.reasons_csv:
-                reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
-                reasons_filter = set(reasons_filter)
-                if "__all_pedos__" in reasons_filter:
-                    reasons_filter.add("csam")
-                    reasons_filter.add("loli")
-                    reasons_filter.add("shota")
-                    reasons_filter.add("pedophil")
-                if "__all_bigots__" in reasons_filter:
-                    reasons_filter.add("racism")
-                    reasons_filter.add("sexism")
-                    reasons_filter.add("transphobia")
-                    reasons_filter.add("homophobia")
-                    reasons_filter.add("islamophobia")
-                    reasons_filter.add("nazi")
-                    reasons_filter.add("fascist")
-                    reasons_filter.add("hate speech")
-                    reasons_filter.add("bigotry")
                 for r in reasons_filter:
                     reason_filter_counter = 0
-                    for censure in censures:
+                    for censure in r_censures:
                         if r in censure.reason.lower():
                             reason_filter_counter += 1
                     if reason_filter_counter >= self.args.min_censures:
@@ -105,8 +110,8 @@ class CensuresGiven(Resource):
                 skip_instance = False
             if skip_instance:
                 continue
-            c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
-            c_instance_details["censure_evidence"] = [censure.evidence for censure in censures if censure.evidence is not None]
+            c_instance_details["censure_reasons"] = [censure.reason for censure in r_censures]
+            c_instance_details["censure_evidence"] = [censure.evidence for censure in r_censures if censure.evidence is not None]
             c_instance_details["censure_count"] = censure_count
             instance_details.append(c_instance_details)
         if self.args.csv:

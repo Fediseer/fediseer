@@ -65,22 +65,26 @@ class HesitationsGiven(Resource):
             limit = None
         if self.args.min_hesitations and self.args.min_hesitations != 1:
             limit = None
+        hesitations = database.get_all_hesitations_from_hesitant_id([instance.id for instance in instances])
         for c_instance in database.get_all_dubious_instances_by_hesitant_id(
             hesitant_ids=[instance.id for instance in instances],
             page=self.args.page,
             limit=limit,
         ):
-            hesitations = database.get_all_hesitation_reasons_for_dubious_id(c_instance.id, [instance.id for instance in instances])
-            hesitation_count = len(hesitations)
-            hesitations = [c for c in hesitations if c.reason is not None]
-            c_instance_details = c_instance.get_details()
+            h_hesitations = [c for c in hesitations if c.dubious_id == c_instance.id]
+            hesitation_count = len(h_hesitations)
+            r_hesitations = [c for c in h_hesitations if c.reason is not None]
+            if self.args.csv or self.args.domains:
+                c_instance_details = {"domain": c_instance.domain}
+            else:
+                c_instance_details = c_instance.get_details()
             skip_instance = True
             if self.args.reasons_csv:
                 reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
                 reasons_filter = set(reasons_filter)
                 for r in reasons_filter:
                     reason_filter_counter = 0
-                    for hesitation in hesitations:
+                    for hesitation in r_hesitations:
                         if r in hesitation.reason.lower():
                             reason_filter_counter += 1
                     if reason_filter_counter >= self.args.min_hesitations:
@@ -90,8 +94,8 @@ class HesitationsGiven(Resource):
                 skip_instance = False
             if skip_instance:
                 continue
-            c_instance_details["hesitation_reasons"] = [hesitation.reason for hesitation in hesitations]
-            c_instance_details["hesitation_evidence"] = [hesitation.evidence for hesitation in hesitations if hesitation.evidence is not None]
+            c_instance_details["hesitation_reasons"] = [hesitation.reason for hesitation in r_hesitations]
+            c_instance_details["hesitation_evidence"] = [hesitation.evidence for hesitation in r_hesitations if hesitation.evidence is not None]
             c_instance_details["hesitation_count"] = hesitation_count
             instance_details.append(c_instance_details)
         if self.args.csv:

@@ -60,22 +60,26 @@ class Approvals(Resource):
         if self.args.min_endorsements > len(instances):
             raise e.BadRequest(f"You cannot request more endorsements than the amount of reference domains")
         instance_details = []
+        endorsements = database.get_all_endorsements_from_approving_id([instance.id for instance in instances])
         for e_instance in database.get_all_endorsed_instances_by_approving_id(
             approving_ids=[instance.id for instance in instances],
             page=self.args.page,
             limit=self.args.limit,
         ):
-            endorsements = database.get_all_endorsement_reasons_for_endorsed_id(e_instance.id, [instance.id for instance in instances])
-            endorsement_count = len(endorsements)
-            endorsements = [e for e in endorsements if e.reason is not None]
-            e_instance_details = e_instance.get_details()
+            e_endorsements = [e for e in endorsements if e.endorsed_id == e_instance.id]
+            endorsement_count = len(e_endorsements)
+            r_endorsements = [e for e in e_endorsements if e.reason is not None]
+            if self.args.csv or self.args.domains:
+                e_instance_details = {"domain": e_instance.domain}
+            else:
+                e_instance_details = e_instance.get_details()
             skip_instance = True
             if self.args.reasons_csv:
                 reasons_filter = [r.strip().lower() for r in self.args.reasons_csv.split(',')]
                 reasons_filter = set(reasons_filter)
                 for r in reasons_filter:
                     reason_filter_counter = 0
-                    for endorsement in endorsements:
+                    for endorsement in r_endorsements:
                         if r in endorsement.reason.lower():
                             reason_filter_counter += 1
                     if reason_filter_counter >= self.args.min_endorsements:
@@ -85,7 +89,7 @@ class Approvals(Resource):
                 skip_instance = False
             if skip_instance:
                 continue
-            e_instance_details["endorsement_reasons"] = [endorsement.reason for endorsement in endorsements]
+            e_instance_details["endorsement_reasons"] = [endorsement.reason for endorsement in r_endorsements]
             instance_details.append(e_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200

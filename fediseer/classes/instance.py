@@ -209,7 +209,6 @@ class Instance(db.Model):
         if not guarantee:
             return None
         return guarantee.guarantor_instance
-        return Instance.query.filter_by(id=guarantee.guarantor_id).first()
 
     def get_guarantor_domain(self):
         guarantor = self.get_guarantor()
