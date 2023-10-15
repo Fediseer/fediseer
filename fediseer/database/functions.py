@@ -108,7 +108,7 @@ def get_all_endorsement_reasons_for_endorsed_id(endorsed_id, approving_ids):
 
 def get_all_endorsements_from_approving_id(approving_ids):
     query = Endorsement.query.filter(
-        Endorsement.approving_ids.in_(approving_ids)
+        Endorsement.approving_id.in_(approving_ids)
     )
     return query.all()
 
