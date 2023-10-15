@@ -36,7 +36,7 @@ The fediseer provides a machine readable API to consume the data contained withi
         "question": "What is a guarantee?",
         "stub": "guarantee",
         "document": 
-"""Basically, any guaranteed instance is known as definitelly "not spam" (AKA "ham"). That doesn't mean any non-guaranteed instance is spam. Rather it is considered "unknown". The only reasoning to guarantee an instance is whether they are spam or not. The objective here being to prevent malicious actors from spawning an infinite amount of new instances on the fediverse to send spam.
+"""Basically, any guaranteed instance is known as definitely "not spam" (AKA "ham"). That doesn't mean any non-guaranteed instance is spam. Rather it is considered "unknown". The only reasoning to guarantee an instance is whether they are spam or not. The objective here being to prevent malicious actors from spawning an infinite amount of new instances on the fediverse to send spam.
 
 Each instance can only be guaranteed by one instance and guarantee another instance. This is called the "chain of trust"
 
@@ -96,7 +96,7 @@ One can export the list of instances censured by a subset of instances.
         "question": "What is a hesitation?",
         "stub": "hesitation",
         "document": 
-"""An hesitation is a mulder version of a censure, it signifies some sort of mistrust of one instance towards another. The reason for this can be anything and do not have to be stated.
+"""An hesitation is a milder version of a censure, it signifies some sort of mistrust of one instance towards another. The reason for this can be anything and do not have to be stated.
 
 An instance can be hesitate against number of instances and be doubted by number of instances.
 
@@ -111,7 +111,7 @@ One can export the list of instances hesitate by a subset of instances.
         "question": "What is an instance claim?",
         "stub": "claim",
         "document": 
-"""A claimed instance is an instance whose admin has requisted an API key with which to use the fediseer as their instance.
+"""A claimed instance is an instance whose admin has requested an API key with which to use the fediseer as their instance.
 
 Fediseer has no users. Instead it's driven by instance admins only. Instance admins likewise only act as their instances.
 """
@@ -141,7 +141,7 @@ Note that guarantees are always public as this is necessary for the good functio
         "question": "What is an instance flag?",
         "stub": "flag",
         "document": 
-"""An instance flag represents some marking from the fediverse admins toward an instance. There's currently the following flags
+"""An instance flag represents some marking from the fediverse admins toward an instance. There's currently the following flags:
 
 * `RESTRICTED`: The instance cannot guarantee, endorse, censure or hesitate other instances anymore. This flag is only used against egregious trolling or malicious behaviour.
 * `MUTED`: The instance's visibilities are forcefully set to `PRIVATE` and cannot be changed. This flag is meant to used against trolling or harassing behaviour.
@@ -172,7 +172,7 @@ Like always, no hate speech is allowed.
         "question": "How can I claim my instance?",
         "stub": "instance claim",
         "document": 
-"""You can either use the rest API we have provided, providing your instance domain and admin username on it. Alternativey you can use one of our frontends.
+"""You can either use the rest API we have provided, providing your instance domain and admin username on it. Alternatively you can use one of our frontends.
 
 You will then receive an API key in PMs, which you can afterwards use to represent your instance on the fediseer.
 """
