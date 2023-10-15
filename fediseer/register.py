@@ -26,7 +26,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
                     instance.poll_failures += 60
                 db.session.commit()
         if not allow_unreachable:
-            raise e.BadRequest(f"Error encountered while polling domain {domain}. Please check it's running correctly")
+            raise e.BadRequest(str(err))
     if instance:
         if (
             instance.software != instance_info.software or

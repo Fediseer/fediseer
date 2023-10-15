@@ -176,7 +176,12 @@ class InstanceInfo():
 
     def get_mastodon_info(self):
         site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
-        self.instance_info = site.json()
+        try:
+            self.instance_info = site.json()
+        except Exception as err:
+            if "challenge-error-text" in site.text:
+                raise Exception("Instance is preventing scripted retrieval of their site info.")
+            raise err
         self.approval_required = self.instance_info["approval_required"]
         if self.node_info is None:
             raise Exception("Error retrieving nodeinfo")
@@ -186,7 +191,12 @@ class InstanceInfo():
 
     def get_pleroma_info(self):
         site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
-        self.instance_info = site.json()
+        try:
+            self.instance_info = site.json()
+        except Exception as err:
+            if "challenge-error-text" in site.text:
+                raise Exception("Instance is preventing scripted retrieval of their site info.")
+            raise err
         self.approval_required = self.instance_info["approval_required"]
         if self.node_info is None:
             raise Exception("Error retrieving nodeinfo")
@@ -196,7 +206,12 @@ class InstanceInfo():
 
     def get_firefish_info(self):
         site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout)
-        self.instance_info = site.json()
+        try:
+            self.instance_info = site.json()
+        except Exception as err:
+            if "challenge-error-text" in site.text:
+                raise Exception("Instance is preventing scripted retrieval of their site info.")
+            raise err
         self.approval_required = self.instance_info["approval_required"]
         if self.node_info is None:
             raise Exception("Error retrieving nodeinfo")
@@ -213,7 +228,12 @@ class InstanceInfo():
         site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout,allow_redirects=False)
         if site.status_code != 200:
             raise Exception(f"Unexpected status code retrieved when discovering instance info: {site.status_code}")
-        self.instance_info = site.json()
+        try:
+            self.instance_info = site.json()
+        except Exception as err:
+            if "challenge-error-text" in site.text:
+                raise Exception("Instance is preventing scripted retrieval of their site info.")
+            raise err
         self.approval_required = self.instance_info.get("approval_required")
         if self.node_info is None:
             raise Exception("Error retrieving nodeinfo")
