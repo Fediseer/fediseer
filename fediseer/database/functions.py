@@ -4,7 +4,7 @@ from sqlalchemy import func, or_, and_, not_, Boolean
 from fediseer.flask import db
 from fediseer.utils import hash_api_key
 from sqlalchemy.orm import joinedload
-from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag, InstanceTag
+from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag, InstanceTag, Rebuttal
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
@@ -93,10 +93,8 @@ def get_all_approving_instances_by_endorsed_id(endorsed_id):
 
 def get_all_endorsement_reasons_for_endorsed_id(endorsed_id, approving_ids):
     query = Endorsement.query.filter(
-        and_(
-            Endorsement.endorsed_id == endorsed_id,
-            Endorsement.approving_id.in_(approving_ids),
-        )
+        Endorsement.endorsed_id == endorsed_id,
+        Endorsement.approving_id.in_(approving_ids),
     ).with_entities(
         Endorsement.reason,
     )
@@ -146,10 +144,8 @@ def get_all_censuring_instances_by_censured_id(censured_id):
 
 def get_all_censure_reasons_for_censured_id(censured_id, censuring_ids):
     query = Censure.query.filter(
-        and_(
-            Censure.censured_id == censured_id,
-            Censure.censuring_id.in_(censuring_ids),
-        )
+        Censure.censured_id == censured_id,
+        Censure.censuring_id.in_(censuring_ids),
     ).with_entities(
         Censure.reason,
         Censure.evidence,
@@ -200,17 +196,31 @@ def get_all_hesitant_instances_by_dubious_id(dubious_id):
 
 def get_all_hesitation_reasons_for_dubious_id(dubious_id, hesitant_ids):
     query = Hesitation.query.filter(
-        and_(
-            Hesitation.dubious_id == dubious_id,
-            Hesitation.hesitant_id.in_(hesitant_ids),
-        )
+        Hesitation.dubious_id == dubious_id,
+        Hesitation.hesitant_id.in_(hesitant_ids),
     ).with_entities(
         Hesitation.reason,
         Hesitation.evidence,
     )
     return query.all()
 
+def get_rebuttal(target_instance_id, source_instance_id):
+    query = Rebuttal.query.filter_by(
+        target_id=target_instance_id,
+        source_id=source_instance_id,
+    )
+    return query.first()
 
+def get_all_rebuttals_from_source_instance_id(source_instance_id, target_ids = None):
+    query = Rebuttal.query.filter(
+        Rebuttal.source_id == source_instance_id,
+    ).with_entities(
+        Rebuttal.rebuttal,
+        Rebuttal.target_id,
+    )
+    if target_ids is not None:
+        query = query.filter(Rebuttal.target_id.in_(target_ids))
+    return query.all()
 
 def get_all_guaranteed_instances_by_guarantor_id(guarantor_id):
     query = db.session.query(

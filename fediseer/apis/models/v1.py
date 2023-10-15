@@ -62,6 +62,7 @@ class Models:
         self.response_model_instances_censured = api.inherit('CensuredInstanceDetails', self.response_model_instances, {
             'censure_reasons': fields.List(fields.String(description="The reasons instances have given for censuring this instance")),
             'censure_evidence': fields.List(fields.String(description="Evidence justifying this censure, typically should be one or more URLs.")),
+            'rebuttal': fields.List(fields.String(description="Counter argument by the target instance.", example="Nuh uh!")),
             'censure_count': fields.Integer(description="The amount of censures this instance has received from the reference instances"),
         })
         self.response_model_model_Censures_get = api.model('CensuredInstances', {
@@ -80,6 +81,7 @@ class Models:
         self.response_model_dubious_instances = api.inherit('DubiousInstanceDetails', self.response_model_instances, {
             'hesitation_reasons': fields.List(fields.String(description="The reasons instances have given for hesitating against this instance")),
             'hesitation_evidence': fields.List(fields.String(description="Evidence justifying this hesitation, typically should be one or more URLs.")),
+            'rebuttal': fields.List(fields.String(description="Counter argument by the target instance.", example="Nuh uh!")),
             'hesitation_count': fields.Integer(description="The amount of hesitations this instance has received from the reference instances"),
         })
         self.response_model_model_Hesitations_get = api.model('DubiousInstances', {
@@ -93,6 +95,9 @@ class Models:
         self.input_censures_modify = api.model('ModifyCensureHesitations', {
             'reason': fields.String(required=False, description="The reason for this censure/hesitation. No profanity or hate speech allowed!", example="csam"),
             'evidence': fields.String(required=False, description="The evidence for this censure/hesitation. Typically URL but can be a long form of anything you feel appropriate.", example="https://link.to/your/evidence", max_length=1000),
+        })
+        self.input_rebuttals_modify = api.model('ModifyRebuttals', {
+            'rebuttal': fields.String(required=False, description="The counter-argument for this censure/hesitation.", example="Nuh uh!", max_length=1000),
         })
         self.response_model_api_key_reset = api.model('ApiKeyReset', {
             "message": fields.String(default='OK',required=True, description="The result of this operation."),
