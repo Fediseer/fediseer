@@ -154,13 +154,15 @@ class Censures(Resource):
                 if p_instance != get_instance:
                     continue
             instances.append(p_instance)
+        censures = database.get_all_censure_reasons_for_censured_id(instance.id, [c.id for c in instances])
+        rebuttals = database.get_all_rebuttals_from_source_instance_id(instance.id,[c.id for c in instances])
         for c_instance in instances:
-            censures = database.get_all_censure_reasons_for_censured_id(instance.id, [c_instance.id])
-            censures = [c for c in censures if c.reason is not None]
+            censures = [c for c in censures if c.reason is not None and c.censuring_id == c_instance.id]
             c_instance_details = c_instance.get_details()
             if len(censures) > 0:
                 c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
                 c_instance_details["censure_evidence"] = [censure.evidence for censure in censures if censure.evidence is not None]
+                c_instance_details["rebuttal"] = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
             instance_details.append(c_instance_details)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200

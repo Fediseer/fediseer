@@ -4,6 +4,7 @@ import fediseer.apis.v1.solicitations as solicitations
 import fediseer.apis.v1.endorsements as endorsements
 import fediseer.apis.v1.censures as censures
 import fediseer.apis.v1.hesitations as hesitations
+import fediseer.apis.v1.rebuttals as rebuttals
 import fediseer.apis.v1.guarantees as guarantees
 import fediseer.apis.v1.activitypub as activitypub
 import fediseer.apis.v1.badges as badges
@@ -27,6 +28,7 @@ api.add_resource(endorsements.BatchEndorsements, "/batch/endorsements")
 api.add_resource(censures.Censures, "/censures/<string:domain>")
 api.add_resource(censures.CensuresGiven, "/censures_given/<string:domains_csv>")
 api.add_resource(censures.BatchCensures, "/batch/censures")
+api.add_resource(rebuttals.Rebuttals, "/rebuttals/<string:domain>")
 api.add_resource(hesitations.Hesitations, "/hesitations/<string:domain>")
 api.add_resource(hesitations.HesitationsGiven, "/hesitations_given/<string:domains_csv>")
 api.add_resource(hesitations.BatchHesitations, "/batch/hesitations")

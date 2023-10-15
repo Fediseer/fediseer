@@ -8,6 +8,7 @@ class ReportType(enum.Enum):
     CLAIM = 4
     SOLICITATION = 5
     FLAG = 6
+    REBUTTAL = 7
 
 class ReportActivity(enum.Enum):
     ADDED = 0

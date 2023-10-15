@@ -72,6 +72,17 @@ class Hesitation(db.Model):
     dubious_instance = db.relationship("Instance", back_populates="hesitations_received", foreign_keys=[dubious_id])
     created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+class Rebuttal(db.Model):
+    __tablename__ = "rebuttals"
+    __table_args__ = (UniqueConstraint('source_id', 'target_id', name='rebuttal_source_id_target_id'),)
+    id = db.Column(db.Integer, primary_key=True)
+    rebuttal = db.Column(db.Text, unique=False, nullable=False, index=False)
+    source_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_instance = db.relationship("Instance", back_populates="rebuttals_given", foreign_keys=[source_id])
+    target_id = db.Column(db.Integer, db.ForeignKey("instances.id", ondelete="CASCADE"), nullable=False, index=True)
+    target_instance = db.relationship("Instance", back_populates="rebuttals_received", foreign_keys=[target_id])
+    created = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
 class Solicitation(db.Model):
     __tablename__ = "solicitations"
     __table_args__ = (UniqueConstraint('source_id', 'target_id', name='solicitations_source_id_target_id'),)
@@ -134,6 +145,8 @@ class Instance(db.Model):
     censures_received = db.relationship("Censure", back_populates="censured_instance", cascade="all, delete-orphan", foreign_keys=[Censure.censured_id])
     hesitations_given = db.relationship("Hesitation", back_populates="hesitating_instance", cascade="all, delete-orphan", foreign_keys=[Hesitation.hesitant_id])
     hesitations_received = db.relationship("Hesitation", back_populates="dubious_instance", cascade="all, delete-orphan", foreign_keys=[Hesitation.dubious_id])
+    rebuttals_given = db.relationship("Rebuttal", back_populates="source_instance", cascade="all, delete-orphan", foreign_keys=[Rebuttal.source_id])
+    rebuttals_received = db.relationship("Rebuttal", back_populates="target_instance", cascade="all, delete-orphan", foreign_keys=[Rebuttal.target_id])
     solicitations_requested = db.relationship("Solicitation", back_populates="source_instance", cascade="all, delete-orphan", foreign_keys=[Solicitation.source_id])
     solicitations_received = db.relationship("Solicitation", back_populates="target_instance", cascade="all, delete-orphan", foreign_keys=[Solicitation.target_id])
     guarantees = db.relationship("Guarantee", back_populates="guarantor_instance", cascade="all, delete-orphan", foreign_keys=[Guarantee.guarantor_id])

@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.21.0
+
+* Added rebuttals
+* Improved speed of GET on /hesitations and /censures
+
 # 0.20.1
 
 * Allow filtering by software
