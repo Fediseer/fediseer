@@ -8,6 +8,7 @@ from fediseer import enums
 
 class GuaranteeBadge(Resource):
 
+    @cache.cached(timeout=60, query_string=True)
     def get(self, domain):
         '''Retrieve Guarantee Badge SVG
         '''
@@ -37,6 +38,7 @@ class EndorsementBadge(Resource):
     get_parser.add_argument("style", required=False, default=enums.BadgeStyle.FULL.name, type=str, help=f"The style the text should take. 'FULL' (default) means icon, text and counter. 'ICON' means just icon and counter.", location="args")
 
     @api.expect(get_parser)
+    @cache.cached(timeout=60, query_string=True)
     def get(self, domain):
         '''Retrieve Endorsement Badge SVG
         '''
