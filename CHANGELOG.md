@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.21.1
+
+Allow to display endorsement badge without text
+
 # 0.21.0
 
 * Added rebuttals

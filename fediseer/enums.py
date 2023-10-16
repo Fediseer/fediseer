@@ -33,3 +33,7 @@ class InstanceState(enum.Enum):
 class InstanceFlags(enum.Enum):
     RESTRICTED = 0
     MUTED = 1
+
+class BadgeStyle(enum.Enum):
+    FULL = 0
+    ICON = 1

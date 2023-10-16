@@ -4,6 +4,7 @@ from sqlalchemy.orm import aliased
 from fediseer.classes.instance import Guarantee, Endorsement
 from flask import make_response
 from sqlalchemy import func
+from fediseer import enums
 
 class GuaranteeBadge(Resource):
 
@@ -31,10 +32,16 @@ class GuaranteeBadge(Resource):
         return response
 
 class EndorsementBadge(Resource):
+    get_parser = reqparse.RequestParser()
+    get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+    get_parser.add_argument("style", required=False, default=enums.BadgeStyle.FULL.name, type=str, help=f"The style the text should take. 'FULL' (default) means icon, text and counter. 'ICON' means just icon and counter.", location="args")
 
+    @api.expect(get_parser)
     def get(self, domain):
         '''Retrieve Endorsement Badge SVG
         '''
+        self.args = self.get_parser.parse_args()
+        style = enums.BadgeStyle[self.args.style]
         query = db.session.query(
             Instance.domain,
             func.count(Endorsement.id)  # Count the number of endorsements
@@ -47,9 +54,9 @@ class EndorsementBadge(Resource):
         )
         endorsements = query.first()
         if endorsements is None:
-            svg = generate_endorsements_badge(domain, 0)
+            svg = generate_endorsements_badge(domain, 0, style)
         else:
-            svg = generate_endorsements_badge(domain, endorsements[1])
+            svg = generate_endorsements_badge(domain, endorsements[1], style)
         response = make_response(svg)
         response.headers['Content-Type'] = 'image/svg+xml'
         return response

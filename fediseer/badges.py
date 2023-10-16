@@ -1,5 +1,6 @@
 from pybadges import badge
 from loguru import logger
+from fediseer import enums
 import base64
 
 with open('fediseer/assets/crossed-chains.svg', 'rb') as file:
@@ -32,14 +33,17 @@ def generate_guarantee_badge(domain: str, guarantor: str):
     )
     return guarantee_badge
 
-def generate_endorsements_badge(domain: str, count: int):
+def generate_endorsements_badge(domain: str, count: int, style: enums.BadgeStyle = enums.BadgeStyle.FULL):
     left_color = "DarkSlateGray "
     right_color = "DarkOliveGreen"
     right_text=str(count)
+    left_text = "Endorsements"
+    if style == enums.BadgeStyle.ICON:
+        left_text = ''
     if count == 0:
         right_color = "DarkRed"
     endorsements_badge = badge(
-        left_text="Endorsements", 
+        left_text=left_text, 
         right_text=right_text, 
         left_color=left_color,
         right_color=right_color,
