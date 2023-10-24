@@ -1,4 +1,4 @@
 requests
 pythorhead
-pythonseer>=0.1.3
+pythonseer>=0.16.0
 python-dotenv

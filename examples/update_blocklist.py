@@ -47,7 +47,7 @@ min_censures = 1
 changes_warning_threshold = 10
 
 password = os.getenv("LEMMY_PASSWORD", PASSWORD)
-lemmy = Lemmy(f"https://{LEMMY_DOMAIN}")
+lemmy = Lemmy(f"https://{LEMMY_DOMAIN}", request_timeout=15)
 if lemmy.log_in(USERNAME, password) is False:
     raise Exception("Could not log in to lemmy")
 
@@ -116,7 +116,10 @@ else:
     ret = lemmy.site.edit(
         blocked_instances=list(defed),
         )
-print("Edit Successful")
-with open("previous_defed.json", 'w') as file:
-    file.write(json.dumps(list(defed),indent=4))
-print("Stored previous defed list to disk file 'previous_defed.json'")
+if ret is None:
+    print("Edit Failed!")
+else:    
+    print("Edit Successful.")
+    with open("previous_defed.json", 'w') as file:
+        file.write(json.dumps(list(defed),indent=4))
+    print("Stored previous defed list to disk file 'previous_defed.json'")
