@@ -98,11 +98,13 @@ class WhitelistDomain(Resource):
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
             if not guarantor_instance:
                 raise e.BadRequest(f"Requested guarantor domain {self.args.guarantor} is not registered with the Fediseer yet!")
-        if self.args.admin not in instance_info.admin_usernames:
+
+        if not instance_info.is_admin(self.args.admin):
             if len(instance_info.admin_usernames) == 0:
                 raise e.Unauthorized(f"We could not discover any admins for this instance software. Please Ensure your software exposes this info. If it's exposed in a novel manner, consider sending us a PR to be able to retrieve this infomation.")
             else:
                 raise e.Forbidden(f"Only admins of that {instance.software} are allowed to claim it.")
+
         existing_claim = database.find_claim(f"@{self.args.admin}@{domain}")
         if existing_claim:
             raise e.Forbidden(f"You have already claimed this instance as this admin. Please use the PATCH method to reset your API key.")
