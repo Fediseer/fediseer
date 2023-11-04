@@ -275,6 +275,20 @@ class InstanceInfo():
         else:
             software_map[self.software]()
 
+    def is_admin(self, user):
+        admin = user in self.admin_usernames
+
+        if not admin and self.software == "firefish":
+            payload = {
+                "username": user
+            }
+            user_info = requests.post(f"https://{self.domain}/api/users/show", timeout=self._req_timeout, json=payload).json()
+            admin = user_info.get('isAdmin', False)
+            if admin:
+                self.admin_usernames.add(user)
+
+        return admin
+
     @staticmethod
     def get_nodeinfo(domain, req_timeout=3):
         headers = {
