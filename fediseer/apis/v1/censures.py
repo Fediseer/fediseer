@@ -162,11 +162,11 @@ class Censures(Resource):
         censures = database.get_all_censure_reasons_for_censured_id(instance.id, [c.id for c in instances])
         rebuttals = database.get_all_rebuttals_from_source_instance_id(instance.id,[c.id for c in instances])
         for c_instance in instances:
-            censures = [c for c in censures if c.reason is not None and c.censuring_id == c_instance.id]
+            censures_filtered = [c for c in censures if c.reason is not None and c.censuring_id == c_instance.id]
             c_instance_details = c_instance.get_details()
-            if len(censures) > 0:
-                c_instance_details["censure_reasons"] = [censure.reason for censure in censures]
-                c_instance_details["censure_evidence"] = [censure.evidence for censure in censures if censure.evidence is not None]
+            if len(censures_filtered) > 0:
+                c_instance_details["censure_reasons"] = [censure.reason for censure in censures_filtered]
+                c_instance_details["censure_evidence"] = [censure.evidence for censure in censures_filtered if censure.evidence is not None]
                 rebuttals = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
                 if len(rebuttals) > 0 and not database.instance_has_flag(c_instance.id,enums.InstanceFlags.MUTED):
                     c_instance_details["rebuttal"] = rebuttals

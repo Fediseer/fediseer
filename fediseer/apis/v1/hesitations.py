@@ -147,11 +147,11 @@ class Hesitations(Resource):
         hesitations = database.get_all_hesitation_reasons_for_dubious_id(instance.id, [c.id for c in instances])
         rebuttals = database.get_all_rebuttals_from_source_instance_id(instance.id,[c.id for c in instances])
         for c_instance in instances:
-            hesitations = [c for c in hesitations if c.reason is not None and c.hesitant_id == c_instance.id]
+            hesitations_filtered = [c for c in hesitations if c.reason is not None and c.hesitant_id == c_instance.id]
             c_instance_details = c_instance.get_details()
-            if len(hesitations) > 0:
-                c_instance_details["hesitation_reasons"] = [hesitation.reason for hesitation in hesitations]
-                c_instance_details["hesitation_evidence"] = [hesitation.evidence for hesitation in hesitations if hesitation.evidence is not None]
+            if len(hesitations_filtered) > 0:
+                c_instance_details["hesitation_reasons"] = [hesitation.reason for hesitation in hesitations_filtered]
+                c_instance_details["hesitation_evidence"] = [hesitation.evidence for hesitation in hesitations_filtered if hesitation.evidence is not None]
                 c_instance_details["rebuttal"] = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
             instance_details.append(c_instance_details)
         if self.args.csv:
