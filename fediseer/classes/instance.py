@@ -241,7 +241,7 @@ class Instance(db.Model):
             return enums.InstanceState.UNREACHABLE
         if self.poll_failures <= 30*POLLS_PER_DAY:
             return enums.InstanceState.OFFLINE
-        return enums.InstanceState.DECIMMISSIONED
+        return enums.InstanceState.DECOMMISSIONED
         
     def has_flag(self, flag_enum):
         for flag in self.flags:

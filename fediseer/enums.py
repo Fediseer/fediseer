@@ -28,7 +28,7 @@ class InstanceState(enum.Enum):
     UP = 0
     UNREACHABLE = 1
     OFFLINE = 2
-    DECIMMISSIONED = 3
+    DECOMMISSIONED = 3
 
 class InstanceFlags(enum.Enum):
     RESTRICTED = 0
