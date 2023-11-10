@@ -36,20 +36,30 @@ class Whitelist(Resource):
         if self.args.software_csv is not None:
             software = [s.strip() for s in self.args.software_csv.split(',')]
         instance_details = []
-        for instance in database.get_all_instances(
+        all_instances = database.get_all_instances(
             min_endorsements=self.args.endorsements,
             min_guarantors=self.args.guarantors,
             tags=tags,
             software=software,
             page=self.args.page,
             limit=self.args.limit,
-        ):
+        )
+        for instance in all_instances:
             instance_details.append(instance.get_details(show_visibilities=True))
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {
+                "csv": ",".join([instance["domain"] for instance in instance_details]),
+                "total": database.count_all_instances()
+            },200
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
-        return {"instances": instance_details},200
+            return {
+                "domains": [instance["domain"] for instance in instance_details],
+                "total": database.count_all_instances()
+            },200
+        return {
+            "instances": instance_details,
+            "total": database.count_all_instances()
+        },200
 
 class WhitelistDomain(Resource):
     get_parser = reqparse.RequestParser()

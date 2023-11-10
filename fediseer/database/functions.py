@@ -9,14 +9,12 @@ from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
 from fediseer import enums
 
-def get_all_instances(
+def get_all_instance_query(
         min_endorsements = 0, 
         min_guarantors = 1, 
         tags = None,
         software = None,
         include_decommissioned = True,
-        page=1,
-        limit=10,
     ):
     query = db.session.query(
         Instance
@@ -48,10 +46,44 @@ def get_all_instances(
     if software:
         lower_sw = [sw.lower() for sw in software]
         query = query.filter(Instance.software.in_(lower_sw))
+    return query
+
+def get_all_instances(
+        min_endorsements = 0, 
+        min_guarantors = 1, 
+        tags = None,
+        software = None,
+        include_decommissioned = True,
+        page=1,
+        limit=10,
+    ):
+    query = get_all_instance_query(
+        min_endorsements = min_endorsements, 
+        min_guarantors = min_guarantors, 
+        tags = tags,
+        software = software,
+        include_decommissioned = include_decommissioned,
+    )    
     page -= 1
     if page < 0:
         page = 0
     return query.order_by(Instance.created.desc()).offset(limit * page).limit(limit).all()
+
+def count_all_instances(
+        min_endorsements = 0, 
+        min_guarantors = 1, 
+        tags = None,
+        software = None,
+        include_decommissioned = True,
+    ):
+    query = get_all_instance_query(
+        min_endorsements = min_endorsements, 
+        min_guarantors = min_guarantors, 
+        tags = tags,
+        software = software,
+        include_decommissioned = include_decommissioned,
+    )    
+    return query.count()
 
 def query_all_endorsed_instances_by_approving_id(approving_ids):
     return db.session.query(
@@ -141,7 +173,6 @@ def get_all_censured_instances_by_censuring_id(censuring_ids,page=1,limit=100):
         page -= 1
         if page < 0:
             page = 0
-        logger.debug([limit * page,limit])
         return query.order_by(Instance.domain).offset(limit * page).limit(limit).all()
     else:
         return query.all()

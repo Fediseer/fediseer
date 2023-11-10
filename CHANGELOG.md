@@ -1,5 +1,11 @@
 # Changelog
 
+# 0.23.0
+
+* Results will return the total count in the DB to help with pagination
+* Fixed paginated results not always returning all results
+* fixed DECOMMISSIONED typo
+
 # 0.21.1
 
 Allow to display endorsement badge without text

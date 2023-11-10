@@ -92,10 +92,19 @@ class Approvals(Resource):
             e_instance_details["endorsement_reasons"] = [endorsement.reason for endorsement in r_endorsements]
             instance_details.append(e_instance_details)
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {
+                "csv": ",".join([instance["domain"] for instance in instance_details]),
+                "total": len(endorsements)
+            },200
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
-        return {"instances": instance_details},200
+            return {
+                "domains": [instance["domain"] for instance in instance_details],
+                "total": len(endorsements)
+            },200
+        return {
+            "instances": instance_details,
+            "total": len(endorsements)
+        },200
 
 class Endorsements(Resource):
     get_parser = reqparse.RequestParser()
@@ -144,10 +153,20 @@ class Endorsements(Resource):
                 e_instance_details["endorsement_reasons"] = [endorsement.reason for endorsement in endorsements]
             instance_details.append(e_instance_details)
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {
+                "csv": ",".join([instance["domain"] for instance in instance_details]),
+                "total": len(instances)
+            },200
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
-        return {"instances": instance_details},200
+            return {
+                "domains": [instance["domain"] for instance in instance_details],
+                "total": len(instances)
+            },200
+        return {
+            "instances": instance_details,
+            "total": len(instances)
+        },200
+
 
     decorators = [limiter.limit("20/minute", key_func = get_request_path)]
     put_parser = reqparse.RequestParser()

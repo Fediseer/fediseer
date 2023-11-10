@@ -115,11 +115,20 @@ class CensuresGiven(Resource):
             c_instance_details["censure_count"] = censure_count
             instance_details.append(c_instance_details)
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {
+                "csv": ",".join([instance["domain"] for instance in instance_details]),
+                "total": len(censures)
+            },200
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
-        
-        return {"instances": instance_details},200
+            return {
+                "domains": [instance["domain"] for instance in instance_details],
+                "total": len(censures)
+            },200
+        return {
+            "instances": instance_details,
+            "total": len(censures)
+        },200
+            
 
 class Censures(Resource):
     get_parser = reqparse.RequestParser()
@@ -172,10 +181,19 @@ class Censures(Resource):
                     c_instance_details["rebuttal"] = rebuttals
             instance_details.append(c_instance_details)
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
+            return {
+                "csv": ",".join([instance["domain"] for instance in instance_details]),
+                "total": len(censures)
+            },200               
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in instance_details]},200
-        return {"instances": instance_details},200
+            return {
+                "domains": [instance["domain"] for instance in instance_details],
+                "total": len(censures)
+            },200
+        return {
+            "instances": instance_details,
+            "total": len(censures)
+        },200
 
     decorators = [limiter.limit("45/minute"), limiter.limit("30/minute", key_func = get_request_path)]
     put_parser = reqparse.RequestParser()

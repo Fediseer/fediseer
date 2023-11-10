@@ -58,6 +58,7 @@ class Models:
             'instances': fields.List(fields.Nested(self.response_model_instances_visibility)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
+            'total': fields.Integer(description="The total amount of results in the database for this query. Use this to know the amount of pages"),
         })
         self.response_model_instances_censured = api.inherit('CensuredInstanceDetails', self.response_model_instances, {
             'censure_reasons': fields.List(fields.String(description="The reasons instances have given for censuring this instance")),
@@ -69,6 +70,7 @@ class Models:
             'instances': fields.List(fields.Nested(self.response_model_instances_censured)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
+            'total': fields.Integer(description="The total amount of results in the database for this query. Use this to know the amount of pages"),
         })
         self.response_model_instances_endorsed = api.inherit('EndorsedInstanceDetails', self.response_model_instances, {
             'endorsement_reasons': fields.List(fields.String(description="The reasons instances have given for endorsing this instance")),
@@ -77,6 +79,7 @@ class Models:
             'instances': fields.List(fields.Nested(self.response_model_instances_endorsed)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
+            'total': fields.Integer(description="The total amount of results in the database for this query. Use this to know the amount of pages"),
         })
         self.response_model_dubious_instances = api.inherit('DubiousInstanceDetails', self.response_model_instances, {
             'hesitation_reasons': fields.List(fields.String(description="The reasons instances have given for hesitating against this instance")),
@@ -88,6 +91,7 @@ class Models:
             'instances': fields.List(fields.Nested(self.response_model_dubious_instances)),
             'domains': fields.List(fields.String(description="The instance domains as a list.")),
             'csv': fields.String(description="The instance domains as a csv."),
+            'total': fields.Integer(description="The total amount of results in the database for this query. Use this to know the amount of pages"),
         })
         self.input_endorsements_modify = api.model('ModifyEndorsements', {
             'reason': fields.String(required=False, description="The reason for this endorsement. No profanity or hate speech allowed!", example="I just think they're neat."),
