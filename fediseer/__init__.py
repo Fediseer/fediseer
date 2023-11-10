@@ -25,3 +25,7 @@ def after_request(response):
         etag = "Runtime Error"
     response.headers["ETag"] = etag
     return response
+
+if args.test:
+    import fediseer.sandbox
+

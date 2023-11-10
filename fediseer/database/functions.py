@@ -76,7 +76,7 @@ def get_all_endorsed_instances_by_approving_id(approving_ids,page=1,limit=100):
         page -= 1
         if page < 0:
             page = 0
-        return query.offset(limit * page).limit(limit).all()
+        return query.order_by(Instance.domain).offset(limit * page).limit(limit).all()
     else:
         return query.all()
 
@@ -141,7 +141,8 @@ def get_all_censured_instances_by_censuring_id(censuring_ids,page=1,limit=100):
         page -= 1
         if page < 0:
             page = 0
-        return query.offset(limit * page).limit(limit).all()
+        logger.debug([limit * page,limit])
+        return query.order_by(Instance.domain).offset(limit * page).limit(limit).all()
     else:
         return query.all()
 
@@ -204,7 +205,7 @@ def get_all_dubious_instances_by_hesitant_id(hesitant_ids,page=1,limit=100):
         page -= 1
         if page < 0:
             page = 0
-        return query.offset(limit * page).limit(limit).all()
+        return query.order_by(Instance.domain).offset(limit * page).limit(limit).all()
     else:
         return query.all()
 
