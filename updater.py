@@ -44,7 +44,7 @@ if __name__ == "__main__":
     futures = []
     with ThreadPoolExecutor(max_workers=int(os.getenv('FEDISEER_UPDATE_THREADS', 25))) as executor:
         with OVERSEER.app_context():
-            for instance in database.get_all_instances(0,0):
+            for instance in database.get_all_instances(0,0,limit=1000000):
                 if instance.software == 'wildcard':
                     continue
                 # -1 doesn't skip anything
