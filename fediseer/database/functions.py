@@ -541,6 +541,9 @@ def get_all_solicitations():
     ).join(
         subq,
         Instance.id == subq.c.source_id
+    ).filter(
+        # We do not show offline instances for solicitation
+        Instance.poll_failures < enums.InstanceState.OFFLINE.value
     ).order_by(
         subq.c.oldest_solicitation_date
     )
