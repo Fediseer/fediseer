@@ -1,6 +1,6 @@
 ---
 
-- hosts: fediseer
+- hosts: fediseer_api
   gather_facts: false
 
   tasks:

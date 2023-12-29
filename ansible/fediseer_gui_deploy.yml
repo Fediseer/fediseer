@@ -1,6 +1,6 @@
 ---
 
-- hosts: fediseer
+- hosts: fediseer_gui
   gather_facts: true
 
   tasks:
