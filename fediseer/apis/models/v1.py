@@ -25,6 +25,12 @@ class Models:
             'domains': fields.List(fields.String(description="The suspicious domains as a list.")),
             'csv': fields.String(description="The suspicious domains as a csv."),
         })
+        self.response_model_model_Config_get = api.model('FediseerConfig', {
+            'max_guarantees': fields.Integer(description="The total amount of guarantees one instance can give", required=True),
+            'max_guarantors': fields.Integer(description="The total amount of guarantors one instance can have", required=True),
+            'max_config_actions_per_min': fields.Integer(description="The amount of config actions one instance can take per minute.", required=True),
+            'max_tags': fields.Integer(description="The maximum tags each instance can self-assign.", required=True),
+        })
         self.response_model_instances = api.model('InstanceDetails', {
             'id': fields.Integer(description="The instance id", example=1),
             'domain': fields.String(description="The instance domain", example="lemmy.dbzer0.com"),

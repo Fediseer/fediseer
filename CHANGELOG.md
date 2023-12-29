@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.24.0
+
+* Adds config endpoint
+
 # 0.23.0
 
 * Results will return the total count in the DB to help with pagination

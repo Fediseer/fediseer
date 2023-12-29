@@ -1,6 +1,6 @@
 from fediseer.apis.v1.base import *
 from fediseer.messaging import activitypub_pm
-from fediseer import enums
+from fediseer import enums, consts
 from fediseer.classes.instance import Solicitation
 from fediseer.classes.reports import Report
 
@@ -56,7 +56,7 @@ class Solicitations(Resource):
         if instance.is_guaranteed():
             raise e.BadRequest(f"Your instance is already guaranteed by {instance.get_guarantor().domain}")
         if database.has_too_many_actions_per_min(instance.domain):
-            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
+            raise e.TooManyRequests(f"Your instance is doing more than {consts.MAX_CONFIG_ACTIONS_PER_MIN} actions per minute. Please slow down.")
         guarantor_instance = None
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)

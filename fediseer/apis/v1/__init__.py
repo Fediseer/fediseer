@@ -16,6 +16,7 @@ import fediseer.apis.v1.faq as faq
 from fediseer.apis.v1.base import api
 
 api.add_resource(base.Suspicions, "/instances")
+api.add_resource(base.Config, "/config")
 api.add_resource(find.FindInstance, "/find_instance")
 api.add_resource(activitypub.User, "/user/<string:username>")
 api.add_resource(activitypub.Inbox, "/inbox/<string:username>")
