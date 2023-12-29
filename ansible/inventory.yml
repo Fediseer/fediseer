@@ -2,7 +2,12 @@
 
 all:
   hosts:
-    fediseer:
+    fediseer_api:
       ansible_host: 144.91.110.65
       ansible_become: false
       ansible_user: fediseer
+    fediseer_gui:
+      ansible_host: 144.91.110.65
+      ansible_become: true
+      ansible_user: cicd
+      
