@@ -9,9 +9,9 @@ from fediseer.database import functions as database
 from fediseer import exceptions as e
 from fediseer.utils import hash_api_key
 from fediseer.messaging import activitypub_pm
-from pythorhead import Lemmy
 from fediseer.fediverse import InstanceInfo
 from fediseer.limiter import limiter
+from fediseer import consts
 
 api = Namespace('v1', 'API Version 1' )
 
@@ -42,7 +42,6 @@ class Suspicions(Resource):
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
 
     @api.expect(get_parser)
-    @logger.catch(reraise=True)
     @cache.cached(timeout=10, query_string=True)
     @api.marshal_with(models.response_model_model_Suspicions_get, code=200, description='Suspicious Instances', skip_none=True)
     def get(self):
@@ -58,6 +57,24 @@ class Suspicions(Resource):
         if self.args.domains:
             return {"domains": [instance["domain"] for instance in sus_instances]},200
         return {"instances": sus_instances},200
+
+class Config(Resource):
+    get_parser = reqparse.RequestParser()
+    get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+
+    @api.expect(get_parser)
+    @cache.cached(timeout=600)
+    @api.marshal_with(models.response_model_model_Config_get, code=200, description='Fediseer config')
+    def get(self):
+        '''The current Fediseer configuration options
+        '''
+        self.args = self.get_parser.parse_args()
+        return {
+            'max_guarantees': consts.MAX_GUARANTEES,
+            'max_guarantors': consts.MAX_GUARANTORS,
+            'max_tags': consts.MAX_TAGS,  
+            'max_config_actions_per_min': consts.MAX_CONFIG_ACTIONS_PER_MIN,
+        }, 200
 
 # Debug
 # from fediseer.flask import OVERSEER

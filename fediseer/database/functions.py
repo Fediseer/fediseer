@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from fediseer.classes.instance import Instance, Endorsement, Guarantee, RejectionRecord, Censure, Hesitation, Solicitation, InstanceFlag, InstanceTag, Rebuttal
 from fediseer.classes.user import Claim, User
 from fediseer.classes.reports import Report
-from fediseer import enums
+from fediseer import enums, consts
 
 def get_all_instance_query(
         min_endorsements = 0, 
@@ -590,7 +590,7 @@ def has_too_many_actions_per_min(source_domain):
     ).filter(
         Report.created > datetime.utcnow() - timedelta(minutes=1),
     )
-    return query.count() > 20
+    return query.count() > consts.MAX_CONFIG_ACTIONS_PER_MIN
 
 def get_instance_flag(instance_id, flag_enum):
     query = InstanceFlag.query.filter(

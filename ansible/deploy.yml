@@ -1,0 +1,27 @@
+---
+
+- hosts: fediseer
+  gather_facts: false
+
+  tasks:
+  - name: Ensure we're on main branch
+    command: git checkout main
+    args:
+      chdir: fediseer/
+    tags:
+    - git
+
+  - name: Update branch
+    command: git pull
+    args:
+      chdir: fediseer/
+    tags:
+    - git
+
+  - name: Make sure a fediseer service unit is restarted
+    ansible.builtin.systemd_service:
+      state: restarted
+      name: fediseer_systemd_10001
+      scope: user
+    tags: 
+    - service

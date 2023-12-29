@@ -1,7 +1,7 @@
 from fediseer.apis.v1.base import *
 from fediseer.classes.instance import Guarantee, RejectionRecord, Solicitation, InstanceFlag
 from fediseer.classes.reports import Report
-from fediseer import enums
+from fediseer import enums, consts
 from fediseer.register import ensure_instance_registered
 
 class Guarantors(Resource):
@@ -74,7 +74,7 @@ class Guarantees(Resource):
     def put(self, domain):
         '''Guarantee an instance
         A instance can only be guaranteed by one other instance
-        An instance can guarantee up to 20 other instances
+        An instance can guarantee up to consts.MAX_GUARANTEES other instances
         A guaranteed instance can guarantee and endorse other instances.
         '''
         self.args = self.put_parser.parse_args()
@@ -85,12 +85,12 @@ class Guarantees(Resource):
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if len(instance.guarantors) == 0:
             raise e.Forbidden("Only guaranteed instances can guarantee others.")
-        if len(instance.guarantees) >= 20 and instance.id != 0:
-            raise e.Forbidden("You cannot guarantee for more than 20 instances")
+        if len(instance.guarantees) >= consts.MAX_GUARANTEES and instance.id != 0:
+            raise e.Forbidden(f"You cannot guarantee for more than {consts.MAX_GUARANTEES} instances")
         if database.instance_has_flag(instance.id,enums.InstanceFlags.RESTRICTED):
             raise e.Forbidden("You cannot take this action as your instance is restricted")
         if database.has_too_many_actions_per_min(instance.domain):
-            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
+            raise e.TooManyRequests(f"Your instance is doing more than {consts.MAX_CONFIG_ACTIONS_PER_MIN} actions per minute. Please slow down.")
         unbroken_chain, chainbreaker = database.has_unbroken_chain(instance.id)
         if not unbroken_chain:
             raise e.Forbidden(f"Guarantee chain for this instance has been broken. Chain ends at {chainbreaker.domain}!")
@@ -168,7 +168,7 @@ class Guarantees(Resource):
         if not instance:
             raise e.NotFound(f"No Instance found matching provided API key and domain. Have you remembered to register it?")
         if database.has_too_many_actions_per_min(instance.domain):
-            raise e.TooManyRequests("Your instance is doing more than 20 actions per minute. Please slow down.")
+            raise e.TooManyRequests(f"Your instance is doing more than {consts.MAX_CONFIG_ACTIONS_PER_MIN} actions per minute. Please slow down.")
         target_instance = database.find_instance_by_domain(domain=domain)
         if not target_instance:
             raise e.BadRequest("Instance from which to withdraw endorsement not found")
