@@ -1,4 +1,4 @@
-name: Deploy new version
+name: Deploy new fediseer GUI version
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build-n-deploy:
-    name: Fediseer new release
+    name: Fediseer new GUI release
     runs-on: ubuntu-latest
     steps:
     - name: "✔️ Checkout"
@@ -20,7 +20,7 @@ jobs:
       uses: dawidd6/action-ansible-playbook@v2
       with:
         # Required, playbook filepath
-        playbook: ansible/deploy.yml
+        playbook: ansible/fediseer_gui_deploy.yml
         # Optional, directory where playbooks live
         directory: ./
         # Optional, SSH private key
@@ -35,3 +35,4 @@ jobs:
         # Optional, additional flags to pass to ansible-playbook
         options: |
           --inventory ansible/inventory.yml
+          -e docker_compose_dir=${{secrets.DOCKER_COMPOSE_DIR}}

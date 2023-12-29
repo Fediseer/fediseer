@@ -1,0 +1,16 @@
+---
+
+- hosts: fediseer
+  gather_facts: false
+
+  tasks:
+  - name: start docker-compose
+    docker_compose:
+      project_src: "{{docker_compose_dir}}"
+      state: present
+      pull: yes
+      remove_orphans: yes
+    become: true
+    tags:
+      - docker
+      - compose
