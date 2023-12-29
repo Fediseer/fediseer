@@ -1,7 +1,7 @@
 ---
 
 - hosts: fediseer
-  gather_facts: false
+  gather_facts: true
 
   tasks:
   - name: start docker-compose
