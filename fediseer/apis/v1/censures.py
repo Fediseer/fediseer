@@ -176,9 +176,9 @@ class Censures(Resource):
             if len(censures_filtered) > 0:
                 c_instance_details["censure_reasons"] = [censure.reason for censure in censures_filtered]
                 c_instance_details["censure_evidence"] = [censure.evidence for censure in censures_filtered if censure.evidence is not None]
-                rebuttals = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
-                if len(rebuttals) > 0 and not database.instance_has_flag(c_instance.id,enums.InstanceFlags.MUTED):
-                    c_instance_details["rebuttal"] = rebuttals
+                rebuttals_texts = [r.rebuttal for r in rebuttals if r.target_id == c_instance.id]
+                if len(rebuttals_texts) > 0 and not database.instance_has_flag(c_instance.id,enums.InstanceFlags.MUTED):
+                    c_instance_details["rebuttal"] = rebuttals_texts
             instance_details.append(c_instance_details)
         if self.args.csv:
             return {
