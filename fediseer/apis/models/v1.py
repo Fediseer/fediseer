@@ -35,6 +35,7 @@ class Models:
             'id': fields.Integer(description="The instance id", example=1),
             'domain': fields.String(description="The instance domain", example="lemmy.dbzer0.com"),
             'software': fields.String(description="The fediverse software running in this instance", example="lemmy"),
+            'version': fields.String(description="The fediverse version running in this instance", example="0.19.3"),
             'claimed': fields.Integer(description="How many admins from this instance has claimed it."),
             'open_registrations': fields.Boolean(description="The instance uptime pct. 100% and thousand of users is unlikely."),
             'email_verify': fields.Boolean(description="The amount of local posts in that instance."),

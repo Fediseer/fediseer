@@ -30,6 +30,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
     if instance:
         if (
             instance.software != instance_info.software or
+            instance.version != instance_info.version or
             instance.open_registrations != instance_info.open_registrations or
             instance.approval_required != instance_info.approval_required or
             instance.email_verify != instance_info.email_verify or
@@ -40,6 +41,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
             # logger.debug(["old", instance.software,instance.open_registrations,instance.approval_required,instance.email_verify,instance.has_captcha])        
             logger.debug(f"Updated instance info for {domain}")
             instance.software = instance_info.software
+            instance.version = instance_info.version
             instance.open_registrations = instance_info.open_registrations
             instance.approval_required = instance_info.approval_required
             instance.email_verify = instance_info.email_verify

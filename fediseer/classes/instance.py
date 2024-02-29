@@ -130,6 +130,7 @@ class Instance(db.Model):
     approval_required = db.Column(db.Boolean, unique=False, nullable=True, index=True)
     has_captcha = db.Column(db.Boolean, unique=False, nullable=True, index=True)
     software = db.Column(db.String(50), unique=False, nullable=False, index=True)
+    version = db.Column(db.String(255), unique=False, nullable=False, index=True)
     sysadmins = db.Column(db.Integer, unique=False, nullable=True)
     moderators = db.Column(db.Integer, unique=False, nullable=True)
     max_list_size = db.Column(db.Integer, unique=False, nullable=False, default=2000)
@@ -170,6 +171,7 @@ class Instance(db.Model):
             "id": self.id,
             "domain": self.domain,
             "software": self.software,
+            "version": self.version,
             "claimed": len(self.admins),
             "open_registrations": self.open_registrations,
             "email_verify": email_verification,

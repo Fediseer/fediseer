@@ -12,6 +12,7 @@ class InstanceInfo():
     instance_info = None
     admin_usernames = set()
     software = None
+    version = None
     open_registrations = None
     approval_required = None
     email_verify = None
@@ -32,6 +33,7 @@ class InstanceInfo():
             self.email_verify = True
             self.has_captcha = True
             self.software = "lemmy"
+            self.version = "0.19.3"
             self.admin_usernames = {"db0"}
             self.node_info = InstanceInfo.get_nodeinfo("lemmy.dbzer0.com")
             self.instance_info = {}
@@ -42,6 +44,7 @@ class InstanceInfo():
             self.email_verify = False
             self.has_captcha = False
             self.software = "fediseer"
+            self.version = FEDISEER_VERSION
             self.admin_usernames = {"fediseer"}
             self.node_info = {}
             self.instance_info = {}
@@ -252,10 +255,12 @@ class InstanceInfo():
         if not self.node_info:
             if self._allow_unreachable:
                 self.software = "unknown"
+                self.version = "unknown"
                 if "*" in self.domain:
                     self.software = "wildcard"
         else:
             self.software = self.node_info["software"]["name"].lower()
+            self.version = self.node_info.get("version","unknown")
         software_map = {
             "lemmy": self.get_lemmy_info,
             "mastodon": self.get_mastodon_info,
