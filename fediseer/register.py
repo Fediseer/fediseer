@@ -61,6 +61,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
         approval_required=instance_info.approval_required,
         has_captcha=instance_info.has_captcha,
         software=instance_info.software,
+        version=instance_info.version,
         poll_failures=poll_failures,
     )
     new_instance.create()
