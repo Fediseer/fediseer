@@ -27,6 +27,7 @@ def refresh_info(domain):
             pass
 
 if __name__ == "__main__":
+    logger.add("updater.log", retention="7 days", rotation="1d", compression="bz2", level=10)
     # Only setting this for the WSGI logs
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s', level=logging.WARNING)
     logger.init("Updater", status="Starting")
