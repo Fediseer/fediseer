@@ -82,7 +82,8 @@ defed = (set(blocklist) | set(trusted_censures["domains"]) | set(filtered_censur
 try:
     with open("previous_defed.json", 'r') as file:
         prev_defed = set(json.loads(file.read()))
-except FileNotFoundError:
+except (FileNotFoundError,json.decoder.JSONDecodeError):
+    print("WARNING: Previous defed file doesn't exist. Will probably receive a warning about blocklist.")
     prev_defed = set()
 if len(defed - prev_defed) > 0:
     print(f"New blocks to add {defed - prev_defed}")
