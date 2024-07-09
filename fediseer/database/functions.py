@@ -384,7 +384,7 @@ def find_instance_by_domain(domain):
 
 def find_multiple_instance_by_domains(domains):
     instance = Instance.query.filter(
-        Instance.domain.in_(domains)
+        Instance.domain.in_([d.lower() for d in domains])
     ).all()
     return instance
 
