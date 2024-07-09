@@ -23,7 +23,7 @@ class InstanceInfo():
     _siteinfo_err: Exception = None
 
     def __init__(self, domain, allow_unreachable=False, req_timeout=5):
-        self.domain = domain
+        self.domain = domain.lower()
         self._allow_unreachable = allow_unreachable
         self._req_timeout = req_timeout
         if domain.endswith("test.dbzer0.com"):

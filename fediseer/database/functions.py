@@ -349,7 +349,7 @@ def find_instance_by_account(user_account):
     return instance
 
 def find_instance_by_domain(domain):
-    instance = Instance.query.filter_by(domain=domain).first()
+    instance = Instance.query.filter_by(domain=domain.lower()).first()
     return instance
 
 def find_admins_by_instance(instance):

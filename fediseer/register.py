@@ -55,7 +55,7 @@ def ensure_instance_registered(domain, allow_unreachable=False, record_unreachab
         # If the domain is gone, we assume straight decommission
         poll_failures = 100
     new_instance = Instance(
-        domain=domain,
+        domain=domain.lower(),
         open_registrations=instance_info.open_registrations,
         email_verify=instance_info.email_verify,
         approval_required=instance_info.approval_required,
