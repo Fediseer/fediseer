@@ -4,7 +4,7 @@ class User(Resource):
     get_parser = reqparse.RequestParser()
 
     @api.expect(get_parser)
-    @api.representation('application/activity+json')
+    @api.produces('application/activity+json')
     @cache.cached(timeout=10)
     def get(self, username):
         '''User details
