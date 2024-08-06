@@ -20,7 +20,7 @@ api_root = Api()
 api_root.representations["application/activity+json"] = output_json
 api_root.init_app(app, add_specs=False)
 api = Namespace('v1', 'API Version 1', api=api_root)
-logger.info(api.apis)
+logger.info(api.apis[0].representations)
 
 from fediseer.apis.models.v1 import Models
 
