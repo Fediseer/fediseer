@@ -1,7 +1,6 @@
 import os
 from flask import request, Flask
-from flask_restx import Api, Namespace, Resource, reqparse
-from flask_restx.representations import output_json
+from flask_restx import Namespace, Resource, reqparse
 from fediseer.flask import cache, db
 from fediseer.observer import retrieve_suspicious_instances
 from loguru import logger
@@ -14,13 +13,8 @@ from fediseer.fediverse import InstanceInfo
 from fediseer.limiter import limiter
 from fediseer import consts
 
-app = Flask(__name__, static_folder=None)
-app.url_map.strict_slashes = False
-api_root = Api()
-api_root.representations["application/activity+json"] = output_json
-api_root.init_app(app, add_specs=False)
-api = Namespace('v1', 'API Version 1', api=api_root)
-logger.info(api.apis[0].representations)
+api = Namespace('v1', 'API Version 1')
+logger.info(api.apis)
 
 from fediseer.apis.models.v1 import Models
 
