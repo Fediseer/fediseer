@@ -1,9 +1,11 @@
 from fediseer.apis.v1.base import *
+from flask import make_response
 
 class User(Resource):
     get_parser = reqparse.RequestParser()
 
     @api.expect(get_parser)
+    @api.produces('application/activity+json')
     @cache.cached(timeout=10)
     def get(self, username):
         '''User details
@@ -30,6 +32,9 @@ class User(Resource):
                 "publicKeyPem": pubkey
             }
         }
+        response = make_response(fediseer)
+        response.headers['Content-Type'] = 'application/activity+json'
+        return response        
         return fediseer,200
 
 class Inbox(Resource):

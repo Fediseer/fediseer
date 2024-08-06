@@ -1,5 +1,5 @@
 import os
-from flask import request
+from flask import request, Flask
 from flask_restx import Namespace, Resource, reqparse
 from fediseer.flask import cache, db
 from fediseer.observer import retrieve_suspicious_instances
@@ -13,7 +13,8 @@ from fediseer.fediverse import InstanceInfo
 from fediseer.limiter import limiter
 from fediseer import consts
 
-api = Namespace('v1', 'API Version 1' )
+api = Namespace('v1', 'API Version 1')
+logger.info(api.apis)
 
 from fediseer.apis.models.v1 import Models
 
