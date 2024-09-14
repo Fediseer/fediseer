@@ -151,6 +151,7 @@ class InstanceInfo():
     def retrieve_admins(self):
         software_map = {
             "lemmy": self.get_lemmy_admins,
+            "piefed": self.get_lemmy_admins,
             "mastodon": self.get_mastodon_admins,
             "friendica": self.get_mastodon_admins,
             "pleroma": self.get_pleroma_admins,
@@ -263,6 +264,7 @@ class InstanceInfo():
             self.version = self.node_info["software"].get("version","unknown")
         software_map = {
             "lemmy": self.get_lemmy_info,
+            "piefed": self.get_lemmy_info,
             "mastodon": self.get_mastodon_info,
             "friendica": self.get_mastodon_info,
             "pleroma": self.get_pleroma_info,
