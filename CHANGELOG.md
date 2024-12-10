@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.25.0
+
+Switched from botsin.space to gts.fediseer.com for proxy mastodon account
+
 # 0.24.0
 
 * Adds config endpoint

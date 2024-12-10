@@ -88,7 +88,7 @@ class WhitelistDomain(Resource):
     put_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     put_parser.add_argument("admin", required=True, type=str, help="The username of the admin who wants to register this domain", location="json")
     put_parser.add_argument("guarantor", required=False, type=str, help="(Optional) The domain of another guaranteed instance. They will receive a PM to validate you and you will be added to the solicitations list.", location="json")
-    put_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
+    put_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@gts.fediseer.com. For this to work, ensure that gts.fediseer.com is not blocked in your instance and optimally follow @fediseer@gts.fediseer.com as well. If set, this will be used permanently for communication to your instance.", location="json")
 
 
     @api.expect(put_parser,models.input_instance_claim, validate=True)
@@ -184,7 +184,7 @@ class WhitelistDomain(Resource):
     patch_parser.add_argument("return_new_key", default=False, required=False, type=bool, help="If True, the key will be returned as part of the response instead of PM'd. IT will still PM a notification to you.", location="json")
     patch_parser.add_argument("sysadmins", default=None, required=False, type=int, help="How many sysadmins this instance has.", location="json")
     patch_parser.add_argument("moderators", default=None, required=False, type=int, help="How many moderators this instance has.", location="json")
-    patch_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@botsin.space. For this to work, ensure that botsin.space is not blocked in your instance and optimally follow @fediseer@botsin.space as well. If set, this will be used permanently for communication to your instance.", location="json")
+    patch_parser.add_argument("pm_proxy", required=False, type=str, help="(Optional) If you do receive the PM from @fediseer@fediseer.com, set this to true to make the Fediseer PM your your API key via @fediseer@gts.fediseer.com. For this to work, ensure that gts.fediseer.com is not blocked in your instance and optimally follow @fediseer@gts.fediseer.com as well. If set, this will be used permanently for communication to your instance.", location="json")
     patch_parser.add_argument("visibility_endorsements", required=False, type=str, location="json")
     patch_parser.add_argument("visibility_censures", required=False, type=str, location="json")
     patch_parser.add_argument("visibility_hesitations", required=False, type=str, location="json")

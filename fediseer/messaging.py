@@ -38,8 +38,9 @@ class ActivityPubPM:
         }
 
         self.mastodon = Mastodon(
-            access_token = 'pytooter_usercred.secret',
-            api_base_url = f"https://{os.environ['MASTODON_INSTANCE']}"
+            version_check_mode="none",
+            client_id = 'pytooter_clientcred.secret',
+            access_token = f"https://{os.environ['MASTODON_TOKEN']}",
         )
 
     def send_pm_to_right_software(self, message, username, domain, software):
