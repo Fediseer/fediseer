@@ -11,11 +11,7 @@ Mastodon.create_app(
 )
 
 mastodon = Mastodon(
+    version_check_mode="none",
     client_id = 'pytooter_clientcred.secret',
-    api_base_url = f"https://{os.environ['MASTODON_INSTANCE']}"
-)
-mastodon.log_in(
-    os.environ['MASTODON_EMAIL'],
-    os.environ['MASTODON_PASSWORD'],
-    to_file = 'pytooter_usercred.secret'
+    access_token = f"https://{os.environ['MASTODON_TOKEN']}",
 )
