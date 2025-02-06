@@ -8,6 +8,7 @@ SUPPORTED_SOFTWARE = {
     "firefish",
     "iceshrimp",
     "misskey",
+    "sharkey",
     "mitra",
 }
 POLLS_PER_DAY=2

@@ -153,6 +153,7 @@ class InstanceInfo():
             "lemmy": self.get_lemmy_admins,
             "piefed": self.get_lemmy_admins,
             "mastodon": self.get_mastodon_admins,
+            "sharkey": self.get_mastodon_admins,
             "friendica": self.get_mastodon_admins,
             "pleroma": self.get_pleroma_admins,
             "akkoma": self.get_pleroma_admins,
