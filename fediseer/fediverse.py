@@ -231,8 +231,11 @@ class InstanceInfo():
     def discover_info(self):
         # Mastodon API
         site = requests.get(f"https://{self.domain}/api/v1/instance",timeout=self._req_timeout,allow_redirects=False)
+
         if site.status_code != 200:
-            raise Exception(f"Unexpected status code retrieved when discovering instance info: {site.status_code}")
+            self.get_unknown_info()
+            return
+
         try:
             self.instance_info = site.json()
         except Exception as err:
