@@ -8,7 +8,7 @@
     community.docker.docker_compose_v2:
       project_src: "{{ docker_compose_dir }}"
       state: present
-      pull: yes
+      pull: always
       remove_orphans: yes
     tags:
       - docker
