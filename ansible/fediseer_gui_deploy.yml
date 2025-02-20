@@ -5,7 +5,7 @@
 
   tasks:
   - name: start docker-compose
-    docker_compose:
+    community.docker.docker_compose_v2:
       project_src: "{{ docker_compose_dir }}"
       state: present
       pull: yes
