@@ -88,7 +88,7 @@ class ActivityPubPM:
         document["object"]["tag"] = [
 			{
 			  "type": "Mention",
-			  "to": f"@{username}",
+			  "name": f"@{username}",
 			  "href": f"https://{domain}/users/{username}"
 			}
 		]
