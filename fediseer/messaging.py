@@ -96,6 +96,7 @@ class ActivityPubPM:
 
     def send_pm(self, document, domain):
         document["id"] = f"https://fediseer.com/{uuid.uuid4()}"
+	document["@id"] = document["id"]
         document["object"]["id"] = f"https://fediseer.com/{uuid.uuid4()}"
         document["object"]["published"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         document = json.dumps(document, indent=4)
