@@ -11,7 +11,7 @@ class InstanceInfo():
     node_info = None
     instance_info = None
     admin_usernames = set()
-    software = None
+    software = 'unknown'
     version = None
     open_registrations = None
     approval_required = None
