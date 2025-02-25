@@ -12,7 +12,7 @@ class InstanceInfo():
     instance_info = None
     admin_usernames = set()
     software = 'unknown'
-    version = None
+    version = 'unknown'
     open_registrations = None
     approval_required = None
     email_verify = None
