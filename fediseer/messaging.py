@@ -30,7 +30,7 @@ class ActivityPubPM:
             "actor": "https://fediseer.com/api/v1/user/fediseer",
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
-                "https: //w3id.org/security/v1"
+                "https://w3id.org/security/v1"
             ],	
             "object": {
                 "attributedTo": "https://fediseer.com/api/v1/user/fediseer",
@@ -88,7 +88,7 @@ class ActivityPubPM:
         document["object"]["tag"] = [
 			{
 			  "type": "Mention",
-			  "to": f"@{username}",
+			  "name": f"@{username}",
 			  "href": f"https://{domain}/users/{username}"
 			}
 		]
