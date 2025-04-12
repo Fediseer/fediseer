@@ -52,7 +52,8 @@ class ActivityPubPM:
         }
         if software in software_map:
             return software_map[software](message, username, domain)
-        raise e.BadRequest("This software does not have direct PM implemented. Please retry using a MASTODON pm_proxy setting.")
+
+        return self.send_both_pm(message, username, domain)
 
     def send_fediseer_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
@@ -66,6 +67,9 @@ class ActivityPubPM:
             "mediaType": "text/markdown",
         }
         return self.send_pm(document, domain)
+
+    def send_both_pm(self, message, username, domain):
+        return self.send_lemmy_pm(message, username, domain) and self.send_mastodon_pm(message, username, domain)
 
     def send_lemmy_pm(self, message, username, domain):
         document = copy.deepcopy(self.document_core)
