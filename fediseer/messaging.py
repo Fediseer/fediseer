@@ -46,6 +46,7 @@ class ActivityPubPM:
     def send_pm_to_right_software(self, message, username, domain, software):
         software_map = {
             "lemmy": self.send_lemmy_pm,
+            "piefed": self.send_lemmy_pm,
             "mastodon": self.send_mastodon_pm,
             "friendica": self.send_mastodon_pm,
             "fediseer": self.send_fediseer_pm,
