@@ -110,7 +110,7 @@ class AllInstances(Resource):
             limit=None,
         )
         for instance in all_instances:
-            logger.debug(instance["domain"])
+            logger.debug(instance.domain)
             instance_details.append(instance.get_details(show_visibilities=True))
         with open(json_path, "w") as f:
             json.dump(instance_details, f)
