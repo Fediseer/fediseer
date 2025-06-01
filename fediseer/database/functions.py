@@ -67,6 +67,8 @@ def get_all_instances(
     page -= 1
     if page < 0:
         page = 0
+    if limit is None:
+        return query.order_by(Instance.created.desc()).all()
     return query.order_by(Instance.created.desc()).offset(limit * page).limit(limit).all()
 
 def count_all_instances(
