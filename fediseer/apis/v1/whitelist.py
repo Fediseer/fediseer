@@ -5,6 +5,7 @@ from fediseer import enums
 from fediseer.classes.instance import Solicitation
 from fediseer.classes.reports import Report
 from fediseer.register import ensure_instance_registered
+from fediseer.flask import OVERSEER
 import os
 import time
 import json
@@ -108,15 +109,16 @@ class AllInstances(Resource):
         main_path = os.path.dirname(sys.modules['__main__'].__file__)
         json_path = os.path.join(main_path, "all_instances.json")
         instance_details = []
-        all_instances = database.get_all_instances(
-            min_guarantors=0,
-            limit=None,
-        )
-        for instance in all_instances:
-            logger.debug(instance.domain)
-            instance_details.append(instance.get_details(show_visibilities=True))
-        with open(json_path, "w") as f:
-            json.dump(instance_details, f)
+        with OVERSEER.app_context():
+            all_instances = database.get_all_instances(
+                min_guarantors=0,
+                limit=None,
+            )
+            for instance in all_instances:
+                logger.debug(instance.domain)
+                instance_details.append(instance.get_details(show_visibilities=True))
+            with open(json_path, "w") as f:
+                json.dump(instance_details, f)
         return instance_details
 
 
