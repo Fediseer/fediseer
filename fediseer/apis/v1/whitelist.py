@@ -9,6 +9,7 @@ import os
 import time
 import json
 import threading
+import sys
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -77,7 +78,8 @@ class AllInstances(Resource):
         '''
         self.args = self.get_parser.parse_args()
         instance_details = None
-        json_path = os.path.join(os.path.dirname(__file__), "all_instances.json")
+        main_path = os.path.dirname(sys.modules['__main__'].__file__)
+        json_path = os.path.join(main_path, "all_instances.json")
         try:
             if os.path.isfile(json_path):
                 mtime = os.path.getmtime(json_path)
@@ -103,7 +105,8 @@ class AllInstances(Resource):
     def get_all_instances(self):
         '''A List with the details of all instances and their endorsements unfiltered
         '''
-        json_path = os.path.join(os.path.dirname(__file__), "all_instances.json")
+        main_path = os.path.dirname(sys.modules['__main__'].__file__)
+        json_path = os.path.join(main_path, "all_instances.json")
         instance_details = []
         all_instances = database.get_all_instances(
             min_guarantors=0,
