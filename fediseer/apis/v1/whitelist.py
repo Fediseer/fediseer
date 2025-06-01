@@ -5,6 +5,10 @@ from fediseer import enums
 from fediseer.classes.instance import Solicitation
 from fediseer.classes.reports import Report
 from fediseer.register import ensure_instance_registered
+import os
+import time
+import json
+import threading
 
 class Whitelist(Resource):
     get_parser = reqparse.RequestParser()
@@ -72,17 +76,46 @@ class AllInstances(Resource):
         '''A List with the details of all instances and their endorsements unfiltered
         '''
         self.args = self.get_parser.parse_args()
+        instance_details = None
+        json_path = os.path.join(os.path.dirname(__file__), "all_instances.json")
+        try:
+            if os.path.isfile(json_path):
+                mtime = os.path.getmtime(json_path)
+                if time.time() - mtime >= 3600:
+                    # Refresh the data if it is older than 1 hour
+                    threading.Thread(target=self.get_all_instances, daemon=True).start()
+                if time.time() - mtime < 3600:
+                    with open(json_path, "r") as f:
+                        instance_details = json.load(f)
+                        return {
+                            "instances": instance_details,
+                            "total": len(instance_details)
+                        },200
+        except Exception as err:
+            logger.error(f"Failed to read cached all_instances.json: {err}")
+            pass
+        instance_details = self.get_all_instances()
+        return {
+            "instances": instance_details,
+            "total": len(instance_details)
+        },200
+
+    def get_all_instances(self):
+        '''A List with the details of all instances and their endorsements unfiltered
+        '''
+        json_path = os.path.join(os.path.dirname(__file__), "all_instances.json")
         instance_details = []
         all_instances = database.get_all_instances(
             min_guarantors=0,
             limit=None,
         )
         for instance in all_instances:
+            logger.debug(instance["domain"])
             instance_details.append(instance.get_details(show_visibilities=True))
-        return {
-            "instances": instance_details,
-            "total": database.count_all_instances()
-        },200
+        with open(json_path, "w") as f:
+            json.dump(instance_details, f)
+        return instance_details
+
 
 class WhitelistDomain(Resource):
     get_parser = reqparse.RequestParser()
