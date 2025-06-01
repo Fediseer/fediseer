@@ -61,6 +61,29 @@ class Whitelist(Resource):
             "total": database.count_all_instances()
         },200
 
+class AllInstances(Resource):
+    get_parser = reqparse.RequestParser()
+    get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
+
+    @api.expect(get_parser)
+    @cache.cached(timeout=3600)
+    @api.marshal_with(models.response_model_model_Whitelist_get, code=200, description='All Instances', skip_none=True)
+    def get(self):
+        '''A List with the details of all instances and their endorsements unfiltered
+        '''
+        self.args = self.get_parser.parse_args()
+        instance_details = []
+        all_instances = database.get_all_instances(
+            min_guarantors=0,
+            limit=None,
+        )
+        for instance in all_instances:
+            instance_details.append(instance.get_details(show_visibilities=True))
+        return {
+            "instances": instance_details,
+            "total": database.count_all_instances()
+        },200
+
 class WhitelistDomain(Resource):
     get_parser = reqparse.RequestParser()
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
