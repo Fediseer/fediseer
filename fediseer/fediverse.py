@@ -273,7 +273,7 @@ class InstanceInfo():
     def parse_instance_info(self):
         if self.domain == "fediseer.com":
             return
-        logger.debug(f"Parsing instance info for {self.domain}")
+        logger.info(f"Parsing instance info for {self.domain}")
         if not self.node_info:
             if self._allow_unreachable:
                 self.software = "unknown"
