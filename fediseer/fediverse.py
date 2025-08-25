@@ -184,7 +184,6 @@ class InstanceInfo():
             self.discover_admins()
         else:
             software_map[self.software]()
-        logger.info(self.admin_usernames)
 
     def get_lemmy_info(self):
         requested_lemmy = Lemmy(f"https://{self.domain}")
@@ -304,7 +303,6 @@ class InstanceInfo():
             software_map[self.software]()
 
     def is_admin(self, user):
-        logger.info(self.admin_usernames)
         admin = user in self.admin_usernames
 
         if not admin and self.software == "firefish":
