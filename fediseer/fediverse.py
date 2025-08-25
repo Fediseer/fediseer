@@ -75,17 +75,17 @@ class InstanceInfo():
             pass
 
     def get_lemmy_admins(self):
-        self.admin_usernames = set([a["person"]["name"] for a in self.instance_info["admins"]])
+        self.admin_usernames.update(set([a["person"]["name"] for a in self.instance_info["admins"]]))
 
     def get_mastodon_admins(self):
         if "contact_account" in self.instance_info: # New API
             if "username" not in self.instance_info["contact_account"]:
                 raise Exception(f"No admin contact is specified for {self.domain}.")
-            self.admin_usernames = {self.instance_info["contact_account"]["username"]}
+            self.admin_usernames.update({self.instance_info["contact_account"]["username"]})
         elif "contact" in self.instance_info: # Old API
             if "account" not in self.instance_info["contact"]:
                 raise Exception(f"No admin contact is specified for {self.domain}.")
-            self.admin_usernames = {self.instance_info["contact"]["account"]["username"]}
+            self.admin_usernames.update({self.instance_info["contact"]["account"]["username"]})
         else:
             raise Exception(f"Could not determine admin contacts for {self.domain}.")
 
@@ -114,7 +114,7 @@ class InstanceInfo():
             offset += 10
         if len(admins_found) == 0:
             raise Exception(f"No admin contact is specified for {self.domain}.")
-        self.admin_usernames = admins_found
+        self.admin_usernames.update(admins_found)
 
     def get_pleroma_admins(self):
         if "staffAccounts" not in self.node_info["metadata"] or len(self.node_info["metadata"]["staffAccounts"]) == 0:
@@ -131,9 +131,7 @@ class InstanceInfo():
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
                     logger.debug(f"Found admins from TXT record for {self.domain}: {admins}")
-                    logger.debug(self.admin_usernames)
                     self.admin_usernames.update(admins)
-                    logger.debug(self.admin_usernames)
         except:
             pass
 
