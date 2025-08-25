@@ -128,6 +128,8 @@ class InstanceInfo():
             logger.info(f"Checking for TXT records for {self.domain}")
             resolver = dns.resolver.Resolver()
             txt_records = resolver.resolve(self.domain, 'TXT')
+            logger.info(f"Found {len(txt_records)} TXT records for {self.domain}")
+            logger.info([record.to_text() for record in txt_records])
             for record in [record.to_text() for record in txt_records]:
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
