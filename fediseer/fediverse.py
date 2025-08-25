@@ -125,19 +125,14 @@ class InstanceInfo():
     def get_txt_admins(self):
         # This is a method to get admins from a TXT record
         try:
-            logger.info(f"Checking for TXT records for {self.domain}")
             resolver = dns.resolver.Resolver()
             txt_records = resolver.resolve(self.domain, 'TXT')
-            logger.info(f"Found {len(txt_records)} TXT records for {self.domain}")
-            logger.info([record.to_text() for record in txt_records])
             for record in [record.to_text() for record in txt_records]:
-                logger.info(record)
-                logger.info(record.strip('"'))
-                logger.info(record.strip('"').startswith('fediseer-admins='))
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
                     logger.debug(f"Found admins from TXT record for {self.domain}: {admins}")
                     self.admin_usernames.update(admins)
+                    logger.debug(self.admin_usernames)
         except:
             pass
 
