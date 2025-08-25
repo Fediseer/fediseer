@@ -9,7 +9,7 @@ class Solicitations(Resource):
     get_parser.add_argument("Client-Agent", default="unknown:0:unknown", type=str, required=False, help="The client name and version.", location="headers")
     get_parser.add_argument("csv", required=False, type=bool, help="Set to true to return just the domains as a csv. Mutually exclusive with domains", location="args")
     get_parser.add_argument("domains", required=False, type=bool, help="Set to true to return just the domains as a list. Mutually exclusive with csv", location="args")
-    get_parser.add_argument("new", required=False, default=True, type=bool, help="Set to false to also return solicitations that are older than 2 weeks", location="args")
+    get_parser.add_argument("old", required=False, type=bool, help="Set to true to also return solicitations that are older than 2 weeks", location="args")
 
     @api.expect(get_parser, query_string=True)
     @cache.cached(timeout=10)
@@ -19,7 +19,7 @@ class Solicitations(Resource):
         '''
         self.args = self.get_parser.parse_args()
         instance_details = []
-        for instance in database.get_all_solicitations(self.args.new):
+        for instance in database.get_all_solicitations(self.args.old):
             instance_detail = instance.get_details()
             instance_detail["comment"] = database.find_latest_solicitation_by_source(instance.id).comment
             instance_details.append(instance_detail)
