@@ -57,6 +57,7 @@ class InstanceInfo():
             self._nodeinfo_err = err
 
     def get_instance_info(self):
+        logger.info(f"Getting instance info for {self.domain}")
         try:
             self.parse_instance_info()
         except Exception as err:
@@ -164,6 +165,7 @@ class InstanceInfo():
         return []
 
     def retrieve_admins(self):
+        logger.info(f"Retrieving admins for {self.domain}")
         software_map = {
             "lemmy": self.get_lemmy_admins,
             "piefed": self.get_lemmy_admins,
@@ -273,7 +275,6 @@ class InstanceInfo():
     def parse_instance_info(self):
         if self.domain == "fediseer.com":
             return
-        logger.info(f"Parsing instance info for {self.domain}")
         if not self.node_info:
             if self._allow_unreachable:
                 self.software = "unknown"
