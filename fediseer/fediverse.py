@@ -125,6 +125,7 @@ class InstanceInfo():
     def get_txt_admins(self):
         # This is a method to get admins from a TXT record
         try:
+            logger.info(f"Checking for TXT records for {self.domain}")
             resolver = dns.resolver.Resolver()
             txt_records = resolver.resolve(self.domain, 'TXT')
             for record in [record.to_text() for record in txt_records]:
