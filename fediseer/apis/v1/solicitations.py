@@ -21,7 +21,10 @@ class Solicitations(Resource):
         instance_details = []
         for instance in database.get_all_solicitations(self.args.old):
             instance_detail = instance.get_details()
-            instance_detail["comment"] = database.find_latest_solicitation_by_source(instance.id).comment
+            latest_solicitation = database.find_latest_solicitation_by_source(instance.id)
+            if latest_solicitation:
+                instance_detail["comment"] = latest_solicitation.comment
+                instance_detail["created"] = latest_solicitation.created
             instance_details.append(instance_detail)
         if self.args.csv:
             return {"csv": ",".join([instance["domain"] for instance in instance_details])},200
