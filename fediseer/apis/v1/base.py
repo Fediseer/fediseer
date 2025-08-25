@@ -14,7 +14,6 @@ from fediseer.limiter import limiter
 from fediseer import consts
 
 api = Namespace('v1', 'API Version 1')
-logger.info(api.apis)
 
 from fediseer.apis.models.v1 import Models
 

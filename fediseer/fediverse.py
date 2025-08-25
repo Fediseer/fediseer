@@ -1,5 +1,6 @@
 import requests
 import socket
+import dns.resolver
 from loguru import logger
 from pythorhead import Lemmy
 from fediseer.consts import FEDISEER_VERSION
@@ -74,17 +75,17 @@ class InstanceInfo():
             pass
 
     def get_lemmy_admins(self):
-        self.admin_usernames = set([a["person"]["name"] for a in self.instance_info["admins"]])
+        self.admin_usernames.update(set([a["person"]["name"] for a in self.instance_info["admins"]]))
 
     def get_mastodon_admins(self):
         if "contact_account" in self.instance_info: # New API
             if "username" not in self.instance_info["contact_account"]:
                 raise Exception(f"No admin contact is specified for {self.domain}.")
-            self.admin_usernames = {self.instance_info["contact_account"]["username"]}
+            self.admin_usernames.update({self.instance_info["contact_account"]["username"]})
         elif "contact" in self.instance_info: # Old API
             if "account" not in self.instance_info["contact"]:
                 raise Exception(f"No admin contact is specified for {self.domain}.")
-            self.admin_usernames = {self.instance_info["contact"]["account"]["username"]}
+            self.admin_usernames.update({self.instance_info["contact"]["account"]["username"]})
         else:
             raise Exception(f"Could not determine admin contacts for {self.domain}.")
 
@@ -113,13 +114,26 @@ class InstanceInfo():
             offset += 10
         if len(admins_found) == 0:
             raise Exception(f"No admin contact is specified for {self.domain}.")
-        self.admin_usernames = admins_found
+        self.admin_usernames.update(admins_found)
 
     def get_pleroma_admins(self):
         if "staffAccounts" not in self.node_info["metadata"] or len(self.node_info["metadata"]["staffAccounts"]) == 0:
             raise Exception(f"No admin contact is specified for {self.domain}.")
         for staff in self.node_info["metadata"]["staffAccounts"]:
             self.admin_usernames.add(staff.split('/')[-1])
+
+    def get_txt_admins(self):
+        # This is a method to get admins from a TXT record
+        try:
+            resolver = dns.resolver.Resolver()
+            txt_records = resolver.resolve(self.domain, 'TXT')
+            for record in [record.to_text() for record in txt_records]:
+                if record.strip('"').startswith('fediseer-admins='):
+                    admins = record.strip('"').split("=",1)[1].split(",")
+                    logger.debug(f"Found admins from TXT record for {self.domain}: {admins}")
+                    self.admin_usernames.update(admins)
+        except:
+            pass
 
     def discover_admins(self):
         try:
@@ -164,6 +178,7 @@ class InstanceInfo():
             "unknown": self.get_unknown_admins,
             "wildcard": self.get_unknown_admins,
         }
+        self.get_txt_admins()
         if self.software not in software_map:
             self.discover_admins()
         else:
@@ -319,7 +334,6 @@ class InstanceInfo():
     def is_reachable(domain, req_timeout=5):
         # Attempts to check if we can even reach the frontpage of the domain
         # so that we know if it's an issue reaching the nodeinfo, or a problem of reaching the domain
-        logger.debug(domain)
         req = requests.get(f"https://{domain}", timeout=req_timeout, allow_redirects=False)
         logger.debug(req.status_code)
         if req.status_code not in [200,401,403]:
