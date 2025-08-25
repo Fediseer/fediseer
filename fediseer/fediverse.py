@@ -128,8 +128,9 @@ class InstanceInfo():
         try:
             resolver = dns.resolver.Resolver()
             txt_records = resolver.resolve(self.domain, 'TXT')
-            logger.info(txt_records)
-            for record in txt_records:
+            answers = resolver.resolve("gts.fediseer.com", 'TXT')
+            logger.info(answers)
+            for record in answers:
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
                     logger.info(f"Found admins from TXT record: {admins}")
