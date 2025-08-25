@@ -524,13 +524,13 @@ def get_reports(
     return query.order_by(Report.created.desc()).offset(10 * page).limit(10).all()
 
 
-def get_all_solicitations(new=False):
+def get_all_solicitations(old=True):
     # Subquery to find the minimum created date for each source_instance
     subq_base = db.session.query(
         Solicitation.source_id,
         func.min(Solicitation.created).label('oldest_solicitation_date')
     )
-    if new:
+    if not old:
         subq_base = subq_base.filter(
             Solicitation.created > datetime.utcnow() - timedelta(weeks=2)
         )
