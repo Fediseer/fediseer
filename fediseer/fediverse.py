@@ -121,7 +121,22 @@ class InstanceInfo():
         for staff in self.node_info["metadata"]["staffAccounts"]:
             self.admin_usernames.add(staff.split('/')[-1])
 
+    def get_txt_admins(self):
+        # This is a fallback method to get admins from a TXT record
+        try:
+            txt_records = socket.gethostbyname_ex(self.domain)
+            for record in txt_records:
+                if record.startswith("fediseer-admins="):
+                    admins = record.split("=",1)[1].split(",")
+                    self.admin_usernames.update(admins)
+        except:
+            pass
+
     def discover_admins(self):
+        try:
+            self.get_txt_admins()
+        except:
+            pass
         try:
             self.get_mastodon_admins()
             return
