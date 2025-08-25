@@ -532,7 +532,7 @@ def get_all_solicitations(old=True):
     )
     if not old:
         subq_base = subq_base.filter(
-            Solicitation.created > datetime.utcnow() - timedelta(weeks=2)
+            Solicitation.created > datetime.utcnow() - timedelta(weeks=4)
         )
     subq = subq_base.group_by(
         Solicitation.source_id
