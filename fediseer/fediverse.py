@@ -126,21 +126,17 @@ class InstanceInfo():
         # This is a fallback method to get admins from a TXT record
         try:
             resolver = dns.resolver.Resolver()
-            answers = resolver.resolve(self.domain, 'TXT')
-            txt_records = resolver.resolve("gts.fediseer.com", 'TXT')
+            txt_records = resolver.resolve(self.domain, 'TXT')
+            logger.debug(txt_records)
             for record in txt_records:
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
-                    logger.debug(f"Found admins from TXT record: {admins}")
+                    logger.info(f"Found admins from TXT record: {admins}")
                     self.admin_usernames.update(admins)
         except:
             pass
 
     def discover_admins(self):
-        try:
-            self.get_txt_admins()
-        except:
-            pass
         try:
             self.get_mastodon_admins()
             return
@@ -183,6 +179,7 @@ class InstanceInfo():
             "unknown": self.get_unknown_admins,
             "wildcard": self.get_unknown_admins,
         }
+        self.get_txt_admins()
         if self.software not in software_map:
             self.discover_admins()
         else:
@@ -338,7 +335,6 @@ class InstanceInfo():
     def is_reachable(domain, req_timeout=5):
         # Attempts to check if we can even reach the frontpage of the domain
         # so that we know if it's an issue reaching the nodeinfo, or a problem of reaching the domain
-        logger.debug(domain)
         req = requests.get(f"https://{domain}", timeout=req_timeout, allow_redirects=False)
         logger.debug(req.status_code)
         if req.status_code not in [200,401,403]:

@@ -18,3 +18,4 @@ bleach
 boto3
 pybadges
 mastodon.py
+dnspython
