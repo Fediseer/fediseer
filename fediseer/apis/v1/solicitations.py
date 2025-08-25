@@ -59,6 +59,7 @@ class Solicitations(Resource):
         if database.has_too_many_actions_per_min(instance.domain):
             raise e.TooManyRequests(f"Your instance is doing more than {consts.MAX_CONFIG_ACTIONS_PER_MIN} actions per minute. Please slow down.")
         guarantor_instance = None
+        existing_solicitation = None
         if self.args.guarantor:
             guarantor_instance = database.find_instance_by_domain(self.args.guarantor)
             if not guarantor_instance:
@@ -78,6 +79,9 @@ class Solicitations(Resource):
             target_id=guarantor_instance.id if guarantor_instance else None,
         )
         db.session.add(new_solicitation)
+        # Delete any existing solicitation to avoid clutter
+        if existing_solicitation:
+            db.session.delete(existing_solicitation)
         new_report = Report(
             source_domain=instance.domain,
             target_domain=guarantor_instance.domain if guarantor_instance else instance.domain,
