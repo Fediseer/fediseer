@@ -128,7 +128,7 @@ class InstanceInfo():
         try:
             resolver = dns.resolver.Resolver()
             txt_records = resolver.resolve(self.domain, 'TXT')
-            logger.debug(txt_records)
+            logger.info(txt_records)
             for record in txt_records:
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
