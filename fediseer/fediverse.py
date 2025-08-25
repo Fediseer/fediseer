@@ -163,6 +163,7 @@ class InstanceInfo():
         return []
 
     def retrieve_admins(self):
+        logger.info(f"Retrieving admins for {self.domain}")
         software_map = {
             "lemmy": self.get_lemmy_admins,
             "piefed": self.get_lemmy_admins,
