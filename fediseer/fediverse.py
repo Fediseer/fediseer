@@ -131,6 +131,7 @@ class InstanceInfo():
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
                     logger.debug(f"Found admins from TXT record for {self.domain}: {admins}")
+                    logger.debug(self.admin_usernames)
                     self.admin_usernames.update(admins)
                     logger.debug(self.admin_usernames)
         except:
