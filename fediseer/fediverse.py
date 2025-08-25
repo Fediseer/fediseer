@@ -128,6 +128,7 @@ class InstanceInfo():
             for record in txt_records:
                 if record.startswith("fediseer-admins="):
                     admins = record.split("=",1)[1].split(",")
+                    logger.debug(f"Found admins from TXT record: {admins}")
                     self.admin_usernames.update(admins)
         except:
             pass
