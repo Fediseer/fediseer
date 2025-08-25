@@ -57,7 +57,6 @@ class InstanceInfo():
             self._nodeinfo_err = err
 
     def get_instance_info(self):
-        logger.info(f"Getting instance info for {self.domain}")
         try:
             self.parse_instance_info()
         except Exception as err:
@@ -129,10 +128,9 @@ class InstanceInfo():
             resolver = dns.resolver.Resolver()
             txt_records = resolver.resolve(self.domain, 'TXT')
             for record in [record.to_text() for record in txt_records]:
-                logger.debug(record)
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
-                    logger.info(f"Found admins from TXT record: {admins}")
+                    logger.debug(f"Found admins from TXT record for {self.domain}: {admins}")
                     self.admin_usernames.update(admins)
         except:
             pass
@@ -165,7 +163,6 @@ class InstanceInfo():
         return []
 
     def retrieve_admins(self):
-        logger.info(f"Retrieving admins for {self.domain}")
         software_map = {
             "lemmy": self.get_lemmy_admins,
             "piefed": self.get_lemmy_admins,
