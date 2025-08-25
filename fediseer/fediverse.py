@@ -1,5 +1,6 @@
 import requests
 import socket
+import dns.resolver
 from loguru import logger
 from pythorhead import Lemmy
 from fediseer.consts import FEDISEER_VERSION
@@ -124,10 +125,12 @@ class InstanceInfo():
     def get_txt_admins(self):
         # This is a fallback method to get admins from a TXT record
         try:
-            txt_records = socket.gethostbyname_ex(self.domain)
+            resolver = dns.resolver.Resolver()
+            answers = resolver.resolve(self.domain, 'TXT')
+            txt_records = resolver.resolve("gts.fediseer.com", 'TXT')
             for record in txt_records:
-                if record.startswith("fediseer-admins="):
-                    admins = record.split("=",1)[1].split(",")
+                if record.strip('"').startswith('fediseer-admins='):
+                    admins = record.strip('"').split("=",1)[1].split(",")
                     logger.debug(f"Found admins from TXT record: {admins}")
                     self.admin_usernames.update(admins)
         except:
