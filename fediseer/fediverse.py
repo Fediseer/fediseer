@@ -131,6 +131,9 @@ class InstanceInfo():
             logger.info(f"Found {len(txt_records)} TXT records for {self.domain}")
             logger.info([record.to_text() for record in txt_records])
             for record in [record.to_text() for record in txt_records]:
+                logger.info(record)
+                logger.info(record.strip('"'))
+                logger.info(record.strip('"').startswith('fediseer-admins='))
                 if record.strip('"').startswith('fediseer-admins='):
                     admins = record.strip('"').split("=",1)[1].split(",")
                     logger.debug(f"Found admins from TXT record for {self.domain}: {admins}")
