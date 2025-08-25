@@ -143,6 +143,7 @@ class Models:
 
         self.response_model_instances_soliciting = api.inherit('SolicitingInstanceDetails', self.response_model_instances, {
             'comment': fields.String(description="The optional comment explaining why this instance deserves a guarantee"),
+            'created': fields.DateTime(description="The date this solicitation was created"),
         })
         self.response_model_model_Solicitation_get = api.model('SolicitedInstances', {
             'instances': fields.List(fields.Nested(self.response_model_instances_soliciting)),
