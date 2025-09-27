@@ -16,7 +16,7 @@ regex
 pythorhead>=0.8.2
 bleach
 boto3
-pybadges
+badgepy
 mastodon.py
 dnspython
 pyopenssl

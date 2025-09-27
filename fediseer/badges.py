@@ -1,4 +1,4 @@
-from pybadges import badge
+from badgepy import badge
 from loguru import logger
 from fediseer import enums
 import base64
