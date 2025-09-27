@@ -22,5 +22,13 @@ if __name__ == "__main__":
     if args.insecure:
         allowed_host = "0.0.0.0"
         logger.init_warn("WSGI Mode", status="Insecure")
-    serve(OVERSEER, port=args.port, url_scheme=url_scheme, threads=45, connection_limit=1024, asyncore_use_poll=True)
+    serve(
+        OVERSEER,
+        host=args.listen,
+        port=args.port,
+        url_scheme=url_scheme,
+        threads=45,
+        connection_limit=1024,
+        asyncore_use_poll=True,
+    )        
     logger.init("WSGI Server", status="Stopped")
