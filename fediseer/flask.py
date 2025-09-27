@@ -29,6 +29,7 @@ def create_app():
         with OVERSEER.app_context():
             logger.debug("pool size = {}".format(db.engine.pool.size()))
     logger.init_ok("Fediseer Database", status="Started")
+    return OVERSEER
 
 db = SQLAlchemy()
 OVERSEER = create_app()
