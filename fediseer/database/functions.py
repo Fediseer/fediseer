@@ -20,6 +20,7 @@ def get_all_instance_query(
         Instance
     ).outerjoin(
         Instance.endorsements,
+    ).outerjoin(
         Instance.guarantors,
     ).options(
         joinedload(Instance.guarantors),

@@ -19,4 +19,5 @@ boto3
 badgepy
 mastodon.py
 dnspython
-pyopenssl
+#FIXME: OpenSSL.crypto.sign() missing in latest version. Fix before upgrading.
+pyopenssl~=23.2.0
