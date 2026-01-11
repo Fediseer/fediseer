@@ -32,7 +32,6 @@ def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 5
         'User-Agent': f'Fediseer/{FEDISEER_VERSION}',
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
         'Referer': 'https://api.fediverse.observer/',
         'Content-Type': 'application/json',
         'Origin': 'https://api.fediverse.observer',
