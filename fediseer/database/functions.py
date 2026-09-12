@@ -504,6 +504,7 @@ def get_reports(
         report_type: enums.ReportType = None,
         report_activity: enums.ReportActivity = None,
         page: int = 1,
+        limit: int = 10,
     ):
     query = Report.query
     if source_instances is not None and len(source_instances) > 0:
@@ -522,7 +523,7 @@ def get_reports(
     page -= 1
     if page < 0:
         page = 0
-    return query.order_by(Report.created.desc()).offset(10 * page).limit(10).all()
+    return query.order_by(Report.created.desc()).offset(limit * page).limit(limit).all()
 
 
 def get_all_solicitations(old=True):
