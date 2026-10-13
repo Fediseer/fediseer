@@ -3,6 +3,8 @@ from loguru import logger
 from fediseer.consts import FEDISEER_VERSION
 
 def retrieve_suspicious_instances(activity_suspicion = 20, active_suspicious = 500, activity_suspicion_low = 400):
+    # Disabled since Fediverse Observer is disabled and no alternatives exist
+    return []
     # GraphQL query
     query = '''
     {

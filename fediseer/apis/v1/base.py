@@ -49,7 +49,7 @@ class Suspicions(Resource):
         '''
         self.args = self.get_parser.parse_args()
         try:
-            sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion, self.args.active_suspicion)
+            sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion, self.args.active_suspicion)            
         except Exception as err:
             raise e.ServiceUnavailable("Could not retrieve list from Fediseer Observer. Please try again later")
         if self.args.csv:
