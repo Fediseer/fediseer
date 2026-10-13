@@ -6,9 +6,20 @@ import fediseer.exceptions as e
 from datetime import datetime
 from loguru import logger
 
+def is_valid_domain(domain):
+    # Total length cannot exceed 253 characters
+    if len(domain) > 253:
+        return False
+        
+    pattern = r"^(?:[a-zA-Z0-9*](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$"
+    
+    return bool(re.match(pattern, domain))
+
 def ensure_instance_registered(domain, allow_unreachable=False, record_unreachable = False, allowed_timeout=5):
     if domain == "localhost":
         raise e.BadRequest("Cannot seek for localhost")
+    if is_valid_domain(domain) is False:
+        raise e.BadRequest("Invalid domain")
     instance = database.find_instance_by_domain(domain)
     try:
         instance_info = InstanceInfo(domain,allow_unreachable=allow_unreachable, req_timeout=allowed_timeout)
