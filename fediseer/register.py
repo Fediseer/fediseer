@@ -5,6 +5,7 @@ from fediseer.flask import db
 import fediseer.exceptions as e
 from datetime import datetime
 from loguru import logger
+import re
 
 def is_valid_domain(domain):
     # Total length cannot exceed 253 characters
