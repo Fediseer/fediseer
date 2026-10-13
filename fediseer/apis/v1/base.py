@@ -52,11 +52,15 @@ class Suspicions(Resource):
             sus_instances = retrieve_suspicious_instances(self.args.activity_suspicion, self.args.active_suspicion)            
         except Exception as err:
             raise e.ServiceUnavailable("Could not retrieve list from Fediseer Observer. Please try again later")
+        
+        headers = {"Deprecation": "true"}
+        
         if self.args.csv:
-            return {"csv": ",".join([instance["domain"] for instance in sus_instances])},200
+            return {"csv": ",".join([instance["domain"] for instance in sus_instances])}, 200, headers
         if self.args.domains:
-            return {"domains": [instance["domain"] for instance in sus_instances]},200
-        return {"instances": sus_instances},200
+            return {"domains": [instance["domain"] for instance in sus_instances]}, 200, headers
+        
+        return {"instances": sus_instances}, 200, headers
 
 class Config(Resource):
     get_parser = reqparse.RequestParser()
