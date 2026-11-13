@@ -166,6 +166,7 @@ class InstanceInfo():
         software_map = {
             "lemmy": self.get_lemmy_admins,
             "piefed": self.get_lemmy_admins,
+            "pylova": self.get_lemmy_admins,
             "mastodon": self.get_mastodon_admins,
             "sharkey": self.get_mastodon_admins,
             "friendica": self.get_mastodon_admins,
@@ -284,6 +285,7 @@ class InstanceInfo():
         software_map = {
             "lemmy": self.get_lemmy_info,
             "piefed": self.get_lemmy_info,
+            "pylova": self.get_lemmy_info,
             "mastodon": self.get_mastodon_info,
             "friendica": self.get_mastodon_info,
             "pleroma": self.get_pleroma_info,
